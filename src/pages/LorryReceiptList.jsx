@@ -27,11 +27,15 @@ const LorryReceiptList = () => {
       if (window.electronAPI) {
         // Load companies for filter dropdown
         const companiesData = await window.electronAPI.query('SELECT * FROM companies ORDER BY name');
-        setCompanies(companiesData);        // Load lorry receipts with joins
+        setCompanies(companiesData);        // Load lorry receipts with joins - using city instead of full address for list view
         const receiptsData = await window.electronAPI.query(`
           SELECT lr.*, 
-                 cons_or.name as consignor_name, cons_or.address as consignor_address,
-                 cons_ee.name as consignee_name, cons_ee.address as consignee_address,
+                 cons_or.name as consignor_name, 
+                 COALESCE(cons_or.city, cons_or.address) as consignor_city,
+                 cons_or.address as consignor_address,
+                 cons_ee.name as consignee_name, 
+                 COALESCE(cons_ee.city, cons_ee.address) as consignee_city,
+                 cons_ee.address as consignee_address,
                  t.truck_number as truck_reg_number, t.truck_type, t.capacity_ton,
                  d.name as driver_name, d.phone as driver_phone
           FROM lorry_receipts lr
@@ -57,8 +61,12 @@ const LorryReceiptList = () => {
       
       if (window.electronAPI) {        let sql = `
           SELECT lr.*, 
-                 cons_or.name as consignor_name, cons_or.address as consignor_address,
-                 cons_ee.name as consignee_name, cons_ee.address as consignee_address,
+                 cons_or.name as consignor_name, 
+                 COALESCE(cons_or.city, cons_or.address) as consignor_city,
+                 cons_or.address as consignor_address,
+                 cons_ee.name as consignee_name, 
+                 COALESCE(cons_ee.city, cons_ee.address) as consignee_city,
+                 cons_ee.address as consignee_address,
                  t.truck_number as truck_reg_number, t.truck_type, t.capacity_ton,
                  d.name as driver_name, d.phone as driver_phone
           FROM lorry_receipts lr
@@ -314,11 +322,10 @@ const LorryReceiptList = () => {
               value={filters.consignor_id}
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Consignors</option>
+            >              <option value="">All Consignors</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>
-                  {company.name}
+                  {company.name} {company.city ? `(${company.city})` : ''}
                 </option>
               ))}
             </select>

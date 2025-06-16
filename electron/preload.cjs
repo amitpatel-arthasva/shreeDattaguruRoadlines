@@ -22,10 +22,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // App operations
   getVersion: () => ipcRenderer.invoke('get-version'),
-  
-  // File operations
+    // File operations
   showSaveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options),
   showOpenDialog: (options) => ipcRenderer.invoke('show-open-dialog', options),
+  
+  // Navigation operations
+  navigateBack: () => ipcRenderer.invoke('navigate-back'),
+  navigateForward: () => ipcRenderer.invoke('navigate-forward'),
+  canGoBack: () => ipcRenderer.invoke('can-go-back'),
+  canGoForward: () => ipcRenderer.invoke('can-go-forward'),
+  
   // Window operations
   closeWindow: () => ipcRenderer.invoke('close-window'),
   minimizeWindow: () => ipcRenderer.invoke('minimize-window'),

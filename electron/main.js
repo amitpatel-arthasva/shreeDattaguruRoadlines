@@ -222,6 +222,31 @@ ipcMain.handle('get-version', () => {
   return app.getVersion();
 });
 
+// Navigation handlers
+ipcMain.handle('navigate-back', () => {
+  if (mainWindow && mainWindow.webContents.canGoBack()) {
+    mainWindow.webContents.goBack();
+    return true;
+  }
+  return false;
+});
+
+ipcMain.handle('navigate-forward', () => {
+  if (mainWindow && mainWindow.webContents.canGoForward()) {
+    mainWindow.webContents.goForward();
+    return true;
+  }
+  return false;
+});
+
+ipcMain.handle('can-go-back', () => {
+  return mainWindow ? mainWindow.webContents.canGoBack() : false;
+});
+
+ipcMain.handle('can-go-forward', () => {
+  return mainWindow ? mainWindow.webContents.canGoForward() : false;
+});
+
 app.whenReady().then(async () => {
   await initializeDatabase();
   createWindow();

@@ -1,19 +1,18 @@
 import db from '../config/database.js';
 
-class Company {
-  static create(companyData) {
+class Company {  static create(companyData) {
     const {
-      name, address, gstin, pan
+      name, address, city, state, pin_code, gstin, pan
     } = companyData;
     
     const sql = `
       INSERT INTO companies (
-        name, address, gstin, pan
-      ) VALUES (?, ?, ?, ?)
+        name, address, city, state, pin_code, gstin, pan
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     
     return db.query(sql, [
-      name, address, gstin, pan
+      name, address, city, state, pin_code, gstin, pan
     ]);
   }
 
@@ -22,9 +21,14 @@ class Company {
     const companies = db.query(sql, [id]);
     return companies[0] || null;
   }
-
   static getAll() {
-    const sql = 'SELECT * FROM companies ORDER BY name';
+    const sql = 'SELECT id, name, city, state, pin_code, gstin, pan, address, created_at, updated_at FROM companies ORDER BY name';
+    return db.query(sql);
+  }
+
+  static getAllForList() {
+    // Optimized for list views - showing only essential fields to prevent width issues
+    const sql = 'SELECT id, name, city, state, gstin, pan FROM companies ORDER BY name';
     return db.query(sql);
   }
 

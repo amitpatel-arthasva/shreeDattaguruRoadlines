@@ -1,10 +1,18 @@
-import Company from '../../database/models/Company.js';
+import Company from '../../database/models/CompanyNew.js';
 
-class CompanyController {
-  static async getAll(req, res) {
+class CompanyController {  static async getAll(req, res) {
     try {
-      const { active_only = 'true' } = req.query;
-      const companies = Company.getAll(active_only === 'true');
+      const { view = 'full' } = req.query;
+      
+      let companies;
+      if (view === 'list') {
+        // For list views - optimized to prevent width issues
+        companies = Company.getAllForList();
+      } else {
+        // For detailed views
+        companies = Company.getAll();
+      }
+      
       res.json({ success: true, data: companies });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });

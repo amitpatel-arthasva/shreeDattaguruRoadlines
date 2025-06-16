@@ -1,4 +1,4 @@
-import { Menu, app } from 'electron';
+import { Menu, app, BrowserWindow } from 'electron';
 
 export function createMenu() {
   const template = [
@@ -30,17 +30,31 @@ export function createMenu() {
       ]
     },
     {
-      label: 'Edit',
+      label: 'Navigate',
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
+        {
+          label: 'Back',
+          accelerator: 'Alt+Left',
+          click: () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow && focusedWindow.webContents.canGoBack()) {
+              focusedWindow.webContents.goBack();
+            }
+          }
+        },
+        {
+          label: 'Forward',
+          accelerator: 'Alt+Right',
+          click: () => {
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow && focusedWindow.webContents.canGoForward()) {
+              focusedWindow.webContents.goForward();
+            }
+          }
+        },
         { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' }
       ]
-    },
-    {
+    },    {
       label: 'View',
       submenu: [
         { role: 'reload' },

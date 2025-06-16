@@ -60,7 +60,7 @@ class DatabaseManager {
       }
     }
   }
-  async runSeeders() {
+  async runSeeders(force = false) {
     const seedersDir = path.join(__dirname, '../seeders');
     if (!fs.existsSync(seedersDir)) {
       console.log('No seeders directory found');
@@ -72,7 +72,8 @@ class DatabaseManager {
       CREATE TABLE IF NOT EXISTS seeder_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         seeder_name VARCHAR(255) UNIQUE NOT NULL,
-        executed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        executed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_run DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -81,27 +82,53 @@ class DatabaseManager {
       .sort();
 
     for (const file of seederFiles) {
+      const seederPath = path.join(seedersDir, file);
+      const seeder = fs.readFileSync(seederPath, 'utf8');
+      
       // Check if seeder was already executed
       const existing = this.db.prepare('SELECT id FROM seeder_history WHERE seeder_name = ?').get(file);
       
-      if (existing) {
-        console.log(`Seeder ${file} already executed, skipping`);
-        continue;
+      if (existing && !force) {
+        console.log(`Seeder ${file} already executed, re-running to check for missing data...`);
+        // Update last_run timestamp
+        this.db.prepare('UPDATE seeder_history SET last_run = CURRENT_TIMESTAMP WHERE seeder_name = ?').run(file);
+      } else if (existing && force) {
+        console.log(`Force re-running seeder ${file}...`);
+        // Update last_run timestamp
+        this.db.prepare('UPDATE seeder_history SET last_run = CURRENT_TIMESTAMP WHERE seeder_name = ?').run(file);
+      } else {
+        console.log(`Running seeder ${file} for the first time...`);
       }
-
-      const seederPath = path.join(seedersDir, file);
-      const seeder = fs.readFileSync(seederPath, 'utf8');
       
       try {
         this.db.exec(seeder);
         
-        // Mark seeder as executed
-        this.db.prepare('INSERT INTO seeder_history (seeder_name) VALUES (?)').run(file);
+        // Mark seeder as executed (only if it's the first time)
+        if (!existing) {
+          this.db.prepare('INSERT INTO seeder_history (seeder_name) VALUES (?)').run(file);
+        }
         
         console.log(`Seeder ${file} executed successfully`);
       } catch (error) {
         console.log(`Seeder ${file} failed:`, error.message);
+        // Don't throw here to allow other seeders to run
       }
+    }
+  }
+
+  // Method to force re-run all seeders
+  async forceRunSeeders() {
+    console.log('Force running all seeders...');
+    return this.runSeeders(true);
+  }
+
+  // Method to reset seeder history (useful for development)
+  async resetSeederHistory() {
+    try {
+      this.db.exec('DELETE FROM seeder_history');
+      console.log('Seeder history reset successfully');
+    } catch (error) {
+      console.log('Failed to reset seeder history:', error.message);
     }
   }
 

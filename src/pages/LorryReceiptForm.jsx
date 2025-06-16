@@ -47,9 +47,8 @@ const LorryReceiptForm = () => {
 
   const loadAllData = async () => {
     try {
-      if (window.electronAPI) {
-        // Load companies
-        const companiesData = await window.electronAPI.query('SELECT * FROM companies ORDER BY name');
+      if (window.electronAPI) {        // Load companies with city information
+        const companiesData = await window.electronAPI.query('SELECT id, name, address, city, state, pin_code, gstin, pan FROM companies ORDER BY name');
         setCompanies(companiesData);
 
         // Load trucks
@@ -394,11 +393,10 @@ const LorryReceiptForm = () => {
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.consignor_id ? 'border-red-500' : 'border-gray-300'
                 }`}
-              >
-                <option value="">Select Consignor</option>
+              >                <option value="">Select Consignor</option>
                 {companies.map(company => (
                   <option key={company.id} value={company.id}>
-                    {company.name}
+                    {company.name} {company.city ? `(${company.city})` : ''}
                   </option>
                 ))}
               </select>
@@ -416,11 +414,10 @@ const LorryReceiptForm = () => {
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.consignee_id ? 'border-red-500' : 'border-gray-300'
                 }`}
-              >
-                <option value="">Select Consignee</option>
+              >                <option value="">Select Consignee</option>
                 {companies.map(company => (
                   <option key={company.id} value={company.id}>
-                    {company.name}
+                    {company.name} {company.city ? `(${company.city})` : ''}
                   </option>
                 ))}
               </select>

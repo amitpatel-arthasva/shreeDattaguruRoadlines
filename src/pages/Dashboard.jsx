@@ -15,14 +15,9 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [selectedQuotation, setSelectedQuotation] = useState(null);
-
   const [isLorryModalOpen, setIsLorryModalOpen] = useState(false);
   const [lorryModalMode] = useState('create');
   const [selectedLorryReceipt] = useState(null);
-  const handleCreateLorryReceipt = () => {
-  setIsLorryModalOpen(true);
-};
-
 
   const handleCreateQuotation = () => {
   setSelectedQuotation(null);
@@ -81,10 +76,9 @@ const Dashboard = () => {
                 hoverBgColor="#E6B2BA"
                 className="text-[#47034b] text-base px-2 py-1 font-semibold flex-1"
                 icon={<span className="text-xl">🧾</span>}
-              />
-              <Button
+              />              <Button
                 text="Add Truck"
-                onClick={handleCreateLorryReceipt}
+                onClick={() => handleNavigate("trucks")}
                 bgColor="#E6B2BA"
                 hoverBgColor="#FAD0C4"
                 className="text-[#47034b] text-base px-2 py-1 font-semibold flex-1"
@@ -95,7 +89,7 @@ const Dashboard = () => {
         </div>
 
         {/* Dashboard Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center md:justify-items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center md:justify-items-stretch mt-10">
           {/* --- Quotations --- */}
 
           <FeatureCard
@@ -214,10 +208,9 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center items-center">
-                <Button
+              <div className="flex flex-wrap gap-2 justify-center items-center">                <Button
                   text="Manage Trucks"
-                  onClick={() => handleNavigate("manage-trucks")}
+                  onClick={() => handleNavigate("trucks")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
                   className="text-[#47034b] text-base font-semibold "                  width="w-auto"
@@ -226,7 +219,7 @@ const Dashboard = () => {
                 />
                 <Button
                   text="Manage Drivers"
-                  onClick={() => handleNavigate("manage-drivers")}
+                  onClick={() => handleNavigate("drivers")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
                   className="text-[#47034b] text-base font-semibold"                  width="w-auto"
@@ -234,13 +227,13 @@ const Dashboard = () => {
                   icon={<span className="text-xl">👨‍💼</span>}
                 />
                 <Button
-                  text="Add Customer"
-                  onClick={() => handleNavigate("add-customer")}
+                  text="Manage Companies"
+                  onClick={() => handleNavigate("companies")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
                   className="text-[#47034b] text-base font-semibold"                  width="w-auto"
                   height="h-7"
-                  icon={<span className="text-xl">👥</span>}
+                  icon={<span className="text-xl">🏢</span>}
                 />
               </div>
             </div>
