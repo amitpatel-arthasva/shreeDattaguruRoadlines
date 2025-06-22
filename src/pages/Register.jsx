@@ -73,8 +73,8 @@ const Register = () => {
         {/* Left side - Logo at top left and text centered vertically */}
         <div className="md:w-1/2 md:pr-8 flex flex-col mb-8 md:mb-0 relative">
           {/* Logo positioned at the top left */}
-          <div className="mb-6 text-left">
-            <img src={Logo} alt="Arthasva Logo" className="h-16" />
+          <div className="w-88 absolute left-1/2 -translate-x-1/2">
+            <img src={Logo} alt="ShreeDattaguruLogo" />
           </div>
           
           {/* Vertically centered text content */}

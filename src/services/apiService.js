@@ -176,9 +176,15 @@ class ApiService {
   // Quotation operations
   async getQuotations(filters = {}) {
     let sql = `
-      SELECT q.*, c.company_name, c.contact_person
+      SELECT q.*, 
+             c.name as company_name, c.address as company_address,
+             c.city as company_city, c.state as company_state,
+             c.pin_code as company_pin_code, c.gstin as company_gstin,
+             c.pan as company_pan, c.phone as company_phone,
+             u.full_name as created_by_name
       FROM quotations q
       LEFT JOIN companies c ON q.company_id = c.id
+      LEFT JOIN users u ON q.created_by = u.id
       WHERE 1=1
     `;
     const params = [];
@@ -193,29 +199,167 @@ class ApiService {
       params.push(filters.status);
     }
 
+    if (filters.from_date) {
+      sql += ' AND q.quotation_date >= ?';
+      params.push(filters.from_date);
+    }
+
+    if (filters.to_date) {
+      sql += ' AND q.quotation_date <= ?';
+      params.push(filters.to_date);
+    }
+
+    if (filters.from_location) {
+      sql += ' AND q.from_location LIKE ?';
+      params.push(`%${filters.from_location}%`);
+    }
+
+    if (filters.to_location) {
+      sql += ' AND q.to_location LIKE ?';
+      params.push(`%${filters.to_location}%`);
+    }
+
+    if (filters.company_name) {
+      sql += ' AND c.name LIKE ?';
+      params.push(`%${filters.company_name}%`);
+    }
+
     sql += ' ORDER BY q.quotation_date DESC, q.created_at DESC';
+
+    if (filters.limit) {
+      sql += ' LIMIT ?';
+      params.push(filters.limit);
+    }
+
+    if (filters.offset) {
+      sql += ' OFFSET ?';
+      params.push(filters.offset);
+    }
+
     return await this.query(sql, params);
+  }
+
+  async getQuotationById(id) {
+    const sql = `
+      SELECT q.*, 
+             c.name as company_name, c.address as company_address,
+             c.city as company_city, c.state as company_state,
+             c.pin_code as company_pin_code, c.gstin as company_gstin,
+             c.pan as company_pan, c.phone as company_phone,
+             u.full_name as created_by_name
+      FROM quotations q
+      LEFT JOIN companies c ON q.company_id = c.id
+      LEFT JOIN users u ON q.created_by = u.id
+      WHERE q.id = ?
+    `;
+    
+    const result = await this.query(sql, [id]);
+    return result[0] || null;
   }
 
   async createQuotation(quotationData) {
     const {
-      quotation_number, company_id, quotation_date, from_location, to_location,
-      material_description, vehicle_type, rate_per_ton, minimum_guarantee_weight,
-      validity_days, terms_conditions, created_by
+      quotation_number, quotation_date, company_id, from_location, to_location,
+      load_type, trip_type, material_details, rate_per_ton, rate_type,
+      applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
+      payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+      demurrage_remark, terms_conditions, status, created_by
     } = quotationData;
     
     return await this.query(
       `INSERT INTO quotations (
-        quotation_number, company_id, quotation_date, from_location, to_location,
-        material_description, vehicle_type, rate_per_ton, minimum_guarantee_weight,
-        validity_days, terms_conditions, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        quotation_number, quotation_date, company_id, from_location, to_location,
+        load_type, trip_type, material_details, rate_per_ton, rate_type,
+        applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
+        payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+        demurrage_remark, terms_conditions, status, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        quotation_number, company_id, quotation_date, from_location, to_location,
-        material_description, vehicle_type, rate_per_ton, minimum_guarantee_weight,
-        validity_days, terms_conditions, created_by
+        quotation_number, quotation_date, company_id, from_location, to_location,
+        load_type, trip_type, material_details, rate_per_ton, rate_type,
+        applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
+        payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+        demurrage_remark, terms_conditions, status, created_by
       ]
     );
+  }
+
+  async updateQuotation(id, quotationData) {
+    const fields = [];
+    const values = [];
+    
+    for (const [key, value] of Object.entries(quotationData)) {
+      if (value !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+      }
+    }
+    
+    if (fields.length === 0) return null;
+    
+    values.push(id);
+    return await this.query(`UPDATE quotations SET ${fields.join(', ')} WHERE id = ?`, values);
+  }
+
+  async deleteQuotation(id) {
+    return await this.query('DELETE FROM quotations WHERE id = ?', [id]);
+  }
+
+  async searchQuotations(searchTerm, limit = 50) {
+    const term = `%${searchTerm}%`;
+    const sql = `
+      SELECT q.*, 
+             c.name as company_name, c.address as company_address,
+             c.city as company_city, c.state as company_state,
+             c.pin_code as company_pin_code, c.gstin as company_gstin,
+             c.pan as company_pan, c.phone as company_phone,
+             u.full_name as created_by_name
+      FROM quotations q
+      LEFT JOIN companies c ON q.company_id = c.id
+      LEFT JOIN users u ON q.created_by = u.id
+      WHERE (q.quotation_number LIKE ? OR q.from_location LIKE ? OR q.to_location LIKE ? 
+             OR c.name LIKE ? OR c.gstin LIKE ?)
+      ORDER BY q.quotation_date DESC, q.created_at DESC
+      LIMIT ?
+    `;
+    return await this.query(sql, [term, term, term, term, term, limit]);
+  }
+
+  async getQuotationStats() {
+    const sql = `
+      SELECT 
+        COUNT(*) as total_quotations,
+        COUNT(CASE WHEN status = 'Active' THEN 1 END) as active_quotations,
+        COUNT(CASE WHEN status = 'Expired' THEN 1 END) as expired_quotations,
+        COUNT(CASE WHEN status = 'Accepted' THEN 1 END) as accepted_quotations,
+        COUNT(CASE WHEN status = 'Rejected' THEN 1 END) as rejected_quotations,
+        AVG(total_freight_with_gst) as avg_freight,
+        SUM(total_freight_with_gst) as total_freight_value
+      FROM quotations
+    `;
+    const result = await this.query(sql);
+    return result[0] || {};
+  }
+
+  async generateQuotationNumber() {
+    const prefix = 'QUO';
+    const year = new Date().getFullYear();
+    const sql = `
+      SELECT quotation_number 
+      FROM quotations 
+      WHERE quotation_number LIKE '${prefix}${year}%' 
+      ORDER BY quotation_number DESC 
+      LIMIT 1
+    `;
+    
+    const result = await this.query(sql);
+    if (result.length === 0) {
+      return `${prefix}${year}001`;
+    }
+    
+    const lastNumber = result[0].quotation_number;
+    const sequence = parseInt(lastNumber.slice(-3)) + 1;
+    return `${prefix}${year}${sequence.toString().padStart(3, '0')}`;
   }
 
   // Lorry Receipt operations

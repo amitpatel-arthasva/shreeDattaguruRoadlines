@@ -5,17 +5,20 @@ import {
   faTruck, 
   faBox, 
   faMoneyBillWave,
-  faMapMarkerAlt,
-  faPhone,
-  faEnvelope,
-  faFileInvoice,
-  faDownload
+  faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../common/Modal';
 import { useToast } from '../common/ToastSystem';
 
 const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   const toast = useToast();
+  
+  // Debug logging
+  React.useEffect(() => {
+    if (isOpen && lorryReceipt) {
+      console.log('LorryReceiptViewModal received data:', lorryReceipt);
+    }
+  }, [isOpen, lorryReceipt]);
   
   if (!lorryReceipt) return null;
 
@@ -42,9 +45,6 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
       default:
         return 'text-gray-600 bg-gray-100';
     }
-  };  const handleDownloadPDF = () => {
-    // TODO: Implement PDF download functionality
-    toast.info('PDF download functionality will be implemented soon');
   };
 
   return (
@@ -55,20 +55,20 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Lorry Receipt Details
+                Consignment Note Details
               </h2>
               <div className="flex items-center gap-4">
                 <span className="text-lg font-semibold text-gray-700">
-                  LR No: {lorryReceipt.lorryReceiptNumber}
+                  CN No: {lorryReceipt.lorryReceiptNumber}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(lorryReceipt.status)}`}>
-                  {lorryReceipt.status}
-                </span>
+                
               </div>
             </div>
             <div className="text-right text-sm text-gray-600">
               <p><strong>Date:</strong> {formatDate(lorryReceipt.date)}</p>
-              <p><strong>Created:</strong> {formatDate(lorryReceipt.createdAt)}</p>
+              <p><strong>From:</strong> {lorryReceipt.fromLocation}</p>
+              <p><strong>To:</strong> {lorryReceipt.toLocation}</p>
+              {lorryReceipt.createdAt && <p><strong>Created:</strong> {formatDate(lorryReceipt.createdAt)}</p>}
             </div>
           </div>
         </div>
@@ -85,15 +85,8 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
               {lorryReceipt.consignor?.gstNumber && (
                 <p><strong>GST:</strong> {lorryReceipt.consignor.gstNumber}</p>
               )}
-              <p className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
-                {lorryReceipt.consignor?.contactNumber || 'N/A'}
-              </p>
-              {lorryReceipt.consignor?.email && (
-                <p className="flex items-center gap-1">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
-                  {lorryReceipt.consignor.email}
-                </p>
+              {lorryReceipt.consignor?.pan && (
+                <p><strong>PAN:</strong> {lorryReceipt.consignor.pan}</p>
               )}
               <p className="flex items-start gap-1">
                 <FontAwesomeIcon icon={faMapMarkerAlt} className="text-gray-400 mt-1" />
@@ -116,15 +109,8 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
               {lorryReceipt.consignee?.gstNumber && (
                 <p><strong>GST:</strong> {lorryReceipt.consignee.gstNumber}</p>
               )}
-              <p className="flex items-center gap-1">
-                <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
-                {lorryReceipt.consignee?.contactNumber || 'N/A'}
-              </p>
-              {lorryReceipt.consignee?.email && (
-                <p className="flex items-center gap-1">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
-                  {lorryReceipt.consignee.email}
-                </p>
+              {lorryReceipt.consignee?.pan && (
+                <p><strong>PAN:</strong> {lorryReceipt.consignee.pan}</p>
               )}
               <p className="flex items-start gap-1">
                 <FontAwesomeIcon icon={faMapMarkerAlt} className="text-gray-400 mt-1" />
@@ -145,13 +131,17 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
             <div className="space-y-2 text-sm">
               <p><strong>Truck Number:</strong> {lorryReceipt.truckDetails?.truckNumber || 'N/A'}</p>
               <p><strong>Vehicle Type:</strong> {lorryReceipt.truckDetails?.vehicleType || 'N/A'}</p>
-              <p><strong>Load Type:</strong> {lorryReceipt.truckDetails?.loadType || 'N/A'}</p>
-              <p><strong>From:</strong> {lorryReceipt.truckDetails?.from || 'N/A'}</p>
+              {lorryReceipt.truckDetails?.capacity && (
+                <p><strong>Capacity:</strong> {lorryReceipt.truckDetails.capacity} Tons</p>
+              )}
+              {lorryReceipt.truckDetails?.ownerName && (
+                <p><strong>Owner:</strong> {lorryReceipt.truckDetails.ownerName}</p>
+              )}
               <p><strong>Driver Name:</strong> {lorryReceipt.truckDetails?.driverName || 'N/A'}</p>
               <p><strong>Driver Mobile:</strong> {lorryReceipt.truckDetails?.driverMobile || 'N/A'}</p>
               <p><strong>License Number:</strong> {lorryReceipt.truckDetails?.licenseNumber || 'N/A'}</p>
-              {lorryReceipt.truckDetails?.weightGuarantee && (
-                <p><strong>Weight Guarantee:</strong> {lorryReceipt.truckDetails.weightGuarantee.value} {lorryReceipt.truckDetails.weightGuarantee.unit}</p>
+              {lorryReceipt.truckDetails?.driverAddress && (
+                <p><strong>Driver Address:</strong> {lorryReceipt.truckDetails.driverAddress}</p>
               )}
             </div>
           </div>
@@ -163,28 +153,46 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
               Material Details
             </h3>
             <div className="space-y-3">
-              {lorryReceipt.materialDetails?.map((material, index) => (
-                <div key={index} className="border-l-4 border-primary-400 pl-3">
-                  <p className="font-medium">{material.materialName}</p>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>Packaging:</strong> {material.packagingType}</p>
-                    <p><strong>Quantity:</strong> {material.quantity}</p>
-                    <p><strong>Articles:</strong> {material.numberOfArticles}</p>
-                    {material.actualWeight && (
-                      <p><strong>Actual Weight:</strong> {material.actualWeight.value} {material.actualWeight.unit}</p>
-                    )}
-                    {material.chargedWeight && (
-                      <p><strong>Charged Weight:</strong> {material.chargedWeight.value} {material.chargedWeight.unit}</p>
-                    )}
-                    {material.freightRate && (
-                      <p><strong>Freight Rate:</strong> ₹{material.freightRate.value} {material.freightRate.unit}</p>
-                    )}
-                    {material.hsnCode && (
-                      <p><strong>HSN Code:</strong> {material.hsnCode}</p>
-                    )}
+              {lorryReceipt.materialDetails?.length > 0 ? (
+                lorryReceipt.materialDetails.map((material, index) => (
+                  <div key={index} className="border-l-4 border-primary-400 pl-3">
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><strong>Nos:</strong> {material.nos}</p>
+                      <p><strong>Particulars:</strong> {material.particulars}</p>
+                      {material.actualWeight && (
+                        <p><strong>Actual Weight:</strong> {material.actualWeight.value} {material.actualWeight.unit}</p>
+                      )}
+                      {material.chargedWeight && (
+                        <p><strong>Chargeable Weight:</strong> {material.chargedWeight.value} {material.chargedWeight.unit}</p>
+                      )}
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-600">
+                  {lorryReceipt.actualWeight && (
+                    <p><strong>Actual Weight:</strong> {lorryReceipt.actualWeight} Tons</p>
+                  )}
+                  {lorryReceipt.chargeableWeight && (
+                    <p><strong>Chargeable Weight:</strong> {lorryReceipt.chargeableWeight} Tons</p>
+                  )}
+                  {/* Show raw nos and particulars arrays if available */}
+                  {lorryReceipt.nos && lorryReceipt.nos.length > 0 && (
+                    <div className="mt-2">
+                      <p><strong>Nos:</strong> {Array.isArray(lorryReceipt.nos) ? lorryReceipt.nos.join(', ') : lorryReceipt.nos}</p>
+                    </div>
+                  )}
+                  {lorryReceipt.particulars && lorryReceipt.particulars.length > 0 && (
+                    <div className="mt-2">
+                      <p><strong>Particulars:</strong> {Array.isArray(lorryReceipt.particulars) ? lorryReceipt.particulars.join(', ') : lorryReceipt.particulars}</p>
+                    </div>
+                  )}
+                  {(!lorryReceipt.nos || lorryReceipt.nos.length === 0) && 
+                   (!lorryReceipt.particulars || lorryReceipt.particulars.length === 0) && (
+                    <p className="text-gray-500">No material details available</p>
+                  )}
                 </div>
-              )) || <p className="text-gray-500">No material details available</p>}
+              )}
             </div>
           </div>
         </div>
@@ -195,102 +203,65 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
             <FontAwesomeIcon icon={faMoneyBillWave} className="text-primary-400" />
             Freight Details
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <p><strong>Freight Type:</strong> {lorryReceipt.freightDetails?.freightType || 'N/A'}</p>
-              <p><strong>Pay By:</strong> {lorryReceipt.freightDetails?.freightPayBy || 'N/A'}</p>
-              <p><strong>Basic Freight:</strong> {formatCurrency(lorryReceipt.freightDetails?.totalBasicFreight)}</p>
+              <p className="text-gray-600"><strong>Freight:</strong></p>
+              <p className="text-gray-900 font-medium">{formatCurrency(lorryReceipt.freight)}</p>
             </div>
             <div>
-              <p><strong>GST:</strong> {lorryReceipt.freightDetails?.gstDetails?.applicableGST || 'N/A'}</p>
-              <p><strong>GST Amount:</strong> {formatCurrency(lorryReceipt.freightDetails?.gstDetails?.gstAmount)}</p>
-              <p><strong>Sub Total:</strong> {formatCurrency(lorryReceipt.freightDetails?.subTotal)}</p>
-            </div>            <div>
-              <p><strong>Advance Received:</strong> {formatCurrency(lorryReceipt.freightDetails?.advanceDetails?.advanceReceived)}</p>
-              <p><strong>Total Freight:</strong> {formatCurrency(lorryReceipt.freightDetails?.totalFreight)}</p>
-              <p><strong>Remaining:</strong> {formatCurrency(lorryReceipt.freightDetails?.advanceDetails?.remainingFreight)}</p>
-            </div>
-          </div>
-          
-          {/* Detailed Charges Breakdown */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p><strong>Freight:</strong> {formatCurrency(lorryReceipt.freightDetails?.freight)}</p>
-              <p><strong>Hamali:</strong> {formatCurrency(lorryReceipt.freightDetails?.hamali)}</p>
+              <p className="text-gray-600"><strong>Hamali:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.hamali)}</p>
             </div>
             <div>
-              <p><strong>AOC:</strong> {formatCurrency(lorryReceipt.freightDetails?.aoc)}</p>
-              <p><strong>Door Delivery:</strong> {formatCurrency(lorryReceipt.freightDetails?.doorDelivery)}</p>
+              <p className="text-gray-600"><strong>AOC:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.aoc)}</p>
             </div>
             <div>
-              <p><strong>Collection:</strong> {formatCurrency(lorryReceipt.freightDetails?.collection)}</p>
-              <p><strong>Service Charge:</strong> {formatCurrency(lorryReceipt.freightDetails?.serviceCharge)}</p>
+              <p className="text-gray-600"><strong>Door Delivery:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.doorDelivery)}</p>
             </div>
             <div>
-              <p><strong>Extra Loading:</strong> {formatCurrency(lorryReceipt.freightDetails?.extraLoading)}</p>
-              <p><strong>Payment Type:</strong> {lorryReceipt.paymentType || 'N/A'}</p>
+              <p className="text-gray-600"><strong>Collection:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.collection)}</p>
+            </div>
+            <div>
+              <p className="text-gray-600"><strong>Service Charge:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.serviceCharge)}</p>
+            </div>
+            <div>
+              <p className="text-gray-600"><strong>Extra Loading:</strong></p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.extraLoading)}</p>
+            </div>
+            <div>
+              <p className="text-gray-600"><strong>Total:</strong></p>
+              <p className="text-gray-900 font-bold text-lg">{formatCurrency(lorryReceipt.total)}</p>
             </div>
           </div>
         </div>
 
-        {/* Invoice & E-Way Bill Details */}
-        {(lorryReceipt.invoiceAndEwayDetails?.invoiceDetails?.length > 0 || 
-          lorryReceipt.invoiceAndEwayDetails?.ewayBillDetails?.ewayBillNumber) && (
-          <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400" />
-              Invoice & E-Way Bill Details
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {lorryReceipt.invoiceAndEwayDetails?.invoiceDetails?.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Invoice Details</h4>
-                  {lorryReceipt.invoiceAndEwayDetails.invoiceDetails.map((invoice, index) => (
-                    <div key={index} className="space-y-1">
-                      <p><strong>Invoice Number:</strong> {invoice.invoiceNumber || 'N/A'}</p>
-                      <p><strong>Invoice Date:</strong> {formatDate(invoice.invoiceDate)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {lorryReceipt.invoiceAndEwayDetails?.ewayBillDetails?.ewayBillNumber && (
-                <div>
-                  <h4 className="font-medium mb-2">E-Way Bill Details</h4>
-                  <div className="space-y-1">
-                    <p><strong>E-Way Bill Number:</strong> {lorryReceipt.invoiceAndEwayDetails.ewayBillDetails.ewayBillNumber}</p>
-                    {lorryReceipt.invoiceAndEwayDetails.ewayBillDetails.ewayBillExpiryDate && (
-                      <p><strong>Expiry Date:</strong> {formatDate(lorryReceipt.invoiceAndEwayDetails.ewayBillDetails.ewayBillExpiryDate)}</p>
-                    )}
-                  </div>
-                </div>
-              )}
+        {/* Additional Details */}
+        <div className="mt-6 bg-gray-50 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600"><strong>Payment Type:</strong></p>
+              <p className="text-gray-900">{lorryReceipt.paymentType || 'N/A'}</p>
             </div>
+            {lorryReceipt.deliveryAt && (
+              <div>
+                <p className="text-gray-600"><strong>Delivery At:</strong></p>
+                <p className="text-gray-900">{lorryReceipt.deliveryAt}</p>
+              </div>
+            )}
+            {lorryReceipt.remarks && (
+              <div className="md:col-span-2">
+                <p className="text-gray-600"><strong>Remarks:</strong></p>
+                <p className="text-gray-900">{lorryReceipt.remarks}</p>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Notes */}
-        {lorryReceipt.notes && (
-          <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Notes</h3>
-            <p className="text-sm text-gray-700">{lorryReceipt.notes}</p>
-          </div>
-        )}        {/* Action Buttons */}
-        <div className="flex justify-between items-center mt-6 pt-4 border-t">
-          <button
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-400 hover:bg-primary-300 text-white rounded-lg transition-colors"
-          >
-            <FontAwesomeIcon icon={faDownload} />
-            Download PDF
-          </button>
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Close
-          </button>
-        </div>      </div>
+        </div>
+      </div>
     </Modal>
   );
 };

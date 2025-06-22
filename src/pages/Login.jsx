@@ -56,8 +56,8 @@ const Login = () => {
         {/* Left side - Logo at top left and text centered vertically */}
         <div className="md:w-1/2 md:pr-8 flex flex-col mb-8 md:mb-0 relative">
           {/* Logo positioned at the top left */}
-          <div className="mb-6 text-left">
-            <img src={Logo} alt="Arthasva Logo" className="h-16" />
+          <div className="w-88 absolute left-1/2 -translate-x-1/2">
+            <img src={Logo} alt="ShreeDattaguruLogo" />
           </div>
           
           {/* Vertically centered text content */}
@@ -102,16 +102,6 @@ const Login = () => {
                 className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white placeholder-primary-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 disabled:opacity-50"
                 placeholder="Enter your password"
               />
-            </div>
-
-            <div className="flex justify-between items-center text-sm">
-              <label className="flex items-center text-primary-50">
-                <input type="checkbox" className="mr-2" disabled={loading} />
-                Remember me
-              </label>
-              <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">
-                Forgot password?
-              </a>
             </div>
 
             <Button 

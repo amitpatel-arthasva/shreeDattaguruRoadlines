@@ -1,10 +1,12 @@
-import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
 import isDev from 'electron-is-dev';
 import { createMenu } from './menu.js';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcrypt';
+import process from 'process';
+import { generateLorryReceiptPrintPdf } from './pdfService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,12 +58,22 @@ function createWindow() {
   });
 
   // Load the app
-  const startUrl = isDev 
-    ? 'http://localhost:5173' 
-    : `file://${path.join(__dirname, '../build/index.html')}`;
+  let startUrl;
+  if (isDev) {
+    startUrl = 'http://localhost:5173';
+  } else {
+    // In production, load from the built files
+    // Use process.resourcesPath to get the correct path in packaged app
+    const buildPath = path.join(process.resourcesPath, 'app.asar', 'build', 'index.html');
+    console.log('Production build path:', buildPath);
+    console.log('Build path exists:', fs.existsSync(buildPath));
+    startUrl = `file://${buildPath}`;
+  }
   
   console.log('Loading URL:', startUrl);
   console.log('isDev:', isDev);
+  console.log('__dirname:', __dirname);
+  console.log('process.resourcesPath:', process.resourcesPath);
   
   mainWindow.loadURL(startUrl);
 
@@ -83,6 +95,23 @@ function createWindow() {
 
   mainWindow.webContents.on('dom-ready', () => {
     console.log('DOM ready');
+  });
+
+  // Add error handling for page load
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('Page failed to load:', {
+      errorCode,
+      errorDescription,
+      validatedURL
+    });
+    
+    // If in production and the page fails to load, try alternative path
+    if (!isDev && errorCode !== -3) { // -3 is usually a navigation error
+      console.log('Trying alternative path...');
+      const altPath = path.join(process.resourcesPath, 'app.asar', 'build', 'index.html');
+      console.log('Alternative path:', altPath);
+      mainWindow.loadURL(`file://${altPath}`);
+    }
   });
 
   // Show window when ready
@@ -247,16 +276,273 @@ ipcMain.handle('can-go-forward', () => {
   return mainWindow ? mainWindow.webContents.canGoForward() : false;
 });
 
+// PDF generation handler for lorry receipt print layout
+ipcMain.handle('generate-lorry-receipt-print-pdf', async (event, { data, filename }) => {
+  try {
+    if (!data) {
+      throw new Error('Lorry receipt data is required');
+    }
+
+    // Generate PDF buffer using print template
+    const pdfBuffer = await generateLorryReceiptPrintPdf(data);
+
+    // Extract filename from various possible fields if not provided
+    let defaultFilename = filename;
+    if (!defaultFilename) {
+      const possibleFilenames = [
+        data.lorryReceiptNumber,
+        data.cn_number,
+        data.lr_number,
+        data.cnNumber,
+        data.lrNumber,
+        data.receipt_number,
+        data.receiptNumber,
+        data.number,
+        data.id
+      ].filter(Boolean);
+      
+      const baseFilename = possibleFilenames.length > 0 ? possibleFilenames[0] : 'Unknown';
+      defaultFilename = `LorryReceipt_Print_${baseFilename}.pdf`;
+    }
+
+    // Show save dialog
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Lorry Receipt PDF (Print Layout)',
+      defaultPath: defaultFilename,
+      filters: [
+        { name: 'PDF Files', extensions: ['pdf'] }
+      ]
+    });
+
+    if (saveResult.canceled) {
+      return { success: false, message: 'User cancelled save operation' };
+    }
+
+    // Save the PDF file
+    await fs.promises.writeFile(saveResult.filePath, pdfBuffer);
+
+    // Ask user if they want to open the file
+    const openResult = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Open PDF', 'Close'],
+      defaultId: 0,
+      title: 'PDF Generated Successfully',
+      message: 'Lorry receipt PDF (Print Layout) has been generated successfully.',
+      detail: `File saved to: ${saveResult.filePath}\n\nWould you like to open the PDF now?`
+    });
+
+    if (openResult.response === 0) {
+      // Open the PDF with default application
+      await shell.openPath(saveResult.filePath);
+    }
+
+    return { 
+      success: true, 
+      filePath: saveResult.filePath,
+      filename: path.basename(saveResult.filePath)
+    };
+  } catch (error) {
+    console.error('Error generating lorry receipt print PDF:', error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+});
+
+// PDF generation handler for invoice
+ipcMain.handle('generate-invoice-pdf', async (event, invoiceData) => {
+  try {
+    if (!invoiceData) {
+      throw new Error('Invoice data is required');
+    }
+
+    // Import the PDF service and template
+    const { generatePdfFromTemplate } = await import('./pdfService.js');
+    const invoiceTemplate = await import('./invoiceTemplate.js');
+
+    // Generate PDF buffer using invoice template
+    const pdfBuffer = await generatePdfFromTemplate(
+      invoiceTemplate.default,
+      invoiceData,
+      {
+        filename: `Invoice-${invoiceData.invoiceNumber}`,
+        pdfOptions: {
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
+        }
+      }
+    );
+
+    // Extract filename from invoice data
+    const defaultFilename = `Invoice-${invoiceData.invoiceNumber || invoiceData.id || 'Unknown'}.pdf`;
+
+    // Show save dialog
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Invoice PDF',
+      defaultPath: defaultFilename,
+      filters: [
+        { name: 'PDF Files', extensions: ['pdf'] }
+      ]
+    });
+
+    if (saveResult.canceled) {
+      return { success: false, message: 'User cancelled save operation' };
+    }
+
+    // Save the PDF file
+    await fs.promises.writeFile(saveResult.filePath, pdfBuffer);
+
+    // Ask user if they want to open the file
+    const openResult = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Open PDF', 'Close'],
+      defaultId: 0,
+      title: 'PDF Generated Successfully',
+      message: 'Invoice PDF has been generated successfully.',
+      detail: `File saved to: ${saveResult.filePath}\n\nWould you like to open the PDF now?`
+    });
+
+    if (openResult.response === 0) {
+      // Open the PDF with default application
+      await shell.openPath(saveResult.filePath);
+    }
+
+    return { 
+      success: true, 
+      filePath: saveResult.filePath,
+      filename: path.basename(saveResult.filePath),
+      pdfBuffer: pdfBuffer.toString('base64') // Return base64 for direct download
+    };
+  } catch (error) {
+    console.error('Error generating invoice PDF:', error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+});
+
+// PDF generation handlers
+ipcMain.handle('generatePdfFromHtml', async (event, htmlContent, options = {}) => {
+  try {
+    if (!mainWindow) {
+      throw new Error('Main window not available');
+    }
+
+    // Create a temporary HTML file
+    const tempHtmlPath = path.join(app.getPath('temp'), `temp_${Date.now()}.html`);
+    await fs.promises.writeFile(tempHtmlPath, htmlContent, 'utf8');
+
+    // Load the HTML in a hidden window
+    const pdfWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    });
+
+    try {
+      // Load the HTML file
+      await pdfWindow.loadFile(tempHtmlPath);
+
+      // Generate PDF
+      const pdfBuffer = await pdfWindow.webContents.printToPDF({
+        format: 'A4',
+        landscape: false,
+        printBackground: true,
+        margin: { 
+          top: '1cm', 
+          right: '1cm', 
+          bottom: '1cm', 
+          left: '1cm' 
+        },
+        ...options
+      });
+
+      return pdfBuffer;
+    } finally {
+      // Clean up
+      pdfWindow.close();
+      try {
+        await fs.promises.unlink(tempHtmlPath);
+      } catch (error) {
+        console.warn('Error deleting temp HTML file:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error generating PDF from HTML:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('generatePdfFromUrl', async (event, url, options = {}) => {
+  try {
+    if (!mainWindow) {
+      throw new Error('Main window not available');
+    }
+
+    // Create a hidden window for PDF generation
+    const pdfWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    });
+
+    try {
+      // Load the URL
+      await pdfWindow.loadURL(url);
+
+      // Generate PDF
+      const pdfBuffer = await pdfWindow.webContents.printToPDF({
+        format: 'A4',
+        landscape: false,
+        printBackground: true,
+        margin: { 
+          top: '1cm', 
+          right: '1cm', 
+          bottom: '1cm', 
+          left: '1cm' 
+        },
+        ...options
+      });
+
+      return pdfBuffer;
+    } finally {
+      // Clean up
+      pdfWindow.close();
+    }
+  } catch (error) {
+    console.error('Error generating PDF from URL:', error);
+    throw error;
+  }
+});
+
 app.whenReady().then(async () => {
   await initializeDatabase();
   createWindow();
 });
 
-app.on('window-all-closed', () => {
-  if (dbManager) {
-    dbManager.close();
-  }
-  if (process.platform !== 'darwin') {
+app.on('window-all-closed', async () => {
+  try {
+    // Clean up database connection
+    if (dbManager) {
+      dbManager.close();
+    }
+    
+    // Clean up browser instance
+    const { closeBrowserInstance } = await import('./pdfService.js');
+    await closeBrowserInstance();
+    
+    // Force quit on all platforms for built app
+    app.quit();
+  } catch (error) {
+    console.error('Error during window-all-closed cleanup:', error);
+    // Force quit even if cleanup fails
     app.quit();
   }
 });
@@ -267,8 +553,88 @@ app.on('activate', () => {
   }
 });
 
-app.on('before-quit', () => {
-  if (dbManager) {
-    dbManager.close();
+app.on('before-quit', async () => {
+  try {
+    // Clean up database connection
+    if (dbManager) {
+      dbManager.close();
+    }
+    
+    // Clean up browser instance
+    const { closeBrowserInstance } = await import('./pdfService.js');
+    await closeBrowserInstance();
+  } catch (error) {
+    console.error('Error during before-quit cleanup:', error);
   }
+});
+
+// Add proper cleanup for all processes
+app.on('will-quit', async (event) => {
+  event.preventDefault(); // Prevent immediate quit
+  
+  try {
+    // Set a timeout to force quit after 5 seconds
+    const forceQuitTimer = setTimeout(() => {
+      console.log('Force quitting after timeout');
+      process.exit(0);
+    }, 5000);
+
+    // Close database connection
+    if (dbManager) {
+      dbManager.close();
+    }
+    
+    // Close browser instance from pdfService
+    const { closeBrowserInstance } = await import('./pdfService.js');
+    await closeBrowserInstance();
+    
+    console.log('All processes cleaned up successfully');
+    clearTimeout(forceQuitTimer);
+    app.exit(0); // Force exit
+  } catch (error) {
+    console.error('Error during cleanup:', error);
+    process.exit(1);
+  }
+});
+
+// Handle process termination signals
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT, cleaning up...');
+  try {
+    if (dbManager) {
+      dbManager.close();
+    }
+    const { closeBrowserInstance } = await import('./pdfService.js');
+    await closeBrowserInstance();
+  } catch (error) {
+    console.error('Error during SIGINT cleanup:', error);
+  } finally {
+    process.exit(0);
+  }
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM, cleaning up...');
+  try {
+    if (dbManager) {
+      dbManager.close();
+    }
+    const { closeBrowserInstance } = await import('./pdfService.js');
+    await closeBrowserInstance();
+  } catch (error) {
+    console.error('Error during SIGTERM cleanup:', error);
+  } finally {
+    process.exit(0);
+  }
+});
+
+// Handle uncaught exceptions and unhandled rejections
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FeatureCard from "../components/common/FeatureCard";
 import Button from "../components/common/Button";
 import {
@@ -8,32 +8,49 @@ import {
   faCogs,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import dashboardService from "../services/dashboardService";
+import { useToast } from "../components/common/ToastSystem";
+import QuotationModal from "../components/quotations/QuotationModal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [selectedQuotation, setSelectedQuotation] = useState(null);
-  const [isLorryModalOpen, setIsLorryModalOpen] = useState(false);
-  const [lorryModalMode] = useState('create');
-  const [selectedLorryReceipt] = useState(null);
+
+  const [dashboardStats, setDashboardStats] = useState({
+    quotations: { total: 0 },
+    lorryReceipts: { total: 0 },
+    invoices: { total: 0 },
+    master: { trucks: 0, drivers: 0, customers: 0 },
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
+
+  const loadDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardService.getDashboardStats();
+      if (response.success) {
+        setDashboardStats(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+      toast.error('Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateQuotation = () => {
-  setSelectedQuotation(null);
-  setModalMode("create");
-  setIsModalOpen(true);
-};
-
-
-
-  const dashboardStats = {
-    quotations: { total: 24, pending: 8, approved: 16 },
-    lorryReceipts: { total: 18, processed: 15, pending: 3 },
-    invoices: { total: 32, paid: 28, unpaid: 4 },
-    loadingSlips: { total: 22, completed: 19, inProgress: 3 },
-    deliverySlips: { total: 27, delivered: 24, pending: 3 },
-    master: { trucks: 12, drivers: 8, customers: 45 },
+    setSelectedQuotation(null);
+    setModalMode("create");
+    setIsModalOpen(true);
   };
 
   const handleNavigate = (route) => {
@@ -70,19 +87,20 @@ const Dashboard = () => {
                 icon={<span className="text-xl">📋</span>}
               />
               <Button
-                text="Create Invoice"
-                onClick={() => handleNavigate("invoices")}
+                text="Create LR"
+                onClick={() => handleNavigate("lorry-receipts/create")}
                 bgColor="#C599B6"
                 hoverBgColor="#E6B2BA"
                 className="text-[#47034b] text-base px-2 py-1 font-semibold flex-1"
                 icon={<span className="text-xl">🧾</span>}
-              />              <Button
-                text="Add Truck"
-                onClick={() => handleNavigate("trucks")}
+              />
+              <Button
+                text="Add Company"
+                onClick={() => handleNavigate("companies")}
                 bgColor="#E6B2BA"
                 hoverBgColor="#FAD0C4"
                 className="text-[#47034b] text-base px-2 py-1 font-semibold flex-1"
-                icon={<span className="text-xl">🚛</span>}
+                icon={<span className="text-xl">🏢</span>}
               />
             </div>
           </div>
@@ -91,7 +109,6 @@ const Dashboard = () => {
         {/* Dashboard Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center md:justify-items-stretch mt-10">
           {/* --- Quotations --- */}
-
           <FeatureCard
             title="Quotations"
             icon={faFileInvoice}
@@ -105,17 +122,14 @@ const Dashboard = () => {
                   <span>Total Quotations</span>
                   <span className="text-lg font-bold">{dashboardStats.quotations.total}</span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span>Pending: {dashboardStats.quotations.pending}</span>
-                  <span>Approved: {dashboardStats.quotations.approved}</span>
-                </div>
               </div>
               <Button
                 text="View"
                 onClick={() => handleNavigate("quotations")}
                 bgColor="#FFF7F3"
                 hoverBgColor="#FAD0C4"
-                className="text-[#47034b] text-base font-semibold"                height="h-8"
+                className="text-[#47034b] text-base font-semibold"
+                height="h-8"
                 width="w-full"
               />
             </div>
@@ -135,17 +149,14 @@ const Dashboard = () => {
                   <span>Total Receipts</span>
                   <span className="text-lg font-bold">{dashboardStats.lorryReceipts.total}</span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span>Processed: {dashboardStats.lorryReceipts.processed}</span>
-                  <span>Pending: {dashboardStats.lorryReceipts.pending}</span>
-                </div>
               </div>
               <Button
                 text="View"
                 onClick={() => handleNavigate("lorry-receipts")}
                 bgColor="#FFF7F3"
                 hoverBgColor="#FAD0C4"
-                className="text-[#47034b] text-base font-semibold"                height="h-8"
+                className="text-[#47034b] text-base font-semibold"
+                height="h-8"
                 width="w-full"
               />
             </div>
@@ -165,23 +176,20 @@ const Dashboard = () => {
                   <span>Total Invoices</span>
                   <span className="text-lg font-bold">{dashboardStats.invoices.total}</span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span>Paid: {dashboardStats.invoices.paid}</span>
-                  <span>Unpaid: {dashboardStats.invoices.unpaid}</span>
-                </div>
               </div>
               <Button
                 text="View"
                 onClick={() => handleNavigate("invoices")}
                 bgColor="#FFF7F3"
                 hoverBgColor="#FAD0C4"
-                className="text-[#47034b] text-base font-semibold"                height="h-8"
+                className="text-[#47034b] text-base font-semibold"
+                height="h-8"
                 width="w-full"
               />
             </div>
           </FeatureCard>
 
-                              {/* --- Master Data --- */}
+          {/* --- Master Data --- */}
           <FeatureCard
             title="Master Data"
             icon={faCogs}
@@ -208,12 +216,14 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center items-center">                <Button
+              <div className="flex flex-wrap gap-2 justify-center items-center">
+                <Button
                   text="Manage Trucks"
                   onClick={() => handleNavigate("trucks")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
-                  className="text-[#47034b] text-base font-semibold "                  width="w-auto"
+                  className="text-[#47034b] text-base font-semibold"
+                  width="w-auto"
                   height="h-7"
                   icon={<span className="text-xl">🚛</span>}
                 />
@@ -222,7 +232,8 @@ const Dashboard = () => {
                   onClick={() => handleNavigate("drivers")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
-                  className="text-[#47034b] text-base font-semibold"                  width="w-auto"
+                  className="text-[#47034b] text-base font-semibold"
+                  width="w-auto"
                   height="h-7"
                   icon={<span className="text-xl">👨‍💼</span>}
                 />
@@ -231,75 +242,28 @@ const Dashboard = () => {
                   onClick={() => handleNavigate("companies")}
                   bgColor="#FFF7F3"
                   hoverBgColor="#FAD0C4"
-                  className="text-[#47034b] text-base font-semibold"                  width="w-auto"
+                  className="text-[#47034b] text-base font-semibold"
+                  width="w-auto"
                   height="h-7"
                   icon={<span className="text-xl">🏢</span>}
                 />
               </div>
             </div>
           </FeatureCard>
-
-
         </div>
 
-        {/* Quick Actions Footer
-        <div className="mt-8 bg-white/50 backdrop-blur-sm rounded-2xl p-6">
-          <h3 className="text-xl font-semibold text-[#C5677B] mb-4">
-            Quick Actions
-          </h3>
-          <div className="flex flex-wrap gap-4">
-            <Button
-              text="New Quotation"
-              onClick={() => handleNavigate("quotations")}
-              bgColor="#C5677B"
-              hoverBgColor="#C599B6"
-              className="text-[#47034b] font-semibold"
-              width="w-auto"
-              icon={<span className="text-xl">📋</span>}
-            />
-            <Button
-              text="Create Invoice"
-              onClick={() => handleNavigate("invoices")}
-              bgColor="#C599B6"
-              hoverBgColor="#E6B2BA"
-              className="text-[#47034b] font-semibold"
-              width="w-auto"
-              icon={<span className="text-xl">🧾</span>}
-            />
-            <Button
-              text="Add Truck"
-              onClick={() => handleNavigate("lorry-receipts")}
-              bgColor="#E6B2BA"
-              hoverBgColor="#FAD0C4"
-              className="text-[#47034b] font-semibold"
-              width="w-auto"
-              icon={<span className="text-xl">🚛</span>}
-            />
-          </div>
-        </div> */}
-        {isLorryModalOpen && (
-  <LorryReceiptModal
-    isOpen={isLorryModalOpen}
-    onClose={() => setIsLorryModalOpen(false)}
-    onSubmit={() => setIsLorryModalOpen(false)} // This can be replaced with logic later
-    lorryReceipt={selectedLorryReceipt}
-    mode={lorryModalMode}
-  />
-)}
-
         {isModalOpen && (
-  <QuotationModal
-    isOpen={isModalOpen}
-    onClose={() => setIsModalOpen(false)}
-    onSubmit={(data) => {
-      console.log("Created quotation:", data);
-      setIsModalOpen(false);
-    }}
-    quotation={selectedQuotation}
-    mode={modalMode}
-  />
-)}
-
+          <QuotationModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={(data) => {
+              console.log("Created quotation:", data);
+              setIsModalOpen(false);
+            }}
+            quotation={selectedQuotation}
+            mode={modalMode}
+          />
+        )}
       </div>
     </div>
   );

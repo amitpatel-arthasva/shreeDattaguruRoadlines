@@ -7,7 +7,6 @@ console.log('Preload script loaded (CommonJS version)');
 contextBridge.exposeInMainWorld('electronAPI', {
   // Database operations
   query: (sql, params) => {
-    console.log('electronAPI.query called with:', sql);
     return ipcRenderer.invoke('db-query', sql, params);
   },
     // Database path management
@@ -21,10 +20,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   
   // App operations
-  getVersion: () => ipcRenderer.invoke('get-version'),
-    // File operations
+  getVersion: () => ipcRenderer.invoke('get-version'),    // File operations
   showSaveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options),
   showOpenDialog: (options) => ipcRenderer.invoke('show-open-dialog', options),
+    // PDF operations
+  generateLorryReceiptPrintPdf: (options) => {
+    console.log('electronAPI.generateLorryReceiptPrintPdf called with:', options);
+    return ipcRenderer.invoke('generate-lorry-receipt-print-pdf', options);
+  },
+  generateInvoicePdf: (invoiceData) => {
+    console.log('electronAPI.generateInvoicePdf called with:', invoiceData);
+    return ipcRenderer.invoke('generate-invoice-pdf', invoiceData);
+  },
+  generatePdfFromHtml: (htmlContent, options) => {
+    console.log('electronAPI.generatePdfFromHtml called');
+    return ipcRenderer.invoke('generatePdfFromHtml', htmlContent, options);
+  },
+  generatePdfFromUrl: (url, options) => {
+    console.log('electronAPI.generatePdfFromUrl called');
+    return ipcRenderer.invoke('generatePdfFromUrl', url, options);
+  },
   
   // Navigation operations
   navigateBack: () => ipcRenderer.invoke('navigate-back'),

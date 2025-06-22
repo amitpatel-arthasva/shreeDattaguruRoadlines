@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
   faSearch,
   faEdit,
   faTrash,
-  faEye,
-  faFileAlt,
+  faEye,  faFileAlt,
   faCalendarAlt,
   faSpinner,
   faDownload
 } from '@fortawesome/free-solid-svg-icons';
 import lorryReceiptService from '../services/lorryReceiptService';
+import { downloadLorryReceiptPrintPdf } from '../services/pdfServiceRenderer';
 import Layout from '../components/common/Layout';
 import Button from '../components/common/Button';
 import ConfirmDialog from '../components/common/ConfirmDialog';
@@ -21,6 +22,7 @@ import LorryReceiptViewModal from '../components/lorryReceipts/LorryReceiptViewM
 
 const LorryReceipts = () => {
   const toast = useToast();
+  const navigate = useNavigate();
   const [lorryReceipts, setLorryReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(''); const [currentPage, setCurrentPage] = useState(1);
@@ -55,14 +57,11 @@ const LorryReceipts = () => {
   }, [debouncedSearchTerm, searchTerm]);
   const fetchLorryReceipts = useCallback(async () => {
     try {
-      setLoading(true);
-      const params = {
+      setLoading(true);      const params = {
         page: currentPage,
         limit: 10,
         ...(debouncedSearchTerm && {
-          consignorName: debouncedSearchTerm,
-          consigneeName: debouncedSearchTerm,
-          truckNumber: debouncedSearchTerm
+          search: debouncedSearchTerm
         })
       };
 
@@ -88,20 +87,16 @@ const LorryReceipts = () => {
   useEffect(() => {
     fetchLorryReceipts();
   }, [fetchLorryReceipts]);  const handleCreateLorryReceipt = () => {
-    // TODO: Implement create functionality
-    toast.info('Create functionality will be implemented soon');
+    navigate('/lorry-receipts/create');
   };
 
   const handleEditLorryReceipt = (lorryReceipt) => {
-    // TODO: Implement edit functionality
-    console.log('Edit LR:', lorryReceipt);
-    toast.info('Edit functionality will be implemented soon');
-  };
-  const handleViewLorryReceipt = async (lorryReceiptId) => {
+    navigate(`/lorry-receipts/edit/${lorryReceipt._id}`);
+  };  const handleViewLorryReceipt = async (lorryReceiptId) => {
     try {
       const response = await lorryReceiptService.getLorryReceiptById(lorryReceiptId);
       if (response.success) {
-        setSelectedLorryReceipt(response.data.lorryReceipt);
+        setSelectedLorryReceipt(response.data); // Fixed: removed .lorryReceipt
         setIsViewModalOpen(true);
       }
     } catch (error) {
@@ -113,7 +108,7 @@ const LorryReceipts = () => {
       }
       // Connection errors are handled by the API interceptor
     }
-  };  const handleDeleteLorryReceipt = async (lorryReceiptId) => {
+  };const handleDeleteLorryReceipt = async (lorryReceiptId) => {
     setConfirmDialog({
       isOpen: true,
       title: 'Delete Lorry Receipt',
@@ -132,12 +127,38 @@ const LorryReceipts = () => {
         }
       }
     });
-  };
+  };  const handleDownloadPDF = async (lorryReceiptId) => {
+    try {
+      toast.info('Generating PDF...', { autoClose: 2000 });
+      
+      // Fetch the complete lorry receipt data
+      const response = await lorryReceiptService.getLorryReceiptById(lorryReceiptId);
+      if (!response.success) {
+        throw new Error('Failed to fetch lorry receipt details');
+      }
 
-  const handleDownloadPDF = async (lorryReceiptId) => {
-    // TODO: Implement PDF download functionality
-    console.log('Download PDF for LR:', lorryReceiptId);
-    toast.info('PDF download functionality will be implemented soon');
+      const lorryReceiptData = response.data;
+      
+      // Generate and download the PDF
+      const result = await downloadLorryReceiptPrintPdf(
+        lorryReceiptData,
+        `LorryReceipt_${lorryReceiptData.lorryReceiptNumber}_${new Date().toISOString().split('T')[0]}.pdf`
+      );
+
+      if (result.success) {
+        toast.success('PDF downloaded successfully');
+      } else {
+        // Check if user cancelled the save operation
+        if (result.message === 'User cancelled save operation') {
+          toast.info('PDF not saved');
+        } else {
+          throw new Error(result.message || result.error || 'Failed to generate PDF');
+        }
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error(`Failed to download PDF: ${error.message}`);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -170,14 +191,14 @@ const LorryReceipts = () => {
 
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="relative w-full sm:w-auto">
+        <div className="relative w-full">
           <FontAwesomeIcon
             icon={faSearch}
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
           />
           <input
             type="text"
-            placeholder="Search by consignor, consignee, or truck number..."
+            placeholder="Search by LR number, consignor, consignee, or truck number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent w-full sm:w-80"
@@ -230,8 +251,7 @@ const LorryReceipts = () => {
                       <div className="flex justify-between items-start mb-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(lorryReceipt.status)}`}>
                           {lorryReceipt.status}
-                        </span>
-                        <div className="flex gap-2">
+                        </span>                        <div className="flex gap-2">
                           <button
                             onClick={() => handleViewLorryReceipt(lorryReceipt._id)}
                             className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
@@ -340,8 +360,7 @@ const LorryReceipts = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {formatDate(lorryReceipt.date)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                          </td>                          <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => handleViewLorryReceipt(lorryReceipt._id)}

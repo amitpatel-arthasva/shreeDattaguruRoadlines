@@ -5,3 +5,6 @@ export { default as lorryReceiptService } from './lorryReceiptService.js';
 export { default as companyService } from './companyService.js';
 export { default as truckService } from './truckService.js';
 export { default as driverService } from './driverService.js';
+
+// Export templates
+export { default as lorryReceiptPrintTemplate } from '../templates/lorryReceiptPrintTemplate.js';

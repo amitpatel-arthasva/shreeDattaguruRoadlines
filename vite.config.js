@@ -13,6 +13,17 @@ export default defineConfig({
   build: {
     outDir: 'build',
     assetsDir: 'assets',
+    rollupOptions: {
+      external: [
+        'electron',
+        'fs',
+        'path',
+        'url',
+        'crypto',
+        'os',
+        'child_process'
+      ]
+    }
   },
   server: {
     port: 5173,
@@ -23,4 +34,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    exclude: ['electron']
+  },
+  define: {
+    // Exclude Node.js globals from browser build
+    global: 'globalThis'
+  }
 })

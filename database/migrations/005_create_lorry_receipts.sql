@@ -2,49 +2,42 @@ CREATE TABLE IF NOT EXISTS lorry_receipts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     
     -- LR Details
-    lr_number TEXT NOT NULL UNIQUE,
+    cn_number TEXT NOT NULL UNIQUE,
+    truck_number TEXT,
     lr_date DATE NOT NULL,
-    from_location TEXT NOT NULL,
     to_location TEXT NOT NULL,
+    from_location TEXT NOT NULL,
     
-    -- Parties
+    -- Company References
     consignor_id INTEGER NOT NULL,
     consignee_id INTEGER NOT NULL,
     
     -- Vehicle & Driver
     truck_id INTEGER,
     driver_id INTEGER,
-    truck_number TEXT,
     
-    -- Particulars
-    particulars TEXT,           -- e.g. "Diammonium Phosphate, MPK"
-    quantity INTEGER,           -- Total number of bags/packages/etc.
-    unit TEXT DEFAULT 'Bags',   -- e.g., Bags, Kg, Nos
+    -- Particulars (stored as JSON arrays)
+    nos TEXT,                   -- JSON array of nos entries
+    particulars TEXT,           -- JSON array of particulars entries
     
     -- Charges
-    freight REAL,
-    hamali REAL,
-    aoc REAL,
-    door_delivery REAL,
-    collection REAL,
-    service_charge REAL DEFAULT 20,
-    extra_loading REAL,
+    freight REAL DEFAULT 0,
+    hamali REAL DEFAULT 0,
+    aoc REAL DEFAULT 0,
+    door_delivery REAL DEFAULT 0,
+    collection REAL DEFAULT 0,
+    st_charge REAL DEFAULT 0,
+    extra_loading REAL DEFAULT 0,
     
     -- Weight Info
     actual_weight REAL,
-    charged_weight REAL,
-    
+    chargeable_weight REAL,
     -- Payment
-    payment_type TEXT CHECK (payment_type IN ('Paid', 'To Be Bill', 'To Pay')),
-    service_tax_payable_by TEXT CHECK (service_tax_payable_by IN ('Consignor', 'Consignee')),
+    payment_type TEXT DEFAULT 'paid' CHECK (payment_type IN ('paid', 'toBeBill', 'toPay')),
     
-    -- Risk & Docs
-    goods_risk TEXT DEFAULT 'Owner',
-    invoice_number TEXT,
-    challan_number TEXT,
-    
-    -- Other
+    -- Other Details
     delivery_at TEXT,
+    total REAL DEFAULT 0,
     remarks TEXT,
     
     -- Audit
