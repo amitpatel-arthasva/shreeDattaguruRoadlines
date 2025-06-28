@@ -6,7 +6,9 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcrypt';
 import process from 'process';
+import { spawn } from 'child_process';
 import { generateLorryReceiptPrintPdf } from './pdfService.js';
+import chromeManager from './chromeManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -277,38 +279,27 @@ ipcMain.handle('can-go-forward', () => {
 });
 
 // PDF generation handler for lorry receipt print layout
-ipcMain.handle('generate-lorry-receipt-print-pdf', async (event, { data, filename }) => {
+ipcMain.handle('generate-lorry-receipt-print-pdf', async (event, options) => {
   try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
+    const { data, filename } = options;
+    
     if (!data) {
       throw new Error('Lorry receipt data is required');
     }
 
-    // Generate PDF buffer using print template
-    const pdfBuffer = await generateLorryReceiptPrintPdf(data);
-
-    // Extract filename from various possible fields if not provided
-    let defaultFilename = filename;
-    if (!defaultFilename) {
-      const possibleFilenames = [
-        data.lorryReceiptNumber,
-        data.cn_number,
-        data.lr_number,
-        data.cnNumber,
-        data.lrNumber,
-        data.receipt_number,
-        data.receiptNumber,
-        data.number,
-        data.id
-      ].filter(Boolean);
-      
-      const baseFilename = possibleFilenames.length > 0 ? possibleFilenames[0] : 'Unknown';
-      defaultFilename = `LorryReceipt_Print_${baseFilename}.pdf`;
-    }
+    // Generate PDF
+    const pdfBuffer = await generateLorryReceiptPrintPdf(data, { filename });
 
     // Show save dialog
     const saveResult = await dialog.showSaveDialog(mainWindow, {
-      title: 'Save Lorry Receipt PDF (Print Layout)',
-      defaultPath: defaultFilename,
+      title: 'Save Lorry Receipt PDF',
+      defaultPath: filename || 'LorryReceipt.pdf',
       filters: [
         { name: 'PDF Files', extensions: ['pdf'] }
       ]
@@ -327,7 +318,7 @@ ipcMain.handle('generate-lorry-receipt-print-pdf', async (event, { data, filenam
       buttons: ['Open PDF', 'Close'],
       defaultId: 0,
       title: 'PDF Generated Successfully',
-      message: 'Lorry receipt PDF (Print Layout) has been generated successfully.',
+      message: 'Lorry Receipt PDF has been generated successfully.',
       detail: `File saved to: ${saveResult.filePath}\n\nWould you like to open the PDF now?`
     });
 
@@ -336,23 +327,22 @@ ipcMain.handle('generate-lorry-receipt-print-pdf', async (event, { data, filenam
       await shell.openPath(saveResult.filePath);
     }
 
-    return { 
-      success: true, 
-      filePath: saveResult.filePath,
-      filename: path.basename(saveResult.filePath)
-    };
+    return { success: true, filePath: saveResult.filePath };
   } catch (error) {
     console.error('Error generating lorry receipt print PDF:', error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
+    return { success: false, message: error.message };
   }
 });
 
 // PDF generation handler for invoice
 ipcMain.handle('generate-invoice-pdf', async (event, invoiceData) => {
   try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
     if (!invoiceData) {
       throw new Error('Invoice data is required');
     }
@@ -409,24 +399,22 @@ ipcMain.handle('generate-invoice-pdf', async (event, invoiceData) => {
       await shell.openPath(saveResult.filePath);
     }
 
-    return { 
-      success: true, 
-      filePath: saveResult.filePath,
-      filename: path.basename(saveResult.filePath),
-      pdfBuffer: pdfBuffer.toString('base64') // Return base64 for direct download
-    };
+    return { success: true, filePath: saveResult.filePath };
   } catch (error) {
     console.error('Error generating invoice PDF:', error);
-    return { 
-      success: false, 
-      error: error.message 
-    };
+    return { success: false, message: error.message };
   }
 });
 
 // PDF generation handlers
 ipcMain.handle('generatePdfFromHtml', async (event, htmlContent, options = {}) => {
   try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
     if (!mainWindow) {
       throw new Error('Main window not available');
     }
@@ -480,6 +468,12 @@ ipcMain.handle('generatePdfFromHtml', async (event, htmlContent, options = {}) =
 
 ipcMain.handle('generatePdfFromUrl', async (event, url, options = {}) => {
   try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
     if (!mainWindow) {
       throw new Error('Main window not available');
     }
@@ -519,6 +513,86 @@ ipcMain.handle('generatePdfFromUrl', async (event, url, options = {}) => {
   } catch (error) {
     console.error('Error generating PDF from URL:', error);
     throw error;
+  }
+});
+
+// Chrome download handler for PDF generation
+ipcMain.handle('download-chrome', async () => {
+  try {
+    console.log('Chrome download requested via IPC');
+    
+    const result = await chromeManager.downloadWithProgress((progress) => {
+      // Send progress updates to renderer
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('chrome-download-progress', progress);
+      }
+    });
+    
+    console.log('Chrome download result:', result);
+    return { success: result };
+  } catch (error) {
+    console.error('Chrome download failed:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Run dependencies installation script
+ipcMain.handle('run-dependencies-install', async () => {
+  try {
+    console.log('Dependencies installation requested via IPC');
+    
+    // Find the installation script in node-bundle
+    let scriptPath;
+    
+    if (isDev) {
+      // In development, look in the project root
+      scriptPath = path.join(process.cwd(), 'node-bundle', 'install-puppeteer.bat');
+    } else {
+      // In production, look in the extraResources folder
+      scriptPath = path.join(process.resourcesPath, 'node-bundle', 'install-puppeteer.bat');
+    }
+    
+    console.log('Looking for dependencies install script at:', scriptPath);
+    
+    if (!fs.existsSync(scriptPath)) {
+      // Debug information
+      console.log('Script not found. Debug info:');
+      console.log('process.resourcesPath:', process.resourcesPath);
+      console.log('app.getAppPath():', app.getAppPath());
+      console.log('isDev:', isDev);
+      
+      try {
+        console.log('Contents of resources:', fs.readdirSync(process.resourcesPath));
+        const nodeBundleDir = path.join(process.resourcesPath, 'node-bundle');
+        if (fs.existsSync(nodeBundleDir)) {
+          console.log('Contents of node-bundle dir:', fs.readdirSync(nodeBundleDir));
+        } else {
+          console.log('node-bundle directory does not exist at:', nodeBundleDir);
+        }
+      } catch (e) {
+        console.log('Error reading directories:', e.message);
+      }
+      
+      throw new Error(`Installation script not found at: ${scriptPath}`);
+    }
+
+    return new Promise((resolve) => {
+      // Use 'start' command to open a new visible command prompt window
+      // The /wait flag makes the start command wait for the batch file to complete
+      spawn('cmd', ['/c', 'start', `"Puppeteer Installation"`, `"${scriptPath}"`], {
+        detached: false,
+        stdio: 'ignore'
+      });
+      
+      // Give it a moment to start, then resolve
+      setTimeout(() => {
+        resolve({ success: true, message: 'Dependencies installation script started in new window' });
+      }, 1000);
+    });
+    
+  } catch (error) {
+    console.error('Dependencies installation failed:', error);
+    return { success: false, error: error.message };
   }
 });
 

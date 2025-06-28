@@ -49,7 +49,8 @@ class Driver {
   }
 
   static delete(id) {
-    const sql = 'DELETE FROM drivers WHERE id = ?';
+    // Use soft delete by setting is_active to 0
+    const sql = 'UPDATE drivers SET is_active = 0 WHERE id = ?';
     return db.query(sql, [id]);
   }
 

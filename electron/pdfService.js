@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import lorryReceiptPrintTemplate from './lorryReceiptPrintTemplate.js';
+import chromeManager from './chromeManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,34 +30,50 @@ const getBrowserInstance = async () => {
         console.warn('Error closing browser instance:', error);
       }
     }
+    
+    try {
+      // Ensure Chrome is available
+      const chromeAvailable = await chromeManager.ensureChrome();
+      if (!chromeAvailable) {
+        throw new Error('Chrome browser could not be initialized for PDF generation');
+      }
+
       const launchOptions = {
-      headless: 'new',
-      args: [
-        '--no-sandbox', 
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage', // Overcome limited resource problems
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-background-timer-throttling', // Ensure timers work correctly
-        '--disable-renderer-backgrounding', // Prevent renderer from being backgrounded
-        '--disable-backgrounding-occluded-windows', // Keep windows active
-        '--force-color-profile=srgb', // Consistent color rendering
-        '--disable-features=VizDisplayCompositor' // Reduce memory usage
-      ],
-      // Ensure process cleanup
-      handleSIGINT: false, // Don't handle SIGINT, let Electron handle it
-      handleSIGTERM: false, // Don't handle SIGTERM, let Electron handle it
-      handleSIGHUP: false // Don't handle SIGHUP, let Electron handle it
-    };
-    
-    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        headless: 'new',
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage', // Overcome limited resource problems
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-background-timer-throttling', // Ensure timers work correctly
+          '--disable-renderer-backgrounding', // Prevent renderer from being backgrounded
+          '--disable-backgrounding-occluded-windows', // Keep windows active
+          '--force-color-profile=srgb', // Consistent color rendering
+          '--disable-features=VizDisplayCompositor' // Reduce memory usage
+        ],
+        // Ensure process cleanup
+        handleSIGINT: false, // Don't handle SIGINT, let Electron handle it
+        handleSIGTERM: false, // Don't handle SIGTERM, let Electron handle it
+        handleSIGHUP: false // Don't handle SIGHUP, let Electron handle it
+      };
+      
+      if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      }
+      
+      browserInstance = await puppeteer.launch(launchOptions);
+      browserUseCount = 0;
+    } catch (error) {
+      if (error.message.includes('Could not find Chrome')) {
+        throw new Error(
+          'Chrome browser not found. The application will attempt to download Chrome automatically. Please try again in a moment.'
+        );
+      }
+      throw error;
     }
-    
-    browserInstance = await puppeteer.launch(launchOptions);
-    browserUseCount = 0;
   }
   
   browserUseCount++;

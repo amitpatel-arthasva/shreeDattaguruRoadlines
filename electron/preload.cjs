@@ -50,12 +50,32 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Window operations
   closeWindow: () => ipcRenderer.invoke('close-window'),
   minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
-  maximizeWindow: () => ipcRenderer.invoke('maximize-window'),
-  
+  maximizeWindow: () => ipcRenderer.invoke('maximize-window'),  
   // Bcrypt operations for password hashing (via IPC)
   bcrypt: {
     hash: (password, saltRounds) => ipcRenderer.invoke('bcrypt-hash', password, saltRounds),
     compare: (password, hash) => ipcRenderer.invoke('bcrypt-compare', password, hash)
+  },
+  
+  // Chrome download for PDF generation
+  downloadChrome: () => {
+    return ipcRenderer.invoke('download-chrome');
+  },
+  
+  // Installation scripts
+  runDependenciesInstall: () => {
+    return ipcRenderer.invoke('run-dependencies-install');
+  },
+  
+  // Listen for Chrome download progress
+  onChromeDownloadProgress: (callback) => {
+    ipcRenderer.on('chrome-download-progress', (event, progress) => {
+      callback(progress);
+    });
+    
+    return () => {
+      ipcRenderer.removeAllListeners('chrome-download-progress');
+    };
   }
 });
 

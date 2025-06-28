@@ -3,19 +3,30 @@
   "private": true,
   "version": "1.0.0",
   "description": "Desktop application for roadlines management",
+  "author": {
+    "name": "Shree Dattagu Roadlines",
+    "email": "support@shreedattagu.com"
+  },
   "main": "electron/main.js",
   "homepage": "./",
   "type": "module",
   "scripts": {
+    "setup": "node scripts/setup.js",
+    "prebuild": "node scripts/prebuild.js",
+    "bundle-nodejs": "node scripts/bundle-nodejs.js",
+    "prepare-installer": "node scripts/prepare-installer.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "electron": "electron .",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron-build": "npm run build && electron-builder",
-    "dist": "npm run build && electron-builder --publish=never",
-    "postinstall": "electron-rebuild"
+    "electron-build": "npm run prepare-installer && npm run prebuild && npm run build && electron-builder",
+    "dist": "electron-builder --publish=never",
+    "postinstall": "electron-builder install-app-deps && node scripts/postinstall.js",
+    "setup-chrome": "npx puppeteer browsers install chrome",
+    "rebuild-safe": "electron-rebuild --force --only=bcrypt || echo 'Native modules already compiled'",
+    "rebuild": "electron-rebuild"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -28,6 +39,7 @@
     "electron-is-dev": "^2.0.0",
     "express": "^4.18.2",
     "framer-motion": "^12.15.0",
+    "glob": "^11.0.0",
     "puppeteer": "^24.10.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -48,7 +60,8 @@
     "globals": "^16.0.0",
     "tailwindcss": "^4.1.10",
     "vite": "^6.3.5",
-    "wait-on": "^7.2.0"
+    "wait-on": "^7.2.0",
+    "yauzl": "^3.2.0"
   },
   "build": {
     "appId": "com.shreeDattaguruRoadlines.app",
@@ -62,16 +75,47 @@
       "database/**/*",
       "api/**/*",
       "assets/**/*",
-      "node_modules/**/*"
+      "chrome-bundle/**/*",
+      "node_modules/**/*",
+      "!node_modules/.cache/puppeteer/**/*",
+      "!node_modules/.cache/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "installer",
+        "to": "installer"
+      },
+      {
+        "from": "node-bundle",
+        "to": "node-bundle"
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Shree Dattagu Roadlines",
+      "deleteAppDataOnUninstall": true,
+      "runAfterFinish": true,
+      "allowElevation": true,
+      "perMachine": true
+    },
     "mac": {
-      "icon": "assets/icon.icns"
+      "category": "public.app-category.business"
     },
     "win": {
-      "icon": "assets/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "linux": {
-      "icon": "assets/icon.png"
+      "category": "Office"
     }
   }
 }

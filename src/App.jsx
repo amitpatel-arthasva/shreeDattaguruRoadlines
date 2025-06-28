@@ -8,6 +8,7 @@ import Register from './pages/Register.jsx'
 import PublicRoute from './components/common/PublicRoute.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { ToastProvider } from './components/common/ToastSystem.jsx'
+import { MasterDataProvider } from './contexts/MasterDataContext.jsx'
 // import LorryReceipts from './pages/LorryReceiptList.jsx'
 import LorryReceipts from './pages/LorryReceipts.jsx'
 import LorryReceiptFormPage from './components/lorryReceipts/LorryReceiptFormPage.jsx'
@@ -24,9 +25,10 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <Background>
-            <Routes>
+        <MasterDataProvider>
+          <Router>
+            <Background>
+              <Routes>
               {/* Public routes */}
               <Route path="/login" element={
                 <PublicRoute>
@@ -59,6 +61,7 @@ function App() {
             </Routes>
           </Background>
         </Router>
+        </MasterDataProvider>
       </ToastProvider>
     </AuthProvider>
   )

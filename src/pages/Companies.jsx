@@ -14,9 +14,11 @@ import Button from '../components/common/Button';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import CompanyModal from '../components/companies/CompanyModal';
 import { useToast } from '../components/common/ToastSystem';
+import { useMasterData } from '../contexts/MasterDataContext';
 
 const Companies = () => {
   const toast = useToast();
+  const { refreshMasterData } = useMasterData();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,11 +177,13 @@ const Companies = () => {
   const confirmDelete = async (companyId) => {
     try {
       await companyService.deleteCompany(companyId);
-      toast.success('Company deleted successfully!');
+      toast.success('Company deactivated successfully!');
       fetchCompanies();
+      // Refresh master data counts
+      await refreshMasterData();
     } catch (error) {
       console.error('Error deleting company:', error);
-      toast.error('Failed to delete company. Please try again.');
+      toast.error('Failed to deactivate company. Please try again.');
     }
     setConfirmDialog({ ...confirmDialog, isOpen: false });
   };

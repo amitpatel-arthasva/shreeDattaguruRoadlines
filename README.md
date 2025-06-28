@@ -55,6 +55,8 @@ A comprehensive desktop application for managing roadlines business operations i
    ```bash
    npm install
    ```
+   
+   **Note:** Chrome will be automatically set up during installation.
 
 2. **Development Mode**
    ```bash
@@ -66,6 +68,36 @@ A comprehensive desktop application for managing roadlines business operations i
    ```bash
    npm run dist
    ```
+   This will bundle Chrome with the installer, so end users don't need to install it separately.
+
+## Building Distribution
+
+### What gets bundled:
+- ✅ **Chrome Browser**: Automatically bundled with the installer
+- ✅ **All Dependencies**: No need for users to run npm install
+- ✅ **SQLite Database**: Portable database included
+- ✅ **Assets & Templates**: All resources included
+
+### Installer Features:
+- 📁 **Installation Directory Choice**: Users can choose where to install
+- 🖥️ **Desktop Shortcut**: Automatically created
+- 📋 **Start Menu Entry**: Added to Windows Start Menu
+- 🔄 **Auto-updater Ready**: Configured for future updates
+
+## Troubleshooting
+
+### PDF Generation Issues
+If you encounter "Could not find Chrome" errors:
+
+1. **For Development:** Run `npm run setup-chrome`
+2. **For Production:** Chrome is bundled automatically - no action needed
+3. **Manual Fix:** Set the `PUPPETEER_EXECUTABLE_PATH` environment variable
+
+### Native Module Issues
+If you encounter rebuild errors during installation:
+```bash
+npm run rebuild-safe
+```
 
 ## Scripts
 

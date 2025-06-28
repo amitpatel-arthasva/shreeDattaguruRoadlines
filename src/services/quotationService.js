@@ -217,23 +217,38 @@ class QuotationService {
       const gstPercentage = parseFloat(quotationData.freightBreakup?.applicableGST?.replace('%', '') || 18);
       const totalFreightWithGst = rateValue * (1 + gstPercentage / 100);
 
-      const fields = [];
-      const params = [];
+      const sql = `
+        UPDATE quotations SET 
+          company_id = ?, from_location = ?, to_location = ?, load_type = ?,
+          trip_type = ?, material_details = ?, rate_per_ton = ?, rate_type = ?,
+          applicable_gst = ?, total_freight_with_gst = ?, pay_by = ?,
+          driver_cash_required = ?, payment_remark = ?, validity_days = ?,
+          expiry_date = ?, demurrage_rate_per_day = ?, demurrage_remark = ?,
+          terms_conditions = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
 
-      // Add fields to update
-      Object.keys(quotationData).forEach(key => {
-        if (quotationData[key] !== undefined && key !== 'id') {
-          fields.push(`${key} = ?`);
-          params.push(quotationData[key]);
-        }
-      });
-
-      if (fields.length === 0) {
-        throw new Error('No fields to update');
-      }
-
-      params.push(id);
-      const sql = `UPDATE quotations SET ${fields.join(', ')} WHERE id = ?`;
+      const params = [
+        quotationData.quoteToCompany?.companyId,
+        quotationData.tripDetails?.from,
+        quotationData.tripDetails?.to,
+        quotationData.tripDetails?.fullOrPartLoad || 'Full Load',
+        quotationData.tripDetails?.tripType || 'One Way',
+        materialDetails,
+        rateValue,
+        quotationData.freightBreakup?.rate?.type || 'Per Ton',
+        quotationData.freightBreakup?.applicableGST || '18%',
+        totalFreightWithGst,
+        quotationData.paymentTerms?.payBy || 'Consignee',
+        parseFloat(quotationData.paymentTerms?.driverCashRequired || 0),
+        quotationData.paymentTerms?.paymentRemark,
+        quotationData.quotationValidity?.validUpTo?.value || 30,
+        expiryDate,
+        parseFloat(quotationData.demurrageDetails?.demurrageRatePerDay || 0),
+        quotationData.demurrageDetails?.demurrageRemark,
+        quotationData.termsAndConditions,
+        id
+      ];
       
       const result = await apiService.query(sql, params);
       
@@ -319,7 +334,11 @@ class QuotationService {
       return `${prefix}${year}${sequence.toString().padStart(3, '0')}`;
     } catch (error) {
       console.error('Error in generateQuotationNumber:', error);
-      throw error;
+      // Fallback number generation
+      const prefix = 'QUO';
+      const year = new Date().getFullYear();
+      const timestamp = Date.now().toString().slice(-3);
+      return `${prefix}${year}${timestamp}`;
     }
   }
 

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS companies (
     pin_code TEXT,
     gstin TEXT,
     pan TEXT,
+    is_active BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,0 +1,8 @@
+{
+  "name": "shreeDattaguruRoadlines-node-bundle",
+  "version": "1.0.0",
+  "description": "Minimal Node.js bundle for Shree Dattagu Roadlines",
+  "dependencies": {
+    "puppeteer": "^24.10.2"
+  }
+}

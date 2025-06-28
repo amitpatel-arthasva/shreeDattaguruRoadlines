@@ -12,16 +12,16 @@ class DashboardService {
       const lorryReceiptsResult = await apiService.query('SELECT COUNT(*) as total FROM lorry_receipts');
       const totalLorryReceipts = lorryReceiptsResult[0]?.total || 0;
 
-      // Get companies count
-      const companiesResult = await apiService.query('SELECT COUNT(*) as total FROM companies');
+      // Get companies count (only active)
+      const companiesResult = await apiService.query('SELECT COUNT(*) as total FROM companies WHERE is_active = 1');
       const totalCompanies = companiesResult[0]?.total || 0;
 
-      // Get trucks count
-      const trucksResult = await apiService.query('SELECT COUNT(*) as total FROM trucks');
+      // Get trucks count (only active)
+      const trucksResult = await apiService.query('SELECT COUNT(*) as total FROM trucks WHERE is_active = 1');
       const totalTrucks = trucksResult[0]?.total || 0;
 
-      // Get drivers count
-      const driversResult = await apiService.query('SELECT COUNT(*) as total FROM drivers');
+      // Get drivers count (only active)
+      const driversResult = await apiService.query('SELECT COUNT(*) as total FROM drivers WHERE is_active = 1');
       const totalDrivers = driversResult[0]?.total || 0;
 
       return {
@@ -42,6 +42,23 @@ class DashboardService {
       throw error;
     }
   }
+
+  // Refresh master data and ensure database schema is up to date
+  async refreshMasterData() {
+    try {
+      // Load fresh master data counts
+      const stats = await this.getDashboardStats();
+      
+      return {
+        success: true,
+        message: 'Master data refreshed successfully',
+        data: stats.data
+      };
+    } catch (error) {
+      console.error('Error refreshing master data:', error);
+      throw error;
+    }
+  }
 }
 
-export default new DashboardService(); 
+export default new DashboardService();

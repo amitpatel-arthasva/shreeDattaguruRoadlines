@@ -1,0 +1,18 @@
+{
+  "createdAt": "2025-06-25T22:35:40.467Z",
+  "nodeVersion": "20.18.1",
+  "bundleSize": 77.63,
+  "requiredDuringInstall": [
+    "node.exe",
+    "npm",
+    "npx"
+  ],
+  "installSteps": [
+    "Extract application files",
+    "Install bundled Node.js (if not present)",
+    "Run npm install puppeteer",
+    "Download Chrome browser via Puppeteer",
+    "Create shortcuts",
+    "Register uninstaller"
+  ]
+}

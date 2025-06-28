@@ -9,11 +9,12 @@ class ApiService {
     
     this.mockData = {
       companies: [
-        { id: 1, company_name: "ABC Transport Ltd.", contact_person: "Rajesh Kumar", phone: "02012345678", mobile: "9876543210", email: "rajesh@abctransport.com" },
-        { id: 2, company_name: "XYZ Logistics Pvt. Ltd.", contact_person: "Priya Sharma", phone: "01123456789", mobile: "9876543211", email: "priya@xyzlogistics.com" },
-        { id: 3, company_name: "PQR Cargo Services", contact_person: "Amit Patel", phone: "07912345678", mobile: "9876543212", email: "amit@pqrcargo.com" }
+        { id: 1, name: "ABC Transport Ltd.", company_name: "ABC Transport Ltd.", contact_person: "Rajesh Kumar", phone: "02012345678", mobile: "9876543210", email: "rajesh@abctransport.com", address: "123 Transport Street", city: "Mumbai", state: "Maharashtra", pin_code: "400001", gstin: "27AAACT1234A1Z5", pan: "AAACT1234A" },
+        { id: 2, name: "XYZ Logistics Pvt. Ltd.", company_name: "XYZ Logistics Pvt. Ltd.", contact_person: "Priya Sharma", phone: "01123456789", mobile: "9876543211", email: "priya@xyzlogistics.com", address: "456 Logistics Avenue", city: "Delhi", state: "Delhi", pin_code: "110001", gstin: "07AAXYZ5678B1Z5", pan: "AAXYZ5678B" },
+        { id: 3, name: "PQR Cargo Services", company_name: "PQR Cargo Services", contact_person: "Amit Patel", phone: "07912345678", mobile: "9876543212", email: "amit@pqrcargo.com", address: "789 Cargo Lane", city: "Pune", state: "Maharashtra", pin_code: "411001", gstin: "27AAPQR9012C1Z5", pan: "AAPQR9012C" }
       ],
-      lorryReceipts: []
+      lorryReceipts: [],
+      quotations: []
     };
     
     // Load data from localStorage in browser mode
@@ -48,6 +49,97 @@ class ApiService {
         const newLR = { id: Date.now(), ...params };
         this.mockData.lorryReceipts.push(newLR);
         return { lastInsertRowid: newLR.id };
+      }
+      
+      // Quotation mock operations
+      if (sql.includes('SELECT quotation_number FROM quotations')) {
+        // For generating quotation numbers
+        const year = new Date().getFullYear();
+        const lastNumber = this.mockData.quotations
+          .filter(q => q.quotation_number.includes(year))
+          .length;
+        return [{ quotation_number: `QUO${year}${String(lastNumber).padStart(3, '0')}` }];
+      }
+      
+      if (sql.includes('INSERT INTO quotations')) {
+        const id = Date.now();
+        const newQuotation = {
+          id: id,
+          quotation_number: params[0],
+          quotation_date: params[1],
+          company_id: params[2],
+          from_location: params[3],
+          to_location: params[4],
+          load_type: params[5],
+          trip_type: params[6],
+          material_details: params[7],
+          rate_per_ton: params[8],
+          rate_type: params[9],
+          applicable_gst: params[10],
+          total_freight_with_gst: params[11],
+          pay_by: params[12],
+          driver_cash_required: params[13],
+          payment_remark: params[14],
+          validity_days: params[15],
+          expiry_date: params[16],
+          demurrage_rate_per_day: params[17],
+          demurrage_remark: params[18],
+          terms_conditions: params[19],
+          status: params[20],
+          created_by: params[21],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        this.mockData.quotations.push(newQuotation);
+        return { lastInsertRowid: id, changes: 1 };
+      }
+      
+      if (sql.includes('UPDATE quotations SET') && sql.includes('WHERE id = ?')) {
+        const id = params[params.length - 1];
+        const quotationIndex = this.mockData.quotations.findIndex(q => q.id == id);
+        if (quotationIndex !== -1) {
+          // Update the quotation with the new values
+          const [
+            company_id, from_location, to_location, load_type, trip_type,
+            material_details, rate_per_ton, rate_type, applicable_gst,
+            total_freight_with_gst, pay_by, driver_cash_required, payment_remark,
+            validity_days, expiry_date, demurrage_rate_per_day, demurrage_remark,
+            terms_conditions
+          ] = params;
+          
+          this.mockData.quotations[quotationIndex] = {
+            ...this.mockData.quotations[quotationIndex],
+            company_id, from_location, to_location, load_type, trip_type,
+            material_details, rate_per_ton, rate_type, applicable_gst,
+            total_freight_with_gst, pay_by, driver_cash_required, payment_remark,
+            validity_days, expiry_date, demurrage_rate_per_day, demurrage_remark,
+            terms_conditions,
+            updated_at: new Date().toISOString()
+          };
+          return { changes: 1 };
+        }
+        return { changes: 0 };
+      }
+      
+      if (sql.includes('SELECT q.*') && sql.includes('FROM quotations q') && sql.includes('WHERE q.id = ?')) {
+        const id = params[0];
+        const quotation = this.mockData.quotations.find(q => q.id == id);
+        if (quotation) {
+          // Add company details to the quotation
+          const company = this.mockData.companies.find(c => c.id == quotation.company_id);
+          return [{
+            ...quotation,
+            company_name: company?.name,
+            company_address: company?.address,
+            company_city: company?.city,
+            company_state: company?.state,
+            company_pin_code: company?.pin_code,
+            company_gstin: company?.gstin,
+            company_pan: company?.pan,
+            created_by_name: 'Admin User'
+          }];
+        }
+        return [];
       }
       
       return [];

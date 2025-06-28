@@ -8,7 +8,7 @@ class TruckService {  // Get all trucks with filtering and pagination
       
       let sql = `
         SELECT * FROM trucks 
-        WHERE 1=1
+        WHERE is_active = 1
       `;
       const queryParams = [];
       
@@ -139,7 +139,7 @@ class TruckService {  // Get all trucks with filtering and pagination
       const term = `%${searchTerm}%`;
       const sql = `
         SELECT * FROM trucks 
-        WHERE (truck_number LIKE ? OR truck_type LIKE ? OR owner_name LIKE ?)
+        WHERE is_active = 1 AND (truck_number LIKE ? OR truck_type LIKE ? OR owner_name LIKE ?)
         ORDER BY truck_number
       `;
       
@@ -156,15 +156,19 @@ class TruckService {  // Get all trucks with filtering and pagination
       throw error;
     }
   }
-  // Delete truck (hard delete since no is_active column)
+  // Delete truck (soft delete using is_active column)
   async deleteTruck(id) {
     try {
-      const sql = 'DELETE FROM trucks WHERE id = ?';
-      await apiService.query(sql, [id]);
+      const sql = 'UPDATE trucks SET is_active = 0 WHERE id = ?';
+      const result = await apiService.query(sql, [id]);
+      
+      if (result.changes === 0) {
+        throw new Error('Truck not found');
+      }
       
       return {
         success: true,
-        message: 'Truck deleted successfully'
+        message: 'Truck deactivated successfully'
       };
     } catch (error) {
       console.error('Error in deleteTruck:', error);

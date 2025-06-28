@@ -22,13 +22,13 @@ class Company {  static create(companyData) {
     return companies[0] || null;
   }
   static getAll() {
-    const sql = 'SELECT id, name, city, state, pin_code, gstin, pan, address, created_at, updated_at FROM companies ORDER BY name';
+    const sql = 'SELECT id, name, city, state, pin_code, gstin, pan, address, created_at, updated_at FROM companies WHERE is_active = 1 ORDER BY name';
     return db.query(sql);
   }
 
   static getAllForList() {
     // Optimized for list views - showing only essential fields to prevent width issues
-    const sql = 'SELECT id, name, city, state, gstin, pan FROM companies ORDER BY name';
+    const sql = 'SELECT id, name, city, state, gstin, pan FROM companies WHERE is_active = 1 ORDER BY name';
     return db.query(sql);
   }
 
@@ -51,7 +51,7 @@ class Company {  static create(companyData) {
   }
 
   static delete(id) {
-    const sql = 'DELETE FROM companies WHERE id = ?';
+    const sql = 'UPDATE companies SET is_active = 0 WHERE id = ?';
     return db.query(sql, [id]);
   }
 
@@ -59,7 +59,7 @@ class Company {  static create(companyData) {
     const term = `%${searchTerm}%`;
     const sql = `
       SELECT * FROM companies 
-      WHERE (name LIKE ? OR address LIKE ? OR gstin LIKE ? OR pan LIKE ?)
+      WHERE is_active = 1 AND (name LIKE ? OR address LIKE ? OR gstin LIKE ? OR pan LIKE ?)
       ORDER BY name
     `;
     return db.query(sql, [term, term, term, term]);

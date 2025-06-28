@@ -30,7 +30,7 @@ class Truck {
   }
 
   static getAll() {
-    const sql = 'SELECT * FROM trucks ORDER BY truck_number';
+    const sql = 'SELECT * FROM trucks WHERE is_active = 1 ORDER BY truck_number';
     return db.query(sql);
   }
 
@@ -53,7 +53,7 @@ class Truck {
   }
 
   static delete(id) {
-    const sql = 'DELETE FROM trucks WHERE id = ?';
+    const sql = 'UPDATE trucks SET is_active = 0 WHERE id = ?';
     return db.query(sql, [id]);
   }
 
@@ -61,7 +61,7 @@ class Truck {
     const term = `%${searchTerm}%`;
     const sql = `
       SELECT * FROM trucks 
-      WHERE (truck_number LIKE ? OR truck_type LIKE ? OR owner_name LIKE ?)
+      WHERE is_active = 1 AND (truck_number LIKE ? OR truck_type LIKE ? OR owner_name LIKE ?)
       ORDER BY truck_number
     `;
     return db.query(sql, [term, term, term]);

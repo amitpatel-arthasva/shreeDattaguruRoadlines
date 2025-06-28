@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS trucks (
     truck_type TEXT,           -- e.g., 'Open', 'Closed', 'Container', etc.
     capacity_ton REAL,         -- Optional: for tracking tonnage
     owner_name TEXT,           -- Optional: if you want to record who owns it
+    is_active BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

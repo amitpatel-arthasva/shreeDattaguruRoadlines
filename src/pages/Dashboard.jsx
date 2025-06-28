@@ -10,15 +10,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../services/dashboardService";
 import { useToast } from "../components/common/ToastSystem";
-import QuotationModal from "../components/quotations/QuotationModal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const toast = useToast();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("create");
-  const [selectedQuotation, setSelectedQuotation] = useState(null);
 
   const [dashboardStats, setDashboardStats] = useState({
     quotations: { total: 0 },
@@ -29,10 +24,39 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardStats();
-  }, []);
+    const loadDashboardStats = async () => {
+      try {
+        setLoading(true);
+        const response = await dashboardService.getDashboardStats();
+        if (response.success) {
+          setDashboardStats(response.data);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        toast.error('Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadDashboardStats = async () => {
+    const refreshMasterData = async () => {
+      try {
+        await dashboardService.refreshMasterData();
+      } catch (error) {
+        console.error('Error refreshing master data:', error);
+        // Don't show error toast for this as it's a background operation
+      }
+    };
+
+    const initializeDashboard = async () => {
+      await loadDashboardStats();
+      await refreshMasterData();
+    };
+    
+    initializeDashboard();
+  }, [toast]);
+
+  const reloadStats = async () => {
     try {
       setLoading(true);
       const response = await dashboardService.getDashboardStats();
@@ -48,9 +72,7 @@ const Dashboard = () => {
   };
 
   const handleCreateQuotation = () => {
-    setSelectedQuotation(null);
-    setModalMode("create");
-    setIsModalOpen(true);
+    navigate("/quotations/create");
   };
 
   const handleNavigate = (route) => {
@@ -64,12 +86,25 @@ const Dashboard = () => {
         <div className="flex flex-col lg:flex-row justify-between items-start mb-3 mt-0 gap-3">
           {/* Header */}
           <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary-400 mb-1">
-              Dashboard
-            </h1>
-            <p className="text-primary-400/70 text-base leading-tight">
-              Welcome back! Here's an overview of your logistics operations.
-            </p>
+            <div className="flex items-center gap-3">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-primary-400 mb-1">
+                  Dashboard
+                </h1>
+                <p className="text-primary-400/70 text-base leading-tight">
+                  Welcome back! Here's an overview of your logistics operations.
+                </p>
+              </div>
+              <Button
+                text="Refresh"
+                onClick={reloadStats}
+                bgColor="#f0f9ff"
+                hoverBgColor="#e0f2fe"
+                className="text-[#47034b] text-sm px-3 py-2 font-medium"
+                icon={<span className="text-lg">🔄</span>}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           {/* Quick Actions */}
@@ -212,7 +247,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <div className="font-bold text-base">{dashboardStats.master.customers}</div>
-                    <div className="opacity-90">Customers</div>
+                    <div className="opacity-90">Companiies</div>
                   </div>
                 </div>
               </div>
@@ -251,19 +286,6 @@ const Dashboard = () => {
             </div>
           </FeatureCard>
         </div>
-
-        {isModalOpen && (
-          <QuotationModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={(data) => {
-              console.log("Created quotation:", data);
-              setIsModalOpen(false);
-            }}
-            quotation={selectedQuotation}
-            mode={modalMode}
-          />
-        )}
       </div>
     </div>
   );

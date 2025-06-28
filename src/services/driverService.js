@@ -8,7 +8,7 @@ class DriverService {  // Get all drivers with filtering and pagination
       
       let sql = `
         SELECT * FROM drivers 
-        WHERE 1=1
+        WHERE is_active = 1
       `;
       const queryParams = [];
       
@@ -164,7 +164,7 @@ class DriverService {  // Get all drivers with filtering and pagination
       await this.updateDriver(id, { is_active: 0 });
       return {
         success: true,
-        message: 'Driver deleted successfully'
+        message: 'Driver deactivated successfully'
       };
     } catch (error) {
       console.error('Error in deleteDriver:', error);

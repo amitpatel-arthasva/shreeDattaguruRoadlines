@@ -8,7 +8,7 @@ class CompanyService {  // Get all companies with filtering and pagination
       
       let sql = `
         SELECT * FROM companies 
-        WHERE 1=1
+        WHERE is_active = 1
       `;
       const queryParams = [];
       
@@ -58,7 +58,7 @@ class CompanyService {  // Get all companies with filtering and pagination
   // Get companies optimized for list views (to prevent width issues)
   async getCompaniesForList() {
     try {
-      const sql = 'SELECT id, name, city, state, gstin, pan FROM companies ORDER BY name';
+      const sql = 'SELECT id, name, city, state, gstin, pan FROM companies WHERE is_active = 1 ORDER BY name';
       
       const companies = await apiService.query(sql);
       return {
@@ -154,7 +154,7 @@ class CompanyService {  // Get all companies with filtering and pagination
       const term = `%${searchTerm}%`;
       const sql = `
         SELECT * FROM companies 
-        WHERE (name LIKE ? OR address LIKE ? OR gstin LIKE ?)
+        WHERE is_active = 1 AND (name LIKE ? OR address LIKE ? OR gstin LIKE ?)
         ORDER BY name
       `;
       
@@ -171,15 +171,19 @@ class CompanyService {  // Get all companies with filtering and pagination
       throw error;
     }
   }
-  // Delete company (since no is_active column, we'll actually delete the record)
+  // Delete company (soft delete using is_active column)
   async deleteCompany(id) {
     try {
-      const sql = 'DELETE FROM companies WHERE id = ?';
-      await apiService.query(sql, [id]);
+      const sql = 'UPDATE companies SET is_active = 0 WHERE id = ?';
+      const result = await apiService.query(sql, [id]);
+      
+      if (result.changes === 0) {
+        throw new Error('Company not found');
+      }
       
       return {
         success: true,
-        message: 'Company deleted successfully'
+        message: 'Company deactivated successfully'
       };
     } catch (error) {
       console.error('Error in deleteCompany:', error);

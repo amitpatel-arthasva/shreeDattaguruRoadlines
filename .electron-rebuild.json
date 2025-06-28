@@ -1,0 +1,5 @@
+{
+  "rebuild": {
+    "better-sqlite3": false
+  }
+}
