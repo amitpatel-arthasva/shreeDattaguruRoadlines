@@ -127,9 +127,7 @@ const DriverModal = ({
             <Button
               text={editingDriver ? 'Update Driver' : 'Add Driver'}
               onClick={handleSubmit}
-              bgColor="#6FFFE9"
-              hoverBgColor="#5aebe9"
-              className="text-black font-medium"
+              className="text-white font-medium"
               width="w-32"
             />
           </div>

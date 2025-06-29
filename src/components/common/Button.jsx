@@ -8,8 +8,8 @@ const Button = ({
   iconPosition = 'before', // 'before' or 'after'
   height, 
   width, 
-  bgColor = '#6FFFE9', 
-  hoverBgColor = '#5aebe9', 
+  bgColor = '#f59e0b', // amber-500 
+  hoverBgColor = '#ea580c', // orange-600
   rounded = 'rounded' 
 }) => {
   const buttonStyle = {

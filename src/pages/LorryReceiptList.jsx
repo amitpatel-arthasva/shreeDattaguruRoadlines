@@ -359,7 +359,7 @@ const LorryReceiptList = () => {
         <div className="flex gap-4">
           <button
             onClick={applyFilters}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200"
+            className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 text-white px-6 py-2 rounded-lg transition duration-200"
           >
             Apply Filters
           </button>
@@ -546,7 +546,7 @@ const LorryReceiptList = () => {
               <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
                 <button
                   onClick={() => printReceipt(selectedReceipt)}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200"
+                  className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 text-white px-4 py-2 rounded-lg transition duration-200"
                 >
                   Print
                 </button>

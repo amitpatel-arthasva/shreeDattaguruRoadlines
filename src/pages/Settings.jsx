@@ -104,8 +104,8 @@ const Settings = () => {
     { id: 'installation', label: 'Installation Setup', icon: '🔧' },
   ];
   const ProfileSection = () => (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-white/20">
-      <h2 className="text-xl font-semibold text-[#C5677B] mb-4">
+    <div className="bg-gradient-to-br from-white to-orange-50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-orange-200">
+      <h2 className="text-xl font-semibold text-orange-600 mb-4">
         User Information
       </h2>
       
@@ -114,7 +114,7 @@ const Settings = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Name
           </label>
-          <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50/80 backdrop-blur-sm">
+          <div className="px-3 py-2 border border-orange-200 rounded-lg bg-orange-50 backdrop-blur-sm">
             {user?.name || 'N/A'}
           </div>
         </div>
@@ -123,7 +123,7 @@ const Settings = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
-          <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50/80 backdrop-blur-sm">
+          <div className="px-3 py-2 border border-orange-200 rounded-lg bg-orange-50 backdrop-blur-sm">
             {user?.email || 'N/A'}
           </div>
         </div>
@@ -132,7 +132,7 @@ const Settings = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Role
           </label>
-          <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50/80 backdrop-blur-sm">
+          <div className="px-3 py-2 border border-orange-200 rounded-lg bg-orange-50 backdrop-blur-sm">
             {user?.role || 'user'}
           </div>
         </div>
@@ -144,8 +144,8 @@ const Settings = () => {
     </div>
   );
   const DatabaseSection = () => (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-white/20">
-      <h2 className="text-xl font-semibold text-[#C5677B] mb-4">
+    <div className="bg-gradient-to-br from-white to-orange-50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-orange-200">
+      <h2 className="text-xl font-semibold text-orange-600 mb-4">
         Database Settings
       </h2>
       
@@ -154,7 +154,7 @@ const Settings = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Current Database Location
           </label>
-          <div className="p-3 bg-gray-50/80 backdrop-blur-sm border rounded-lg">
+          <div className="p-3 bg-orange-50 backdrop-blur-sm border border-orange-200 rounded-lg">
             <p className="text-sm text-gray-600 break-all">
               {currentPath}
             </p>
@@ -173,10 +173,10 @@ const Settings = () => {
               <button
                 onClick={selectDatabaseFolder}
                 disabled={isLoading}
-                className={`px-4 sm:px-6 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                className={`px-4 sm:px-6 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 ${
                   isLoading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-md transform hover:scale-105'
+                    : 'bg-gradient-to-r from-red-400 to-orange-400 hover:from-orange-500 hover:to-red-500 hover:shadow-md transform hover:scale-105'
                 }`}
               >
                 {isLoading ? (
@@ -216,8 +216,8 @@ const Settings = () => {
   );
 
   const InstallationSection = () => (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-white/20">
-      <h2 className="text-xl font-semibold text-[#C5677B] mb-4">
+    <div className="bg-gradient-to-br from-white to-orange-50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-orange-200">
+      <h2 className="text-xl font-semibold text-orange-600 mb-4">
         Installation Setup
       </h2>
       
@@ -232,8 +232,8 @@ const Settings = () => {
         )}
 
         {installationStatus && (
-          <div className="p-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-lg">
-            <div className="flex items-center text-blue-600">
+          <div className="p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-lg">
+            <div className="flex items-center text-orange-600">
               <span className="mr-2">📝</span>
               <span>{installationStatus}</span>
             </div>
@@ -294,16 +294,16 @@ const Settings = () => {
   );
 
   return (
-    <div className="min-h-[80vh] bg-gradient-to-br rounded-4xl from-blue-50 to-indigo-100 text-primary-400">
+    <div className="min-h-[80vh] bg-gradient-to-br rounded-4xl from-orange-50 to-amber-50 text-gray-900">
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">        {/* Mobile Header */}
-        <div className="lg:hidden bg-white/70 backdrop-blur-sm shadow-sm p-4 rounded-2xl mx-4 mt-4 border border-white/20">
+        <div className="lg:hidden bg-gradient-to-r from-red-400 to-orange-400 backdrop-blur-sm shadow-sm p-4 rounded-2xl mx-4 mt-4 border border-orange-300">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary-400">Settings</h1>
+            <h1 className="text-2xl font-bold text-white">Settings</h1>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg bg-white/50 hover:bg-white/70 transition-colors"
+              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -321,8 +321,8 @@ const Settings = () => {
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     activeTab === item.id
-                      ? 'bg-[#C5677B] text-white shadow-md transform scale-105'
-                      : 'bg-white/50 text-gray-700 hover:bg-white/70 hover:shadow-sm'
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md transform scale-105'
+                      : 'bg-white/20 text-white hover:bg-white/30 hover:shadow-sm'
                   }`}
                 >
                   <span className="text-lg">{item.icon}</span>
@@ -334,8 +334,8 @@ const Settings = () => {
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-64 bg-white/50 backdrop-blur-sm min-h-[80vh] p-6 rounded-4xl border-r border-white/20">
-          <h1 className="text-3xl font-bold text-primary-400 mb-8">Settings</h1>
+        <div className="hidden lg:block w-64 bg-gradient-to-br from-orange-400 to-red-400 backdrop-blur-sm min-h-[80vh] p-6 rounded-4xl border-r border-orange-300 shadow-xl">
+          <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
           
           <nav className="space-y-3">
             {sidebarItems.map((item) => (
@@ -344,8 +344,8 @@ const Settings = () => {
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   activeTab === item.id
-                    ? 'bg-[#C5677B] text-white shadow-lg transform scale-105'
-                    : 'text-gray-700 hover:bg-white/50 hover:shadow-sm'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg transform scale-105'
+                    : 'text-white hover:bg-white/20 hover:shadow-sm hover:transform hover:scale-102'
                 }`}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -356,7 +356,7 @@ const Settings = () => {
         </div>        {/* Main Content */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="lg:hidden mb-6">
-            <h2 className="text-2xl font-bold text-primary-400">
+            <h2 className="text-2xl font-bold text-gray-900">
               {sidebarItems.find(item => item.id === activeTab)?.label}
             </h2>
           </div>

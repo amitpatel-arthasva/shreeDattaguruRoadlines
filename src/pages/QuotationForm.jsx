@@ -448,8 +448,8 @@ const QuotationForm = () => {
         </div>
         
         {quotationNumber && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <span className="text-sm font-medium text-blue-800">
+          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <span className="text-sm font-medium text-orange-800">
               Quotation Number: {quotationNumber}
             </span>
           </div>
@@ -626,7 +626,7 @@ const QuotationForm = () => {
             <button
               type="button"
               onClick={addMaterial}
-              className="flex items-center gap-2 px-3 py-2 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-colors"
             >
               <FontAwesomeIcon icon={faPlus} />
               Add Material
@@ -952,7 +952,7 @@ const QuotationForm = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-6 py-3 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FontAwesomeIcon icon={faSave} />
             {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Quotation' : 'Create Quotation')}

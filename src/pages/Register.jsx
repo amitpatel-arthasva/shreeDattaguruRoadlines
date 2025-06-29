@@ -64,11 +64,11 @@ const Register = () => {
   };
 
   return (
-    <div className="w-full min-h-dvh flex items-center justify-center py-8">
+    <div className="w-full min-h-dvh flex items-center justify-center py-8 bg-gradient-to-br from-orange-50 to-amber-50">
       <Card 
         className="max-w-4xl w-full shadow-xl mx-4 md:flex md:flex-row"
         padding="p-8"
-        bgColor="bg-gradient-to-br from-primary-350 to-primary-200"
+        bgColor="bg-gradient-to-br from-orange-400 to-red-400"
       >
         {/* Left side - Logo at top left and text centered vertically */}
         <div className="md:w-1/2 md:pr-8 flex flex-col mb-8 md:mb-0 relative">
@@ -85,9 +85,9 @@ const Register = () => {
         </div>
         
         {/* Right side - Form */}
-        <div className="md:w-1/2 md:pl-8 md:border-l md:border-gray-700">
+        <div className="md:w-1/2 md:pl-8 md:border-l md:border-orange-300">
           <form onSubmit={handleSubmit} className="space-y-4">            <div>
-              <label htmlFor="name" className="block text-gray-200 mb-2">
+              <label htmlFor="name" className="block text-white mb-2">
                 Full Name
               </label>
               <input
@@ -97,11 +97,13 @@ const Register = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
+                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
                 placeholder="Your full name"
               />
-            </div>            <div>
-              <label htmlFor="email" className="block text-gray-200 mb-2">
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-white mb-2">
                 Email
               </label>
               <input
@@ -111,11 +113,13 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
+                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
                 placeholder="your@email.com"
               />
-            </div>            <div>
-              <label htmlFor="phone" className="block text-gray-200 mb-2">
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-white mb-2">
                 Phone Number
               </label>
               <input
@@ -125,11 +129,13 @@ const Register = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
+                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
                 placeholder="Your phone number"
               />
-            </div><div>
-              <label htmlFor="password" className="block text-gray-200 mb-2">
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-white mb-2">
                 Password
               </label>
               <input
@@ -139,11 +145,13 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
+                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
                 placeholder="Create a password"
               />
-            </div>            <div>
-              <label htmlFor="confirmPassword" className="block text-gray-200 mb-2">
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-white mb-2">
                 Confirm Password
               </label>
               <input
@@ -153,7 +161,7 @@ const Register = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-[var(--color-primary-400)] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
+                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
                 placeholder="Confirm your password"
               />
               {passwordError && (
@@ -164,29 +172,27 @@ const Register = () => {
             <div className="flex items-center text-sm mt-4">
               <input type="checkbox" id="termsConditions" className="mr-2" required />              <label htmlFor="termsConditions" className="text-white">
                 I agree to the{' '}
-                <a href="/terms" className="text-[var(--color-primary-400)] hover:text-[var(--color-primary-100)] transition-colors">
+                <a href="/terms" className="text-orange-200 hover:text-white transition-colors">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="/privacy-policy" className="text-[var(--color-primary-400)] hover:text-[var(--color-primary-100)] transition-colors">
+                <a href="/privacy-policy" className="text-orange-200 hover:text-white transition-colors">
                   Privacy Policy
                 </a>
               </label>
             </div>            
-			<Button 
-              text={loading ? "CREATING ACCOUNT..." : "REGISTER"} 
-              width="w-full"
-              bgColor="var(--color-primary-350)" 
-              hoverBgColor="var(--color-primary-300)" 
-              className="!text-[var(--color-primary-50)] text-base font-medium mt-6" 
-              height="h-12"
-              rounded="rounded-full"
+			<button
               type="submit"
               disabled={loading}
-            />            <div className="text-center mt-6">
-              <p className="text-gray-800">
+              className="w-full h-12 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 text-white text-base font-medium rounded-full transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+            >
+              {loading ? "CREATING ACCOUNT..." : "REGISTER"}
+            </button>
+
+            <div className="text-center mt-6">
+              <p className="text-white">
                 Already have an account?{' '}
-                <Link to="/login" className="text-[var(--color-primary-50)] hover:text-[var(--color-primary-100)] transition-colors">
+                <Link to="/login" className="text-orange-200 hover:text-white transition-colors">
                   Log In
                 </Link>
               </p>

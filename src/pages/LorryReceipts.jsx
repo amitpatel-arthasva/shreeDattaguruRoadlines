@@ -207,8 +207,6 @@ const LorryReceipts = () => {
         <Button
           text="Create Lorry Receipt"
           onClick={handleCreateLorryReceipt}
-          bgColor="#C5677B"
-          hoverBgColor="#C599B6"
           className="text-white font-semibold"
           width="w-auto"
           icon={<FontAwesomeIcon icon={faPlus} />}
@@ -233,8 +231,6 @@ const LorryReceipts = () => {
                 <Button
                   text="Create Your First Lorry Receipt"
                   onClick={handleCreateLorryReceipt}
-                  bgColor="#C5677B"
-                  hoverBgColor="#C599B6"
                   className="text-white font-semibold"
                   width="w-auto"
                 />

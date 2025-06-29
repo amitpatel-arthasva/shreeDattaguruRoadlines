@@ -1,7 +1,7 @@
 const Background = ({ 
   children, 
   className = "", 
-  bgColor = "bg-gradient-to-br from-primary-50 to-primary-100",
+  bgColor = "bg-orange-50",
   fullHeight = true
 }) => {
   return (

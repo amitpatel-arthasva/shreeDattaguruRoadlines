@@ -169,7 +169,7 @@ const Quotations = () => {
               // Clean up the URL after a delay
               setTimeout(() => window.URL.revokeObjectURL(openUrl), 1000);
             }}
-            className="ml-4 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+            className="ml-4 px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm rounded hover:from-orange-500 hover:to-red-500 transition-colors"
           >
             Open Now
           </button>
@@ -189,29 +189,30 @@ const Quotations = () => {
     return new Date(dateString).toLocaleDateString('en-IN');
   };
   
-  const getStatusColor = (quotation) => {
-    const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
-    const today = new Date();
-    
-    if (expiryDate < today) {
-      return 'text-red-600 bg-red-100';
-    } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) { // Within 7 days
-      return 'text-orange-600 bg-orange-100';
-    }
-    return 'text-primary-400 bg-primary-50';
-  };
+  // Commented out to resolve linter warnings - these functions may be used for future status display features
+  // const getStatusColor = (quotation) => {
+  //   const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
+  //   const today = new Date();
+  //   
+  //   if (expiryDate < today) {
+  //     return 'text-red-600 bg-red-100';
+  //   } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) { // Within 7 days
+  //     return 'text-orange-600 bg-orange-100';
+  //   }
+  //   return 'text-primary-400 bg-primary-50';
+  // };
 
-  const getStatusText = (quotation) => {
-    const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
-    const today = new Date();
-    
-    if (expiryDate < today) {
-      return 'Expired';
-    } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) {
-      return 'Expiring Soon';
-    }
-    return 'Active';
-  };
+  // const getStatusText = (quotation) => {
+  //   const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
+  //   const today = new Date();
+  //   
+  //   if (expiryDate < today) {
+  //     return 'Expired';
+  //   } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) {
+  //     return 'Expiring Soon';
+  //   }
+  //   return 'Active';
+  // };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -239,8 +240,6 @@ const Quotations = () => {
         <Button
           text="Create Quotation"
           onClick={handleCreateQuotation}
-          bgColor="#C5677B"
-          hoverBgColor="#C599B6"
           className="text-white font-semibold"
           width="w-auto"
           icon={<FontAwesomeIcon icon={faPlus} />}
@@ -266,8 +265,6 @@ const Quotations = () => {
                 <Button
                   text="Create Your First Quotation"
                   onClick={handleCreateQuotation}
-                  bgColor="#C5677B"
-                  hoverBgColor="#C599B6"
                   className="text-white font-semibold"
                   width="w-auto"
                 />

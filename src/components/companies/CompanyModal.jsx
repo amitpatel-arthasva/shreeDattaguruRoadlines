@@ -197,9 +197,7 @@ const CompanyModal = ({
             <Button
               text={editingCompany ? 'Update Company' : 'Add Company'}
               onClick={handleSubmit}
-              bgColor="#6FFFE9"
-              hoverBgColor="#5aebe9"
-              className="text-black font-medium"
+              className="text-white font-medium"
               width="w-36"
             />
           </div>

@@ -75,10 +75,10 @@ const DatabaseSettings = () => {
               <button
                 onClick={selectDatabaseFolder}
                 disabled={isLoading}
-                className={`px-6 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`px-6 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                   isLoading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500'
                 }`}
               >
                 {isLoading ? 'Updating...' : 'Select Folder'}

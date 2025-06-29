@@ -102,8 +102,8 @@ const ConfirmDialog = ({
           />
           <Button 
             text={confirmText}
-            bgColor={dangerConfirm ? "#EF4444" : "#C5677B"}
-            hoverBgColor={dangerConfirm ? "#DC2626" : "#C599B6"}
+            bgColor={dangerConfirm ? "#EF4444" : "#f59e0b"}
+            hoverBgColor={dangerConfirm ? "#DC2626" : "#ea580c"}
             className="text-white w-full sm:w-auto order-1 sm:order-2"
             onClick={handleConfirm}
           />

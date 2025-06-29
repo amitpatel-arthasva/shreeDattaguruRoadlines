@@ -898,8 +898,6 @@ const QuotationModal = ({ isOpen, onClose, onSubmit, quotation, mode = 'create' 
             <Button
               text={loading ? 'Saving...' : (mode === 'create' ? 'Create Quotation' : 'Update Quotation')}
               onClick={handleSubmit}
-              bgColor="#C5677B"
-              hoverBgColor="#C599B6"
               className="text-white font-semibold"
               width="w-auto"
               disabled={loading}

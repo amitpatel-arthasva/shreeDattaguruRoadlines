@@ -185,10 +185,8 @@ const Trucks = () => {
                 resetForm();
                 setIsCreateModalOpen(true);
               }}
-              bgColor="#6FFFE9"
-              hoverBgColor="#5aebe9"
               width="w-auto"
-              className="px-6"
+              className="px-6 text-white font-medium"
             />
           </div>
 
@@ -230,10 +228,8 @@ const Trucks = () => {
                     resetForm();
                     setIsCreateModalOpen(true);
                   }}
-                  bgColor="#6FFFE9"
-                  hoverBgColor="#5aebe9"
                   width="w-auto"
-                  className="px-6"
+                  className="px-6 text-white font-medium"
                 />
               </div>
             ) : (

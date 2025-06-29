@@ -921,13 +921,13 @@ const LorryReceiptFormPage = () => {
             </button>
             <button
               onClick={handleSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
             >
               Create
             </button>
             <button
               onClick={handlePrint}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
             >
               Print
             </button>
@@ -985,7 +985,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignor')}
-                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company
@@ -1123,7 +1123,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignee')}
-                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company

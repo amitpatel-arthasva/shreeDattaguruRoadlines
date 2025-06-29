@@ -121,7 +121,7 @@ const ChromeDownloadModal = ({ isOpen, onClose }) => {
           {downloadStatus.status === 'complete' && (
             <button
               onClick={() => onClose(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
             >
               Continue
             </button>
@@ -131,7 +131,7 @@ const ChromeDownloadModal = ({ isOpen, onClose }) => {
             <div className="space-x-2">
               <button
                 onClick={retryDownload}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
               >
                 Retry
               </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BillHeader from '../../assets/images/billHeader.png';
 import companyService from '../../services/companyService';
@@ -89,7 +89,7 @@ const LorryReceiptEditPage = () => {
     if (id) {
       loadLorryReceiptData();
     }
-  }, [id]);
+  }, [id, loadLorryReceiptData]);
 
   // Load companies and trucks
   useEffect(() => {
@@ -97,7 +97,7 @@ const LorryReceiptEditPage = () => {
     loadTrucks();
   }, []);
 
-  const loadLorryReceiptData = async () => {
+  const loadLorryReceiptData = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Loading lorry receipt data for ID:', id);
@@ -177,7 +177,7 @@ const LorryReceiptEditPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
 
   const loadCompanies = async () => {
     try {
@@ -260,7 +260,7 @@ const LorryReceiptEditPage = () => {
     }
   };
 
-  const calculateTotal = () => {
+  const calculateTotal = useCallback(() => {
     const freight = parseFloat(formData.freight) || 0;
     const hamali = parseFloat(formData.hamali) || 0;
     const aoc = parseFloat(formData.aoc) || 0;
@@ -270,8 +270,13 @@ const LorryReceiptEditPage = () => {
     const extraLoading = parseFloat(formData.extraLoading) || 0;
     
     const total = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;
-    return total.toFixed(2);
-  };
+    const totalValue = total.toFixed(2);
+    
+    // Update the total in form data
+    setFormData(prev => ({ ...prev, total: totalValue }));
+    
+    return totalValue;
+  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -439,13 +444,14 @@ const LorryReceiptEditPage = () => {
     return !hasErrors;
   };
 
-  const findExistingCompany = (companyData) => {
-    return companies.find(company => 
-      company.name.toLowerCase() === companyData.name.toLowerCase() &&
-      company.address?.toLowerCase() === companyData.address?.toLowerCase() &&
-      company.city?.toLowerCase() === companyData.city?.toLowerCase()
-    );
-  };
+  // TODO: This function may be needed for future company validation features
+  // const findExistingCompany = (companyData) => {
+  //   return companies.find(company => 
+  //     company.name.toLowerCase() === companyData.name.toLowerCase() &&
+  //     company.address?.toLowerCase() === companyData.address?.toLowerCase() &&
+  //     company.city?.toLowerCase() === companyData.city?.toLowerCase()
+  //   );
+  // };
 
   const handleCompanyNameChange = (e, type) => {
     const { value } = e.target;
@@ -552,7 +558,6 @@ const LorryReceiptEditPage = () => {
 
   const handleCompanyKeyDown = (e, type) => {
     const isConsignor = type === 'consignor';
-    const isDropdownOpen = isConsignor ? showConsignorDropdown : showConsigneeDropdown;
     const focusedIndex = isConsignor ? focusedConsignorIndex : focusedConsigneeIndex;
     const filteredCompanies = isConsignor ? filteredConsignorCompanies : filteredConsigneeCompanies;
     const totalOptions = filteredCompanies.length;
@@ -740,7 +745,7 @@ const LorryReceiptEditPage = () => {
   // Calculate total automatically when charge fields change
   useEffect(() => {
     calculateTotal();
-  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
+  }, [calculateTotal]);
 
   if (loading) {
     return (

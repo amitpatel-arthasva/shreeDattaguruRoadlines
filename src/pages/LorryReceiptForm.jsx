@@ -665,8 +665,8 @@ const LorryReceiptForm = () => {
             </div>
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <div className="text-lg font-semibold text-blue-900">
+          <div className="mt-4 p-4 bg-orange-50 rounded-lg">
+            <div className="text-lg font-semibold text-orange-900">
               Total Amount: ₹{calculateTotal().toFixed(2)}
             </div>
           </div>
@@ -792,7 +792,7 @@ const LorryReceiptForm = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-6 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 disabled:from-amber-300 disabled:to-orange-300 text-white font-medium py-3 px-6 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             {isSubmitting ? 'Saving...' : (isEditMode ? 'Update' : 'Create')} Lorry Receipt
           </button>

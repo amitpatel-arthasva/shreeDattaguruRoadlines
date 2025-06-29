@@ -237,12 +237,12 @@ const Navbar = () => {
   return (
     <div className="w-full fixed top-0 left-0 flex justify-center pt-4 z-50">
       <div 
-        className="w-[95%] rounded-4xl bg-[#170D1C]/50 px-6 py-4 relative flex items-center"
+        className="w-[95%] rounded-4xl bg-gradient-to-r from-amber-400/90 to-orange-400/90 px-6 py-4 relative flex items-center shadow-xl border border-orange-300/30"
         style={{ backdropFilter: 'blur(10px)' }}
       >        {/* Logo and Navigation - Desktop */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="text-white text-2xl font-bold mr-6">
-            MoveSure
+          <Link to="/" className="text-red-900 text-2xl font-bold mr-6">
+            Shree Dattaguru Road lines
           </Link>
           
           {/* Navigation Buttons */}
@@ -278,8 +278,8 @@ const Navbar = () => {
         {/* Mobile Navbar Layout */}
         <div className="md:hidden flex items-center justify-between w-full">          {/* Logo - Mobile */}
           <div className="flex items-center">
-            <Link to="/" className="text-white text-lg font-bold">
-              MoveSure
+            <Link to="/" className="text-red-900 text-lg font-bold">
+              Shree Dattaguru Road Lines
             </Link>
           </div>
           
@@ -315,7 +315,7 @@ const Navbar = () => {
             onMouseLeave={handleFinancesMouseLeave}
           >
             <button 
-              className="flex items-center text-white hover:text-gray-300 transition-colors py-2"
+              className="flex items-center text-black hover:text-gray-300 transition-colors py-2"
               onClick={handleFinancesClick}
             >
               Services
@@ -329,8 +329,9 @@ const Navbar = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-              <div className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-1 w-[14em] rounded-2xl shadow-lg bg-[#170D1C]/80 z-50 transition-all duration-300 ease-in-out 
-                           origin-top ${showFinancesDropdown ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'}`}>              <div className="py-1">
+              <div className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-1 w-[14em] rounded-2xl shadow-lg bg-gradient-to-br from-orange-400/95 to-amber-400/95 border border-orange-200/30 z-50 transition-all duration-300 ease-in-out 
+                           origin-top ${showFinancesDropdown ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'}`}
+                style={{ backdropFilter: 'blur(8px)' }}>              <div className="py-1">
                 <DropdownItem to="/lorry-receipts" text="Lorry Receipts" icon={<FontAwesomeIcon icon={faReceipt} className="mr-2" />} />
                 <DropdownItem to="/trucks" text="Trucks" icon={<FontAwesomeIcon icon={faTruck} className="mr-2" />} />
                 <DropdownItem to="/drivers" text="Drivers" icon={<FontAwesomeIcon icon={faUser} className="mr-2" />} />
@@ -343,11 +344,11 @@ const Navbar = () => {
         </div>        <div className="hidden md:flex items-center ml-auto space-x-8">
           {/* Active Page Indicator - desktop only */}
           {shouldShowPageName && (
-            <div className="text-white font-medium">
+            <div className="text-red-900 font-medium">
               <span className="text-md">{currentPage}</span>
             </div>
           )}          {/* User Name Display - visible on desktop */}
-          <div className="text-white font-medium">
+          <div className="text-red-900 font-medium">
             <span className="text-sm">Welcome, {user?.name || 'User'}</span>
           </div>
 
@@ -373,8 +374,9 @@ const Navbar = () => {
               </svg>
             </button>
             
-            <div className={`absolute right-0 top-full mt-1 w-48 rounded-2xl shadow-lg bg-[#170D1C]/80 z-50 transition-all duration-300 ease-in-out 
-                          origin-top ${showProfileDropdown ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'}`}>              <div className="py-0.5">
+            <div className={`absolute right-0 top-full mt-1 w-48 rounded-2xl shadow-lg bg-gradient-to-br from-orange-400/95 to-amber-400/95 border border-orange-200/30 z-50 transition-all duration-300 ease-in-out 
+                          origin-top ${showProfileDropdown ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'}`}
+              style={{ backdropFilter: 'blur(8px)' }}>              <div className="py-0.5">
                 <DropdownItem 
                   to="/settings" 
                   text="Settings" 
@@ -396,12 +398,12 @@ const Navbar = () => {
       </div>
       
       {/* Mobile Menu - Full Screen Overlay */}
-      <div className={`fixed inset-0 bg-[#170D1C]/95 z-30 transition-all duration-300 md:hidden ${
+      <div className={`fixed inset-0 bg-gradient-to-br from-orange-400/95 to-amber-400/95 z-30 transition-all duration-300 md:hidden ${
         isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-      }`} style={{ backdropFilter: 'blur(5px)' }}>
+      }`} style={{ backdropFilter: 'blur(10px)' }}>
         {/* Close button in the top-right corner */}
         <button 
-          className="absolute top-6 right-6 text-white hover:text-gray-300 focus:outline-none bg-[#2D1F3A] p-3 rounded-xl shadow-lg"
+          className="absolute top-6 right-6 text-white hover:text-orange-100 focus:outline-none bg-white/20 hover:bg-white/30 p-3 rounded-xl shadow-lg transition-all duration-200"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-label="Close menu"
         >
@@ -417,8 +419,8 @@ const Navbar = () => {
               disabled={!canGoBack}
               className={`p-3 rounded-xl transition-all duration-200 ${
                 canGoBack 
-                  ? 'text-white bg-[#2D1F3A] hover:bg-[#3D2F4A]' 
-                  : 'text-gray-500 bg-gray-800 cursor-not-allowed'
+                  ? 'text-white bg-white/20 hover:bg-white/30' 
+                  : 'text-gray-300 bg-gray-600/50 cursor-not-allowed'
               }`}
               title="Go Back"
             >
@@ -430,8 +432,8 @@ const Navbar = () => {
               disabled={!canGoForward}
               className={`p-3 rounded-xl transition-all duration-200 ${
                 canGoForward 
-                  ? 'text-white bg-[#2D1F3A] hover:bg-[#3D2F4A]' 
-                  : 'text-gray-500 bg-gray-800 cursor-not-allowed'
+                  ? 'text-white bg-white/20 hover:bg-white/30' 
+                  : 'text-gray-300 bg-gray-600/50 cursor-not-allowed'
               }`}
               title="Go Forward"
             >
@@ -441,7 +443,7 @@ const Navbar = () => {
           
           <Link 
             to="/dashboard" 
-            className={`text-white text-xl font-medium transform transition-all duration-500 ease-out ${
+            className={`text-black text-xl font-medium transform transition-all duration-500 ease-out ${
               isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'
             }`} 
             style={{ transitionDelay: '100ms' }}
@@ -455,7 +457,7 @@ const Navbar = () => {
             isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'
           }`} style={{ transitionDelay: '150ms' }}>
             <button 
-              className="text-white text-xl font-medium mb-2 flex items-center bg-[#2D1F3A] px-4 py-2 rounded-xl"
+              className="text-white text-xl font-medium mb-2 flex items-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition-all duration-200"
               onClick={toggleFinancesDropdown}
             >
               Services
@@ -468,7 +470,7 @@ const Navbar = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </button>            <div className={`flex flex-col space-y-3 items-center bg-[#2D1F3A]/70 rounded-lg w-full py-3 px-4 mt-2 transition-all duration-300 ${
+            </button>            <div className={`flex flex-col space-y-3 items-center bg-white/10 rounded-lg w-full py-3 px-4 mt-2 transition-all duration-300 ${
               isFinancesDropdownOpen ? 'max-h-96 opacity-100 scale-y-100' : 'max-h-0 opacity-0 scale-y-0 overflow-hidden'
             }`}>
               <div className={`transform transition-all duration-300 ease-out ${
@@ -504,7 +506,7 @@ const Navbar = () => {
             </div>
           </div>
             {/* Mobile Account Links */}
-          <div className={`pt-6 border-t border-gray-700 w-2/3 flex flex-col items-center space-y-4 transform transition-all duration-500 ease-out ${
+          <div className={`pt-6 border-t border-white/30 w-2/3 flex flex-col items-center space-y-4 transform transition-all duration-500 ease-out ${
             isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'
           }`} style={{ transitionDelay: '200ms' }}>        		   {/* User Name Display - Mobile */}
             <div className="text-white text-center">
@@ -533,7 +535,7 @@ const Navbar = () => {
 const NavLink = ({ to, text }) => (
   <Link 
     to={to} 
-    className="text-white hover:text-gray-300 transition-colors"
+    className="text-red-900 hover:text-gray-700 transition-colors"
   >
     {text}
   </Link>
@@ -542,7 +544,7 @@ const NavLink = ({ to, text }) => (
 const DropdownItem = ({ to, text, icon, className = '', onClick }) => (
   <Link 
     to={to} 
-    className={`flex items-center m-2 px-4 py-2 text-sm text-white hover:bg-gray-700 rounded-2xl transition-colors ${className}`}
+    className={`flex items-center m-2 px-4 py-2 text-sm text-red-900 hover:bg-white/20 rounded-2xl transition-colors ${className}`}
     onClick={onClick}
   >
     {icon}
