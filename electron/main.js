@@ -44,12 +44,12 @@ async function initializeDatabase() {
 
 function createWindow() {
   const preloadPath = path.join(__dirname, 'preload.cjs');
-  console.log('Preload script path:', preloadPath);
-  console.log('Preload script exists:', fs.existsSync(preloadPath));
   
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    minWidth: 1200,
+    minHeight: 800,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -96,7 +96,6 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('dom-ready', () => {
-    console.log('DOM ready');
   });
 
   // Add error handling for page load
@@ -402,6 +401,78 @@ ipcMain.handle('generate-invoice-pdf', async (event, invoiceData) => {
     return { success: true, filePath: saveResult.filePath };
   } catch (error) {
     console.error('Error generating invoice PDF:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+// PDF generation handler for quotation
+ipcMain.handle('generate-quotation-pdf', async (event, quotationData) => {
+  try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
+    if (!quotationData) {
+      throw new Error('Quotation data is required');
+    }
+
+    // Import the PDF service and template
+    const { generatePdfFromTemplate } = await import('./pdfService.js');
+    const quotationTemplate = await import('./quotationTemplate.js');
+
+    // Generate PDF buffer using quotation template
+    const pdfBuffer = await generatePdfFromTemplate(
+      quotationTemplate.default,
+      quotationData,
+      {
+        filename: `Quotation-${quotationData.quotationNumber}`,
+        pdfOptions: {
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
+        }
+      }
+    );
+
+    // Extract filename from quotation data
+    const defaultFilename = `Quotation-${quotationData.quotationNumber || quotationData.id || 'Unknown'}.pdf`;
+
+    // Show save dialog
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Quotation PDF',
+      defaultPath: defaultFilename,
+      filters: [
+        { name: 'PDF Files', extensions: ['pdf'] }
+      ]
+    });
+
+    if (saveResult.canceled) {
+      return { success: false, message: 'User cancelled save operation' };
+    }
+
+    // Save the PDF file
+    await fs.promises.writeFile(saveResult.filePath, pdfBuffer);
+
+    // Ask user if they want to open the file
+    const openResult = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Open PDF', 'Close'],
+      defaultId: 0,
+      title: 'PDF Generated Successfully',
+      message: 'Quotation PDF has been generated successfully.',
+      detail: `File saved to: ${saveResult.filePath}\n\nWould you like to open the PDF now?`
+    });
+
+    if (openResult.response === 0) {
+      // Open the PDF with default application
+      await shell.openPath(saveResult.filePath);
+    }
+
+    return { success: true, filePath: saveResult.filePath };
+  } catch (error) {
+    console.error('Error generating quotation PDF:', error);
     return { success: false, message: error.message };
   }
 });

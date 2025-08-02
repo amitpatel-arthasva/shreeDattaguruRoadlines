@@ -304,7 +304,15 @@ class QuotationService {
       }
 
       const quotation = response.data.quotation;
-      return await generateQuotationPdf(quotation);
+      
+      // Check if we're in Electron environment
+      if (window.electronAPI && window.electronAPI.generateQuotationPdf) {
+        // Use Electron IPC for better user experience (save dialog + open option)
+        return await window.electronAPI.generateQuotationPdf(quotation);
+      } else {
+        // Fallback to web-based PDF generation
+        return await generateQuotationPdf(quotation);
+      }
     } catch (error) {
       console.error('Error in generateQuotationPdf:', error);
       throw error;

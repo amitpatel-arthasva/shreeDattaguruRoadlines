@@ -166,21 +166,6 @@ const LorryReceipts = () => {
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Created':
-        return 'text-blue-600 bg-blue-100';
-      case 'In Transit':
-        return 'text-orange-600 bg-orange-100';
-      case 'Delivered':
-        return 'text-green-600 bg-green-100';
-      case 'Cancelled':
-        return 'text-red-600 bg-red-100';
-      default:
-        return 'text-gray-600 bg-gray-100';
-    }
-  };
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -243,11 +228,9 @@ const LorryReceipts = () => {
                 {lorryReceipts.slice(0, 3).map((lorryReceipt) => (
                   <div key={lorryReceipt._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
                     <div className="p-6">
-                      {/* Status Badge */}
-                      <div className="flex justify-between items-start mb-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(lorryReceipt.status)}`}>
-                          {lorryReceipt.status}
-                        </span>                        <div className="flex gap-2">
+                      {/* Action Buttons */}
+                      <div className="flex justify-end items-start mb-4">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => handleViewLorryReceipt(lorryReceipt._id)}
                             className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
@@ -325,7 +308,6 @@ const LorryReceipts = () => {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LR No</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -340,11 +322,6 @@ const LorryReceipts = () => {
                               <FontAwesomeIcon icon={faFileAlt} className="text-primary-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">{lorryReceipt.lorryReceiptNumber}</span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(lorryReceipt.status)}`}>
-                              {lorryReceipt.status}
-                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{lorryReceipt.consignor?.consignorName || 'N/A'}</div>

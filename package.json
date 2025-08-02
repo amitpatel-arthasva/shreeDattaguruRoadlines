@@ -12,6 +12,9 @@
   "type": "module",
   "scripts": {
     "setup": "node scripts/setup.js",
+    "setup-puppeteer": "node scripts/setup-puppeteer.js",
+    "test-puppeteer": "node scripts/test-puppeteer.js",
+    "verify-puppeteer-setup": "node scripts/verify-puppeteer-setup.js",
     "prebuild": "node scripts/prebuild.js",
     "bundle-nodejs": "node scripts/bundle-nodejs.js",
     "prepare-installer": "node scripts/prepare-installer.js",
@@ -21,9 +24,9 @@
     "preview": "vite preview",
     "electron": "electron .",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron-build": "npm run prepare-installer && npm run prebuild && npm run build && electron-builder",
+    "electron-build": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder",
     "dist": "electron-builder --publish=never",
-    "postinstall": "electron-builder install-app-deps && node scripts/postinstall.js",
+    "postinstall": "install-app-deps && node scripts/postinstall.js && node scripts/setup-puppeteer.js",
     "setup-chrome": "npx puppeteer browsers install chrome",
     "rebuild-safe": "electron-rebuild --force --only=bcrypt || echo 'Native modules already compiled'",
     "rebuild": "electron-rebuild"
@@ -40,13 +43,18 @@
     "express": "^4.18.2",
     "framer-motion": "^12.15.0",
     "glob": "^11.0.0",
-    "puppeteer": "^24.10.2",
+    "puppeteer-core": "^24.11.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.22.0"
   },
+  "puppeteer": {
+    "skipDownload": false,
+    "cacheDirectory": "./puppeteer-cache"
+  },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@puppeteer/browsers": "^2.10.5",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
@@ -66,6 +74,7 @@
   "build": {
     "appId": "com.shreeDattaguruRoadlines.app",
     "productName": "Shree Dattagu Roadlines",
+    "icon": "build/desktoplogo.ico",
     "directories": {
       "output": "dist"
     },
@@ -75,19 +84,24 @@
       "database/**/*",
       "api/**/*",
       "assets/**/*",
-      "chrome-bundle/**/*",
+      "puppeteer-cache/**/*",
       "node_modules/**/*",
-      "!node_modules/.cache/puppeteer/**/*",
       "!node_modules/.cache/**/*"
     ],
     "extraResources": [
       {
-        "from": "installer",
-        "to": "installer"
+        "from": "chrome-bundle",
+        "to": "chrome-bundle",
+        "filter": [
+          "**/*"
+        ]
       },
       {
-        "from": "node-bundle",
-        "to": "node-bundle"
+        "from": "puppeteer-cache",
+        "to": "puppeteer-cache",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "nsis": {
@@ -102,7 +116,8 @@
       "perMachine": true
     },
     "mac": {
-      "category": "public.app-category.business"
+      "category": "public.app-category.business",
+      "icon": "build/desktoplogo.ico"
     },
     "win": {
       "target": [
@@ -112,10 +127,12 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "icon": "build/desktoplogo.ico"
     },
     "linux": {
-      "category": "Office"
+      "category": "Office",
+      "icon": "build/desktoplogo.ico"
     }
   }
 }

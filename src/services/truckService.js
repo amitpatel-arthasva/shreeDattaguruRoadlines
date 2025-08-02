@@ -4,7 +4,6 @@ class TruckService {  // Get all trucks with filtering and pagination
   async getTrucks(params = {}) {
     try {
       const { page = 1, limit = 10, search, activeOnly = true } = params;
-      console.log('Getting trucks, activeOnly parameter:', activeOnly); // Avoid unused parameter warning
       
       let sql = `
         SELECT * FROM trucks 

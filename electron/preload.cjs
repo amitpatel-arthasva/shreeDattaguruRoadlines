@@ -32,6 +32,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     console.log('electronAPI.generateInvoicePdf called with:', invoiceData);
     return ipcRenderer.invoke('generate-invoice-pdf', invoiceData);
   },
+  generateQuotationPdf: (quotationData) => {
+    console.log('electronAPI.generateQuotationPdf called with:', quotationData);
+    return ipcRenderer.invoke('generate-quotation-pdf', quotationData);
+  },
   generatePdfFromHtml: (htmlContent, options) => {
     console.log('electronAPI.generatePdfFromHtml called');
     return ipcRenderer.invoke('generatePdfFromHtml', htmlContent, options);

@@ -63,9 +63,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-orange-50">
-      <div className="w-full mx-auto px-2 sm:px-4 lg:px-6 py-8">
+      <div className="w-full mx-auto px-2 sm:px-4 lg:px-6 py-4">
         {/* Dashboard Title */}
-        <div className="mb-8">
+        <div className="mb-2">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
             <p className="text-gray-600">
@@ -75,8 +75,8 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h3 className="text-sm font-medium text-gray-700 mb-4">
+        <div className="mb-4">
+          <h3 className="text-base font-medium text-gray-700 mb-4">
             Quick Actions
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -105,7 +105,7 @@ const Dashboard = () => {
         </div>
 
         {/* Main Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full h-[310px]">
           {/* Quotations */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative w-full">
             <div className="absolute top-4 left-4 bg-purple-100 rounded-lg p-2">
@@ -229,7 +229,7 @@ const Dashboard = () => {
         </div>
 
         {/* Master Data */}
-        <div className="mt-12 mb-8 w-full">
+        <div className="mt-4 mb-8 w-full">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative w-full">
             <div className="absolute top-4 left-4 bg-purple-100 rounded-lg p-2">
               <FontAwesomeIcon

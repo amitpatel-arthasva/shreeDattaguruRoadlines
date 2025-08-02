@@ -155,7 +155,6 @@ class LorryReceiptService {
   }  // Get lorry receipt by ID
   async getLorryReceiptById(id) {
     try {
-      console.log('getLorryReceiptById called with id:', id);
       
       const sql = `
         SELECT lr.*, 
@@ -185,7 +184,6 @@ class LorryReceiptService {
       `;
       
       const result = await apiService.query(sql, [id]);
-      console.log('Query result:', result);
       
       const lr = result[0];
       
@@ -193,7 +191,6 @@ class LorryReceiptService {
         throw new Error('Lorry receipt not found');
       }
 
-      console.log('Raw lorry receipt data:', lr);// Parse JSON fields safely
       let nosArray = [];
       let particularsArray = [];
       
@@ -298,7 +295,6 @@ class LorryReceiptService {
         paymentType: lr.payment_type
       };
       
-      console.log('Transformed receipt data:', transformedReceipt);
       
       return {
         success: true,
@@ -311,7 +307,6 @@ class LorryReceiptService {
 
   // Create new lorry receipt
   async createLorryReceipt(lrData) {    try {
-      console.log('Create LR data:', lrData);
       
       // Generate CN number based on from location
       let cnPrefix = '';

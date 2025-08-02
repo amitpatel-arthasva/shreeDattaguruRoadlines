@@ -4,7 +4,6 @@ class CompanyService {  // Get all companies with filtering and pagination
   async getCompanies(params = {}) {
     try {
       const { page = 1, limit = 10, search, activeOnly = true } = params;
-      console.log('Getting companies, activeOnly parameter:', activeOnly); // Avoid unused parameter warning
       
       let sql = `
         SELECT * FROM companies 

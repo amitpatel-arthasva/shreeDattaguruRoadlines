@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteerCore from 'puppeteer-core';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -32,45 +32,16 @@ const getBrowserInstance = async () => {
     }
     
     try {
-      // Ensure Chrome is available
-      const chromeAvailable = await chromeManager.ensureChrome();
-      if (!chromeAvailable) {
-        throw new Error('Chrome browser could not be initialized for PDF generation');
-      }
-
-      const launchOptions = {
-        headless: 'new',
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage', // Overcome limited resource problems
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-background-timer-throttling', // Ensure timers work correctly
-          '--disable-renderer-backgrounding', // Prevent renderer from being backgrounded
-          '--disable-backgrounding-occluded-windows', // Keep windows active
-          '--force-color-profile=srgb', // Consistent color rendering
-          '--disable-features=VizDisplayCompositor' // Reduce memory usage
-        ],
-        // Ensure process cleanup
-        handleSIGINT: false, // Don't handle SIGINT, let Electron handle it
-        handleSIGTERM: false, // Don't handle SIGTERM, let Electron handle it
-        handleSIGHUP: false // Don't handle SIGHUP, let Electron handle it
-      };
+      // Get puppeteer launch options from chrome manager
+      const launchOptions = await chromeManager.getPuppeteerOptions();
       
-      if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-        launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-      }
-      
-      browserInstance = await puppeteer.launch(launchOptions);
+      console.log('Launching Chrome with options:', launchOptions);
+      browserInstance = await puppeteerCore.launch(launchOptions);
       browserUseCount = 0;
     } catch (error) {
-      if (error.message.includes('Could not find Chrome')) {
-        throw new Error(
-          'Chrome browser not found. The application will attempt to download Chrome automatically. Please try again in a moment.'
-        );
+      console.error('Error launching browser:', error);
+      if (error.message.includes('Could not find Chrome') || error.message.includes('Chrome browser is required')) {
+        throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
       }
       throw error;
     }

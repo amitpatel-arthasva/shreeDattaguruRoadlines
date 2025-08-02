@@ -14,9 +14,7 @@ export const useMasterData = () => {
 export const MasterDataProvider = ({ children }) => {
   const refreshMasterData = useCallback(async () => {
     try {
-      console.log('Refreshing master data...');
       await dashboardService.refreshMasterData();
-      console.log('✅ Master data refreshed successfully');
       return { success: true };
     } catch (error) {
       console.error('❌ Error refreshing master data:', error);
@@ -26,9 +24,7 @@ export const MasterDataProvider = ({ children }) => {
 
   const ensureSchemaUpdates = useCallback(async () => {
     try {
-      console.log('Ensuring database schema is up to date...');
       await dashboardService.ensureSchemaUpdates();
-      console.log('✅ Schema updates complete');
       return { success: true };
     } catch (error) {
       console.error('❌ Error updating schema:', error);

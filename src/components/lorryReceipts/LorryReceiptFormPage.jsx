@@ -4,9 +4,12 @@ import BillHeader from '../../assets/images/billHeader.png';
 import companyService from '../../services/companyService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 import truckService from '../../services/truckService';
+import { useToast } from '../common/ToastSystem.jsx';
 
 const LorryReceiptFormPage = () => {
-  const navigate = useNavigate();    // Company autocomplete state
+  const navigate = useNavigate();
+  const toast = useToast();
+  // Company autocomplete state
   const [companies, setCompanies] = useState([]);
   const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);  const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -25,6 +28,7 @@ const LorryReceiptFormPage = () => {
   const truckDropdownRef = useRef(null);
   const consignorInputRef = useRef(null);
   const consigneeInputRef = useRef(null);
+  const dateInputRef = useRef(null);
 
   // Dummy data for development
   const dummyData = [
@@ -44,7 +48,7 @@ const LorryReceiptFormPage = () => {
 	  consigneeGstin: '07XYZMA1234C1Z8',
       consigneePan: 'XYZMA1234C',
       truckNumber: 'MH 12 AB 1234',
-      date: '2025-01-15',
+      date: new Date().toISOString().split('T')[0],
       to: 'Delhi',
       from: 'Tarapur',
       nos: ['50', '25'],
@@ -56,9 +60,7 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '0',
       actualWeight: '2500',
-      chargeableWeight: '2500',      paid: '16120',
-      toBeBill: '0',
-      toPay: '0',
+      chargeableWeight: '2500',
       paymentType: 'paid',
       deliveryAt: 'Delhi Warehouse',
       total: '16120',
@@ -79,7 +81,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '560001',      consigneeGstin: '29RSTCO1234K1Z3',
       consigneePan: 'RSTCO1234K',
       truckNumber: 'GJ 01 AA 5678',
-      date: '2025-01-16',
+      date: new Date().toISOString().split('T')[0],
       to: 'Bangalore',
       from: 'Bhiwandi',
       nos: ['100'],
@@ -91,9 +93,7 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '200',
       actualWeight: '1800',
-      chargeableWeight: '2000',      paid: '0',
-      toBeBill: '13020',
-      toPay: '0',
+      chargeableWeight: '2000',
       paymentType: 'toBeBill',
       deliveryAt: 'RST Warehouse',
       total: '13020',
@@ -114,7 +114,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '395001',      consigneeGstin: '24GLTEX1234M1Z1',
       consigneePan: 'GLTEX1234M',
       truckNumber: 'KA 05 BC 3456',
-      date: '2025-01-17',
+      date: new Date().toISOString().split('T')[0],
       to: 'Surat',
       from: 'Tarapur',
       nos: ['75', '25', '10'],
@@ -126,9 +126,7 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '500',
       actualWeight: '3200',
-      chargeableWeight: '3500',      paid: '0',
-      toBeBill: '0',
-      toPay: '19470',
+      chargeableWeight: '3500',
       paymentType: 'toPay',
       deliveryAt: 'Global Textiles Factory',
       total: '19470',
@@ -149,7 +147,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '600001',      consigneeGstin: '33INNOV1234C1Z8',
       consigneePan: 'INNOV1234C',
       truckNumber: 'DL 8C AA 9012',
-      date: '2025-01-18',
+      date: new Date().toISOString().split('T')[0],
       to: 'Chennai',
       from: 'Bhiwandi',
       nos: ['20', '15'],
@@ -161,9 +159,7 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '300',
       actualWeight: '1500',
-      chargeableWeight: '1500',      paid: '26220',
-      toBeBill: '0',
-      toPay: '0',
+      chargeableWeight: '1500',
       paymentType: 'paid',
       deliveryAt: 'Innovation Hub Data Center',
       total: '26220',
@@ -186,7 +182,7 @@ const LorryReceiptFormPage = () => {
     consigneePan: '',
     cnNumber: '',
     truckNumber: '',
-    date: '',
+    date: new Date().toISOString().split('T')[0], // Set today's date as default
     to: '',
     from: '',
     nos: [''],
@@ -198,10 +194,8 @@ const LorryReceiptFormPage = () => {
     stCharge: '20', // Default value is 20
     extraLoading: '',
     actualWeight: '',
-    chargeableWeight: '',paid: '',
-    toBeBill: '',
-    toPay: '',
-    paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
+    chargeableWeight: '',
+    paymentType: 'paid',
     deliveryAt: '',
 	total: '',    remarks: ''
   });
@@ -268,12 +262,26 @@ const LorryReceiptFormPage = () => {
       case 'truckNumber':
         error = validateTruckNumber(value);
         break;
+      case 'paid':
+      case 'toBeBill':
+      case 'toPay':
+        if (value && value.trim() !== '') {
+          const numValue = parseFloat(value);
+          if (isNaN(numValue) || numValue < 0) {
+            error = 'Please enter a valid amount';
+          }
+        }
+        break;
       default:
         break;
-    }    setValidationErrors(prev => ({
+    }
+    
+    setValidationErrors(prev => ({
       ...prev,
       [name]: error
-    }));    return error === '';
+    }));
+    
+    return error === '';
   };
 
   // Validate required fields
@@ -332,16 +340,6 @@ const LorryReceiptFormPage = () => {
       hasErrors = true;
     }
 
-    // Validate payment type selection
-    const paymentAmount = parseFloat(formData.paid) || 0;
-    const toBeBillAmount = parseFloat(formData.toBeBill) || 0;
-    const toPayAmount = parseFloat(formData.toPay) || 0;
-
-    if (paymentAmount === 0 && toBeBillAmount === 0 && toPayAmount === 0) {
-      errors.paymentType = 'Please specify payment amount in at least one payment type';
-      hasErrors = true;
-    }
-
     setValidationErrors(prev => ({
       ...prev,
       ...errors
@@ -363,10 +361,19 @@ const LorryReceiptFormPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Validate the field if it's one of the fields we validate
+    if (name === 'consignorPincode' || name === 'consigneePincode') {
+      // Only allow up to 6 digits
+      if (!/^\d{0,6}$/.test(value)) return;
+    }
+    if (name === 'consignorGstin' || name === 'consigneeGstin') {
+      // Only allow up to 15 alphanumeric characters
+      if (!/^[a-zA-Z0-9]{0,15}$/.test(value)) return;
+    }
+    if (name === 'consignorPan' || name === 'consigneePan') {
+      // Only allow up to 10 alphanumeric characters
+      if (!/^[a-zA-Z0-9]{0,10}$/.test(value)) return;
+    }
     validateField(name, value);
-    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -380,17 +387,14 @@ const LorryReceiptFormPage = () => {
     }));
   };
 
-  const addArrayField = (field) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: [...prev[field], '']
-    }));
-  };
-
-  const removeArrayField = (index, field) => {
-    if (formData[field].length > 1) {
-      setFormData(prev => ({        ...prev,
-        [field]: prev[field].filter((_, i) => i !== index)
+  const removeArrayField = (index) => {
+    // Only allow removal if there's more than one row
+    if (formData.nos.length > 1 && formData.particulars.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        // Remove from both nos and particulars arrays
+        nos: prev.nos.filter((_, i) => i !== index),
+        particulars: prev.particulars.filter((_, i) => i !== index)
       }));
     }
   };
@@ -399,10 +403,16 @@ const LorryReceiptFormPage = () => {
     const input = e.currentTarget.querySelector('input');
     if (input) {
       input.focus();
-    }  };
+    }
+  };
 
-  const handlePrint = () => {
-    window.print();
+  // Handle date field click to open date picker
+  const handleDateFieldClick = (e) => {
+    const input = e.currentTarget.querySelector('input[type="date"]');
+    if (input) {
+      input.focus();
+      input.showPicker && input.showPicker(); // Modern browsers support showPicker()
+    }
   };
 
   // Load companies on component mount
@@ -525,7 +535,7 @@ const LorryReceiptFormPage = () => {
     
     // Validate required fields first
     if (!validateRequiredFields()) {
-      alert('Please fill in all required fields before submitting.');
+      toast.error('Please fill in all required fields before submitting.');
       return;
     }
     
@@ -548,17 +558,15 @@ const LorryReceiptFormPage = () => {
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
           consignorId = existingConsignor.id;
-          console.log('Using existing consignor company:', existingConsignor.name);
         } else {
           // Create new company only if it doesn't exist
           const consignorResponse = await companyService.createCompany(consignorData);
           if (consignorResponse.success) {
             consignorId = consignorResponse.data.id;
-            console.log('Created new consignor company:', consignorData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
-            alert('Error creating consignor company. Please try again.');
+            toast.error('Error creating consignor company. Please try again.');
             return;
           }
         }
@@ -584,17 +592,15 @@ const LorryReceiptFormPage = () => {
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
           consigneeId = existingConsignee.id;
-          console.log('Using existing consignee company:', existingConsignee.name);
         } else {
           // Create new company only if it doesn't exist
           const consigneeResponse = await companyService.createCompany(consigneeData);
           if (consigneeResponse.success) {
             consigneeId = consigneeResponse.data.id;
-            console.log('Created new consignee company:', consigneeData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
-            alert('Error creating consignee company. Please try again.');
+            toast.error('Error creating consignee company. Please try again.');
             return;
           }
         }
@@ -606,7 +612,7 @@ const LorryReceiptFormPage = () => {
         }
       }// Validate that we have both company IDs
       if (!consignorId || !consigneeId) {
-        alert('Error: Unable to determine consignor or consignee company. Please try again.');
+        toast.error('Error: Unable to determine consignor or consignee company. Please try again.');
         return;
       }      // Prepare lorry receipt data (only with company references)
       const lorryReceiptData = {
@@ -626,9 +632,7 @@ const LorryReceiptFormPage = () => {
         st_charge: parseFloat(formData.stCharge) || 0,
         extra_loading: parseFloat(formData.extraLoading) || 0,
         actual_weight: parseFloat(formData.actualWeight) || 0,
-        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,        paid: parseFloat(formData.paid) || 0,
-        to_be_bill: parseFloat(formData.toBeBill) || 0,
-        to_pay: parseFloat(formData.toPay) || 0,
+        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
         payment_type: formData.paymentType,
         delivery_at: formData.deliveryAt,
         total: parseFloat(formData.total) || 0,
@@ -637,15 +641,15 @@ const LorryReceiptFormPage = () => {
       const response = await lorryReceiptService.createLorryReceipt(lorryReceiptData);
 
       if (response.success) {
-        alert('Lorry Receipt created successfully!');
+        toast.success('Lorry Receipt created successfully!');
         navigate('/lorry-receipts');
       } else {
-        alert('Error creating lorry receipt');
+        toast.error('Error creating lorry receipt');
       }
 
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Error creating lorry receipt');
+      toast.error('Error creating lorry receipt');
     }
   };  // Fill dummy data function
   const fillDummyData = () => {
@@ -901,6 +905,23 @@ const LorryReceiptFormPage = () => {
     calculateTotal();
   }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
 
+  // Set payment type without amounts
+  const handlePaymentTypeChange = (paymentType) => {
+    setFormData({
+      ...formData,
+      paymentType
+    });
+  };
+
+  // Add a row to both nos and particulars together
+  const addNosAndParticularsRow = () => {
+    setFormData(prev => ({
+      ...prev,
+      nos: [...prev.nos, ''],
+      particulars: [...prev.particulars, '']
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
 		<div className="max-w-7xl mx-auto">
@@ -921,15 +942,9 @@ const LorryReceiptFormPage = () => {
             </button>
             <button
               onClick={handleSubmit}
-              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               Create
-            </button>
-            <button
-              onClick={handlePrint}
-              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
-            >
-              Print
             </button>
           </div>
         </div>
@@ -985,7 +1000,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignor')}
-                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
+                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company
@@ -1055,10 +1070,12 @@ const LorryReceiptFormPage = () => {
                           <input
                             type="text"
                             name="consignorPincode"
-                            value={formData.consignorPincode}                            onChange={handleInputChange}
+                            value={formData.consignorPincode}
+                            onChange={handleInputChange}
                             className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
+                            maxLength={6}
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorPincode && (
@@ -1072,7 +1089,9 @@ const LorryReceiptFormPage = () => {
                             name="consignorGstin"
                             value={formData.consignorGstin}
                             onChange={handleInputChange}
-                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorGstin ? 'border-red-500' : ''}`}                            placeholder="GSTIN"
+                            className={`form-input ${validationErrors.consignorGstin ? 'border-red-500' : ''}`}
+                            placeholder="GSTIN"
+                            maxLength={15}
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorGstin && (
@@ -1085,7 +1104,9 @@ const LorryReceiptFormPage = () => {
                             name="consignorPan"
                             value={formData.consignorPan}
                             onChange={handleInputChange}
-                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPan ? 'border-red-500' : ''}`}                            placeholder="PAN"
+                            className={`form-input ${validationErrors.consignorPan ? 'border-red-500' : ''}`}
+                            placeholder="PAN"
+                            maxLength={10}
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorPan && (
@@ -1123,7 +1144,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignee')}
-                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
+                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company
@@ -1195,10 +1216,12 @@ const LorryReceiptFormPage = () => {
                           <input
                             type="text"
                             name="consigneePincode"
-                            value={formData.consigneePincode}                            onChange={handleInputChange}
+                            value={formData.consigneePincode}
+                            onChange={handleInputChange}
                             className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
+                            maxLength={6}
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneePincode && (
@@ -1211,8 +1234,10 @@ const LorryReceiptFormPage = () => {
                             type="text"
                             name="consigneeGstin"
                             value={formData.consigneeGstin}
-                            onChange={handleInputChange}                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
+                            onChange={handleInputChange}
+                            className={`form-input ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
                             placeholder="GSTIN"
+                            maxLength={15}
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneeGstin && (
@@ -1225,7 +1250,9 @@ const LorryReceiptFormPage = () => {
                             name="consigneePan"
                             value={formData.consigneePan}
                             onChange={handleInputChange}
-                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePan ? 'border-red-500' : ''}`}                            placeholder="PAN"
+                            className={`form-input ${validationErrors.consigneePan ? 'border-red-500' : ''}`}
+                            placeholder="PAN"
+                            maxLength={10}
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneePan && (
@@ -1302,13 +1329,15 @@ const LorryReceiptFormPage = () => {
                   <tr>
                     <td>
                       <strong>Date - <span className="text-red-500">*</span></strong>
-                      <div className="input-container inline-block" onClick={handleDivClick}>
+                      <div className="input-container inline-block" onClick={handleDateFieldClick}>
                         <input
+                          ref={dateInputRef}
                           type="date"
                           name="date"
                           value={formData.date}
                           onChange={handleInputChange}
-                          className="form-input-small"                        />
+                          className="form-input-small"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -1419,7 +1448,7 @@ const LorryReceiptFormPage = () => {
                                 {formData.nos.length > 1 && (
                                   <button
                                     type="button"
-                                    onClick={() => removeArrayField(index, 'nos')}
+                                    onClick={() => removeArrayField(index)}
                                     className="ml-1 text-red-500 hover:text-red-700 text-xs"
                                   >
                                     ×
@@ -1429,7 +1458,7 @@ const LorryReceiptFormPage = () => {
                             ))}
                             <button
                               type="button"
-                              onClick={() => addArrayField('nos')}
+                              onClick={addNosAndParticularsRow}
                               className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
                             >
                               + Add More
@@ -1452,7 +1481,7 @@ const LorryReceiptFormPage = () => {
                                 {formData.particulars.length > 1 && (
                                   <button
                                     type="button"
-                                    onClick={() => removeArrayField(index, 'particulars')}
+                                    onClick={() => removeArrayField(index)}
                                     className="ml-1 text-red-500 hover:text-red-700 text-xs"
                                   >
                                     ×
@@ -1462,7 +1491,7 @@ const LorryReceiptFormPage = () => {
                             ))}
                             <button
                               type="button"
-                              onClick={() => addArrayField('particulars')}
+                              onClick={addNosAndParticularsRow}
                               className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
                             >
                               + Add More
@@ -1592,7 +1621,7 @@ const LorryReceiptFormPage = () => {
                             </div>
                           </td>
 
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
+                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '120px' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
                               <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
@@ -1622,41 +1651,45 @@ const LorryReceiptFormPage = () => {
                                   )}
                                 </div>
                                 &nbsp;Chargeable <span className="text-red-500">*</span>
-                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>
+                                <div style={{ marginBottom: '4px', fontSize: '9px', color: '#666', textAlign: 'center' }}>
+                                  Select payment type
+                                </div>
+                                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <input
                                     type="radio"
                                     id="payment-paid"
                                     name="paymentType"
                                     value="paid"
                                     checked={formData.paymentType === 'paid'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-paid">Paid</label>
+                                  <label htmlFor="payment-paid" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>Paid</label>
                                 </div>
-                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                                   <input
                                     type="radio"
                                     id="payment-toBeBill"
                                     name="paymentType"
                                     value="toBeBill"
                                     checked={formData.paymentType === 'toBeBill'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-toBeBill">To be Bill</label>
+                                  <label htmlFor="payment-toBeBill" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>To be Bill</label>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                                   <input
                                     type="radio"
                                     id="payment-toPay"
                                     name="paymentType"
                                     value="toPay"
                                     checked={formData.paymentType === 'toPay'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-toPay">To Pay</label>
+                                  <label htmlFor="payment-toPay" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>To Pay</label>
                                 </div>
                               </div>
                               <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
@@ -1889,19 +1922,41 @@ const LorryReceiptFormPage = () => {
         }
 
         .form-input-payment {
-          width: 60px;
+          width: 100px;
+          min-width: 100px;
+          max-width: 100px;
+          height: 22px;
           border: none;
           background: transparent;
-          font-size: 9px;
-          padding: 2px 4px;
-          min-height: 14px;
+          font-size: 12px;
+          text-align: center;
+          padding: 1px 2px 0 2px;
           border-bottom: 1px solid #ccc;
+          margin-top: -2px;
+          box-sizing: border-box;
+          display: block;
         }
-
         .form-input-payment:focus {
           outline: 2px solid #3B82F6;
           outline-offset: 1px;
           background: #F9FAFB;
+        }
+        .payment-error-message {
+          color: #ef4444;
+          font-size: 11px;
+          margin-top: 2px;
+          margin-left: 0;
+          text-align: left;
+          width: 100%;
+          min-height: 14px;
+          line-height: 1.2;
+          white-space: normal;
+          display: block;
+        }
+        .input-container.inline-block {
+          margin: 0;
+          padding: 0;
+          min-height: auto;
         }
 
         .form-input-delivery {

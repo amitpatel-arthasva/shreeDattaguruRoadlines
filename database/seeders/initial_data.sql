@@ -42,7 +42,7 @@ SELECT 'GJ 01 AA 5678', 'Closed', 15.0, 'Nitin Desai'
 WHERE NOT EXISTS (SELECT 1 FROM trucks WHERE truck_number = 'GJ 01 AA 5678');
 
 INSERT INTO trucks (truck_number, truck_type, capacity_ton, owner_name)
-SELECT 'DL 8C AA 9012', 'Container', 20.0, 'Priya Sharma'
+SELECT 'DL 82 AA 9012', 'Container', 20.0, 'Priya Sharma'
 WHERE NOT EXISTS (SELECT 1 FROM trucks WHERE truck_number = 'DL 8C AA 9012');
 
 INSERT INTO trucks (truck_number, truck_type, capacity_ton, owner_name)

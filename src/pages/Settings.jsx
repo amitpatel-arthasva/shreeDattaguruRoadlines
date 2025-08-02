@@ -12,10 +12,6 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isElectronEnv, setIsElectronEnv] = useState(false);
 
-  // Installation state
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [installationStatus, setInstallationStatus] = useState('');
-
   const loadCurrentPath = useCallback(async () => {
     try {
       if (window.electronAPI) {
@@ -71,37 +67,9 @@ const Settings = () => {
     }
   };
 
-  const handleDependenciesInstall = async () => {
-    if (!isElectronEnv) {
-      alert('Installation scripts are only available in the desktop app.');
-      return;
-    }
-
-    try {
-      setIsInstalling(true);
-      setInstallationStatus('Starting PDF dependencies installation with bundled Node.js...');
-      
-      const result = await window.electronAPI.runDependenciesInstall();
-      
-      if (result.success) {
-        setInstallationStatus('PDF dependencies installation started in new window. Please keep the command window open until completion.');
-        alert('PDF dependencies installation has been started in a new command window. Please follow the progress and keep the window open until installation completes.');
-      } else {
-        setInstallationStatus(`Error: ${result.error}`);
-        alert(`Installation failed: ${result.error}`);
-      }
-    } catch (error) {
-      setInstallationStatus(`Error: ${error.message}`);
-      alert(`Installation failed: ${error.message}`);
-    } finally {
-      setIsInstalling(false);
-    }
-  };
-
   const sidebarItems = [
     { id: 'profile', label: 'Profile', icon: '👤' },
     { id: 'database', label: 'Database Settings', icon: '💾' },
-    { id: 'installation', label: 'Installation Setup', icon: '🔧' },
   ];
   const ProfileSection = () => (
     <div className="bg-gradient-to-br from-white to-orange-50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-orange-200">
@@ -215,84 +183,6 @@ const Settings = () => {
     </div>
   );
 
-  const InstallationSection = () => (
-    <div className="bg-gradient-to-br from-white to-orange-50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-orange-200">
-      <h2 className="text-xl font-semibold text-orange-600 mb-4">
-        Installation Setup
-      </h2>
-      
-      <div className="space-y-6">
-        {!isElectronEnv && (
-          <div className="p-4 bg-yellow-50/80 backdrop-blur-sm border border-yellow-200 rounded-lg">
-            <div className="flex items-center text-yellow-600">
-              <span className="mr-2">ℹ️</span>
-              <span>Installation scripts are only available in the desktop app.</span>
-            </div>
-          </div>
-        )}
-
-        {installationStatus && (
-          <div className="p-3 bg-orange-50/80 backdrop-blur-sm border border-orange-200 rounded-lg">
-            <div className="flex items-center text-orange-600">
-              <span className="mr-2">📝</span>
-              <span>{installationStatus}</span>
-            </div>
-          </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            PDF Dependencies Installation
-          </label>
-          <p className="text-sm text-gray-500 mb-3">
-            Install Puppeteer and Chrome browser using the bundled Node.js runtime. 
-            This script will set up everything needed for PDF generation in a new command window.
-          </p>
-          <button
-            onClick={handleDependenciesInstall}
-            disabled={isInstalling || !isElectronEnv}
-            className="px-4 sm:px-6 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 hover:shadow-md transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {isInstalling ? 'Installing...' : 'Install PDF Dependencies'}
-          </button>
-        </div>
-
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">What gets installed?</h3>
-          <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-            <li><strong>Puppeteer Library:</strong> PDF generation package (~5MB download)</li>
-            <li><strong>Chrome Browser:</strong> Headless browser for PDF rendering (~150MB download)</li>
-            <li><strong>Note:</strong> Uses the bundled Node.js runtime (already included in the app)</li>
-          </ul>
-        </div>
-
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">Installation Process</h3>
-          <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-            <li>Click the button above to start the installation</li>
-            <li>A new command window will open showing real-time progress</li>
-            <li>The script will first install the Puppeteer package</li>
-            <li>Then it will download the Chrome browser for PDF generation</li>
-            <li>Keep the command window open until installation completes</li>
-            <li>Total installation time: 3-10 minutes (depending on internet speed)</li>
-            <li>You only need to run this once unless you encounter issues</li>
-          </ul>
-        </div>
-
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">About the Node Bundle</h3>
-          <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-            <li>The application includes a portable Node.js runtime (~50MB)</li>
-            <li>This bundle can be copied to other machines for offline installation</li>
-            <li>No system-wide Node.js installation required</li>
-            <li>All components are isolated and won't affect other applications</li>
-            <li>The bundle location can be found in the application's resources folder</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-[80vh] bg-gradient-to-br rounded-4xl from-orange-50 to-amber-50 text-gray-900">
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto">        {/* Mobile Header */}
@@ -364,7 +254,6 @@ const Settings = () => {
           <div className="max-w-3xl mx-auto">
             {activeTab === 'profile' && <ProfileSection />}
             {activeTab === 'database' && <DatabaseSection />}
-            {activeTab === 'installation' && <InstallationSection />}
           </div>
         </div>
       </div>

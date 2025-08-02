@@ -68,7 +68,12 @@ const QuotationViewModal = ({ isOpen, onClose, quotation }) => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-    
+          {/* Status Badge - Only show for expired quotations */}
+          {quotation.quotationValidity?.expiryDate && new Date(quotation.quotationValidity.expiryDate) < new Date() && (
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor()}`}>
+              {getStatusText()}
+            </span>
+          )}
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 p-2 rounded-lg hover:bg-white/10 transition-colors"

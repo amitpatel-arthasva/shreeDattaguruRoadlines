@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFileInvoice, 
@@ -124,6 +123,8 @@ const Invoices = () => {
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
+
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -156,7 +157,7 @@ const Invoices = () => {
         </div>
       ) : (
         <>
-          {/* Invoice List */}
+          {/* Invoice Content */}
           {invoices.length === 0 ? (
             <div className="text-center py-12 flex flex-col items-center">
               <FontAwesomeIcon icon={faFileAlt} className="text-6xl text-gray-300 mb-4" />
@@ -166,72 +167,142 @@ const Invoices = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {invoices.map((invoice) => (
-                <div key={invoice.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
-                  <div className="p-6">
-                    {/* Download button */}
-                    <div className="flex justify-end items-end mb-1">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDownloadPdf(invoice.id)}
-                          disabled={isGeneratingPdf[invoice.id]}
-                          className="text-primary-400 hover:text-primary-300 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={isGeneratingPdf[invoice.id] ? "Generating PDF..." : "Download PDF"}
-                        >
-                          <FontAwesomeIcon 
-                            icon={isGeneratingPdf[invoice.id] ? faSpinner : faDownload} 
-                            className={isGeneratingPdf[invoice.id] ? "animate-spin" : ""} 
-                          />
-                        </button>
+            <div className="space-y-8">
+              {/* Top 3 Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {invoices.slice(0, 3).map((invoice) => (
+                  <div key={invoice.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
+                    <div className="p-6">
+                      {/* Action Buttons */}
+                      <div className="flex justify-end items-start mb-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleDownloadPdf(invoice.id)}
+                            disabled={isGeneratingPdf[invoice.id]}
+                            className="text-green-600 hover:text-green-700 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={isGeneratingPdf[invoice.id] ? "Generating PDF..." : "Download PDF"}
+                          >
+                            <FontAwesomeIcon 
+                              icon={isGeneratingPdf[invoice.id] ? faSpinner : faDownload} 
+                              className={isGeneratingPdf[invoice.id] ? "animate-spin" : ""} 
+                            />
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Invoice Info */}
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                        <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400" />
-                        Invoice #{invoice.invoiceNumber}
-                      </h3>
-                      <p className="text-sm text-gray-600">LR: {invoice.lorryReceiptNumber}</p>
-                    </div>
-
-                    {/* Consignor/Consignee Info */}
-                    <div className="mb-4">
-                      <div className="mb-2">
-                        <p className="text-sm text-gray-600 mb-1">
-                          <strong>From:</strong> {invoice.consignor?.consignorName || 'N/A'}
-                        </p>
+                      {/* Invoice Number */}
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400" />
+                          Invoice #{invoice.invoiceNumber}
+                        </h3>
+                        <p className="text-sm text-gray-600">LR: {invoice.lorryReceiptNumber}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          <strong>To:</strong> {invoice.consignee?.consigneeName || 'N/A'}
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Truck & Amount Info */}
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FontAwesomeIcon icon={faTruck} className="text-primary-400" />
-                        <span className="text-sm font-medium text-gray-700">Truck:</span>
-                        <span className="text-sm text-gray-600">{invoice.truckNumber || 'N/A'}</span>
+                      {/* Consignor & Consignee Info */}
+                      <div className="mb-4">
+                        <div className="mb-2">
+                          <p className="text-sm text-gray-600 mb-1">
+                            <strong>From:</strong> {invoice.consignor?.consignorName || 'N/A'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            <strong>To:</strong> {invoice.consignee?.consigneeName || 'N/A'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Date & Amount */}
-                    <div className="flex justify-between items-center text-sm text-gray-500 border-t pt-3">
-                      <span className="flex items-center gap-1">
-                        <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
-                        {formatDate(invoice.date)}
-                      </span>
-                      <span className="text-lg font-bold text-primary-400">
-                        ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
-                      </span>
+                      {/* Truck & Amount */}
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2">
+                          <FontAwesomeIcon icon={faTruck} className="text-primary-400" />
+                          <span className="text-sm font-medium text-gray-700">Truck:</span>
+                          <span className="text-sm text-gray-600">{invoice.truckNumber || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Date & Amount */}
+                      <div className="text-sm text-gray-500 border-t pt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="flex items-center gap-1">
+                            <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
+                            {formatDate(invoice.date)}
+                          </span>
+                          <span className="text-lg font-bold text-primary-400">
+                            ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* List View */}
+              <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LR No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {invoices.map((invoice) => (
+                        <tr key={invoice.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">#{invoice.invoiceNumber}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {invoice.lorryReceiptNumber}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{invoice.consignor?.consignorName || 'N/A'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{invoice.consignee?.consigneeName || 'N/A'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {invoice.truckNumber || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(invoice.date)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-400">
+                            ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => handleDownloadPdf(invoice.id)}
+                                disabled={isGeneratingPdf[invoice.id]}
+                                className="text-green-600 hover:text-green-700 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={isGeneratingPdf[invoice.id] ? "Generating PDF..." : "Download PDF"}
+                              >
+                                <FontAwesomeIcon 
+                                  icon={isGeneratingPdf[invoice.id] ? faSpinner : faDownload} 
+                                  className={isGeneratingPdf[invoice.id] ? "animate-spin" : ""} 
+                                />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
+              </div>
             </div>
           )}
 

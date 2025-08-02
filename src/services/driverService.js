@@ -4,7 +4,6 @@ class DriverService {  // Get all drivers with filtering and pagination
   async getDrivers(params = {}) {
     try {
       const { page = 1, limit = 10, search, activeOnly = true } = params;
-      console.log('Getting drivers, activeOnly parameter:', activeOnly); // Avoid unused parameter warning
       
       let sql = `
         SELECT * FROM drivers 

@@ -8,15 +8,12 @@ import {
   faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../common/Modal';
-import { useToast } from '../common/ToastSystem';
 
 const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
-  const toast = useToast();
   
   // Debug logging
   React.useEffect(() => {
     if (isOpen && lorryReceipt) {
-      console.log('LorryReceiptViewModal received data:', lorryReceipt);
     }
   }, [isOpen, lorryReceipt]);
   
@@ -30,21 +27,6 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   const formatCurrency = (amount) => {
     if (amount === undefined || amount === null) return '₹0';
     return `₹${Number(amount).toLocaleString('en-IN')}`;
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Created':
-        return 'text-blue-600 bg-blue-100';
-      case 'In Transit':
-        return 'text-orange-600 bg-orange-100';
-      case 'Delivered':
-        return 'text-green-600 bg-green-100';
-      case 'Cancelled':
-        return 'text-red-600 bg-red-100';
-      default:
-        return 'text-gray-600 bg-gray-100';
-    }
   };
 
   return (
@@ -129,19 +111,13 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
               Truck Details
             </h3>
             <div className="space-y-2 text-sm">
-              <p><strong>Truck Number:</strong> {lorryReceipt.truckDetails?.truckNumber || 'N/A'}</p>
+              <p><strong>Truck Number:</strong> {lorryReceipt.truckDetails?.truckNumber || lorryReceipt.truckNumber || 'N/A'}</p>
               <p><strong>Vehicle Type:</strong> {lorryReceipt.truckDetails?.vehicleType || 'N/A'}</p>
               {lorryReceipt.truckDetails?.capacity && (
                 <p><strong>Capacity:</strong> {lorryReceipt.truckDetails.capacity} Tons</p>
               )}
               {lorryReceipt.truckDetails?.ownerName && (
                 <p><strong>Owner:</strong> {lorryReceipt.truckDetails.ownerName}</p>
-              )}
-              <p><strong>Driver Name:</strong> {lorryReceipt.truckDetails?.driverName || 'N/A'}</p>
-              <p><strong>Driver Mobile:</strong> {lorryReceipt.truckDetails?.driverMobile || 'N/A'}</p>
-              <p><strong>License Number:</strong> {lorryReceipt.truckDetails?.licenseNumber || 'N/A'}</p>
-              {lorryReceipt.truckDetails?.driverAddress && (
-                <p><strong>Driver Address:</strong> {lorryReceipt.truckDetails.driverAddress}</p>
               )}
             </div>
           </div>
@@ -206,35 +182,35 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-gray-600"><strong>Freight:</strong></p>
-              <p className="text-gray-900 font-medium">{formatCurrency(lorryReceipt.freight)}</p>
+              <p className="text-gray-900 font-medium">{formatCurrency(lorryReceipt.freightDetails?.freight || lorryReceipt.freight)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Hamali:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.hamali)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.hamali || lorryReceipt.hamali)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>AOC:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.aoc)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.aoc || lorryReceipt.aoc)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Door Delivery:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.doorDelivery)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.doorDelivery || lorryReceipt.doorDelivery)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Collection:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.collection)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.collection || lorryReceipt.collection)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Service Charge:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.serviceCharge)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.stCharge || lorryReceipt.serviceCharge)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Extra Loading:</strong></p>
-              <p className="text-gray-900">{formatCurrency(lorryReceipt.extraLoading)}</p>
+              <p className="text-gray-900">{formatCurrency(lorryReceipt.freightDetails?.extraLoading || lorryReceipt.extraLoading)}</p>
             </div>
             <div>
               <p className="text-gray-600"><strong>Total:</strong></p>
-              <p className="text-gray-900 font-bold text-lg">{formatCurrency(lorryReceipt.total)}</p>
+              <p className="text-gray-900 font-bold text-lg">{formatCurrency(lorryReceipt.freightDetails?.total || lorryReceipt.total)}</p>
             </div>
           </div>
         </div>

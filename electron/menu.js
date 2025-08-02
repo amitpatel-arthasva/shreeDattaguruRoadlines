@@ -1,4 +1,5 @@
 import { Menu, app, BrowserWindow } from 'electron';
+import process from 'process';
 
 export function createMenu() {
   const template = [
@@ -9,14 +10,28 @@ export function createMenu() {
           label: 'New Quotation',
           accelerator: 'CmdOrCtrl+N',
           click: () => {
-            // Handle new quotation
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.executeJavaScript(`
+                if (window.location.hash !== '#/quotations/create') {
+                  window.location.hash = '#/quotations/create';
+                }
+              `);
+            }
           }
         },
         {
           label: 'New Lorry Receipt',
           accelerator: 'CmdOrCtrl+Shift+N',
           click: () => {
-            // Handle new lorry receipt
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.executeJavaScript(`
+                if (window.location.hash !== '#/lorry-receipts/create') {
+                  window.location.hash = '#/lorry-receipts/create';
+                }
+              `);
+            }
           }
         },
         { type: 'separator' },

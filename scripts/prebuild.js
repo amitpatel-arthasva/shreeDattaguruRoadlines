@@ -12,21 +12,24 @@ if (!fs.existsSync(chromeDir)) {
   fs.mkdirSync(chromeDir, { recursive: true });
 }
 
+// Check if Chrome is already bundled
+const existingChrome = findChromeExecutable(chromeDir);
+if (existingChrome) {
+  console.log('✅ Chrome already bundled at:', existingChrome);
+  console.log('🎉 Pre-build Chrome setup complete (using existing bundle)!');
+  process.exit(0);
+}
+
 try {
   // Download Chrome to a specific directory for bundling
   console.log('📥 Downloading Chrome for bundling...');
   
-  // Set environment variables for consistent Chrome location
-  const env = {
-    ...process.env,
-    PUPPETEER_CACHE_DIR: chromeDir,
-    PUPPETEER_SKIP_DOWNLOAD: 'false'
-  };
+  // Since we're using puppeteer-core, we need to use @puppeteer/browsers to download Chrome
+  const browserCommand = 'npx @puppeteer/browsers install chrome@stable --path chrome-bundle';
   
-  execSync('npx puppeteer browsers install chrome', { 
+  execSync(browserCommand, { 
     stdio: 'inherit',
     shell: true, // Important for Windows
-    env: env,
     timeout: 600000 // 10 minute timeout for slow connections
   });
   
