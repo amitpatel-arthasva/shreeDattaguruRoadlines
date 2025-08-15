@@ -21,7 +21,13 @@ const getImageAsBase64 = (imagePath) => {
   }
   
   try {
-    const fullPath = path.join(__dirname, '..', 'assets', 'images', imagePath);
+    // Use assets folder directly for billHeader5.png
+    let fullPath;
+    if (imagePath === 'billHeader5.png') {
+      fullPath = path.join(__dirname, '..', 'assets', imagePath);
+    } else {
+      fullPath = path.join(__dirname, '..', 'assets', 'images', imagePath);
+    }
     
     if (!fs.existsSync(fullPath)) {
       console.warn(`Image not found: ${fullPath}`);
@@ -74,7 +80,7 @@ let logosCache = null;
  * @returns {string} - Base64 data URL for billHeader.png
  */
 const getBillHeaderAsBase64 = () => {
-  return getImageAsBase64('billHeader.png');
+  return getImageAsBase64('billHeader5.png');
 };
 
 /**

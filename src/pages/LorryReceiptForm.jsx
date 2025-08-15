@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../components/common/ToastSystem';
 
 const LorryReceiptForm = () => {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     lr_number: '',
     lr_date: new Date().toISOString().split('T')[0],
@@ -206,7 +208,7 @@ const LorryReceiptForm = () => {
               editId
             ]
           );
-          alert('Lorry Receipt updated successfully!');
+          toast.success('Lorry Receipt updated successfully!');
         } else {
           await window.electronAPI.query(
             `INSERT INTO lorry_receipts (
@@ -230,7 +232,7 @@ const LorryReceiptForm = () => {
               submissionData.remarks
             ]
           );
-          alert('Lorry Receipt created successfully!');
+          toast.success('Lorry Receipt created successfully!');
           resetForm();
         }
       }

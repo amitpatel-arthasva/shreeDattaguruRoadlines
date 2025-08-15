@@ -1,3 +1,58 @@
+// PDF generation handler for memo print layout
+ipcMain.handle('generate-memo-print-pdf', async (event, options) => {
+  try {
+    // Ensure Chrome is available before proceeding
+    const chromeAvailable = await chromeManager.ensureChrome();
+    if (!chromeAvailable) {
+      throw new Error('Chrome browser is required for PDF generation. Please install Chrome from the settings menu.');
+    }
+
+    const { data, filename } = options;
+    if (!data) {
+      throw new Error('Memo data is required');
+    }
+
+    // Import the PDF service and template
+    const { generateMemoPrintPdf } = await import('./pdfService.js');
+    const pdfBuffer = await generateMemoPrintPdf(data, { filename });
+
+    // Show save dialog
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Memo PDF',
+      defaultPath: filename || 'Memo.pdf',
+      filters: [
+        { name: 'PDF Files', extensions: ['pdf'] }
+      ]
+    });
+
+    if (saveResult.canceled) {
+      return { success: false, message: 'User cancelled save operation' };
+    }
+
+    // Save the PDF file
+    await fs.promises.writeFile(saveResult.filePath, pdfBuffer);
+
+    // Ask user if they want to open the file
+    const openResult = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Open PDF', 'Close'],
+      defaultId: 0,
+      title: 'PDF Generated Successfully',
+      message: 'Memo PDF has been generated successfully.',
+      detail: `File saved to: ${saveResult.filePath}\n\nWould you like to open the PDF now?`
+    });
+
+    if (openResult.response === 0) {
+      // Open the PDF with default application
+      await shell.openPath(saveResult.filePath);
+    }
+
+    return { success: true, filePath: saveResult.filePath };
+  } catch (error) {
+    console.error('Error generating memo print PDF:', error);
+    return { success: false, message: error.message };
+  }
+});
 import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
 import isDev from 'electron-is-dev';
@@ -34,15 +89,43 @@ async function initializeDatabase() {
     // Set database path
     dbManager.dbPath = path.join(appDataPath, 'roadlines.db');
     
+    // Check if database file exists, if not copy from template
+    const templateDbPath = path.join(__dirname, '../database/roadlines.db');
+    if (!fs.existsSync(dbManager.dbPath) && fs.existsSync(templateDbPath)) {
+      fs.copyFileSync(templateDbPath, dbManager.dbPath);
+    }
+    
     await dbManager.initialize();
-    console.log('Database initialized successfully');
+    console.log('Database initialized successfully at:', dbManager.dbPath);
+    
+    // Test database connection
+    try {
+      const testResult = dbManager.query('SELECT 1');
+      console.log('Database connection test successful:', testResult);
+    } catch (testError) {
+      console.error('Database connection test failed:', testError);
+      throw testError;
+    }
   } catch (error) {
     console.error('Database initialization failed:', error);
     dialog.showErrorBox('Database Error', 'Failed to initialize database: ' + error.message);
+    throw error; // Re-throw to prevent app from starting with broken DB
   }
 }
 
-function createWindow() {
+async function createWindow() {
+  // Initialize database before creating window
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    // Show error dialog and quit
+    dialog.showErrorBox('Database Error', 
+      'Failed to initialize database. The application will now close.\n\nError: ' + error.message);
+    app.quit();
+    return;
+  }
+
   const preloadPath = path.join(__dirname, 'preload.cjs');
   
   mainWindow = new BrowserWindow({
@@ -138,12 +221,47 @@ function createWindow() {
 ipcMain.handle('db-query', async (event, sql, params) => {
   try {
     if (!dbManager) {
-      throw new Error('Database not initialized');
+      await initializeDatabase();
+      if (!dbManager) {
+        throw new Error('Database not initialized');
+      }
     }
-    return dbManager.query(sql, params);
+
+    // Log the query for debugging
+    console.log('Executing query:', sql, 'with params:', params);
+
+    let result;
+    try {
+      result = dbManager.query(sql, params);
+      console.log('Query result:', result);
+      if (!sql.trim().toUpperCase().startsWith('SELECT')) {
+        console.log('Non-SELECT query executed. Result object:', JSON.stringify(result, null, 2));
+      }
+    } catch (queryError) {
+      console.error('Query execution error:', queryError);
+      throw queryError;
+    }
+
+    const isSelect = sql.trim().toUpperCase().startsWith('SELECT');
+    if (isSelect) {
+      // Ensure result is always an array for SELECT queries
+      const data = Array.isArray(result) ? result : [];
+      return { success: true, data };
+    } else {
+      // For non-SELECT, return structured response
+      return { 
+        success: true,
+        changes: result.changes,
+        lastInsertRowid: result.lastInsertRowid
+      };
+    }
   } catch (error) {
     console.error('Database query error:', error);
-    throw error;
+    return { 
+      success: false, 
+      error: error.message,
+      sql: sql // Include the failing query for debugging
+    };
   }
 });
 
@@ -422,9 +540,21 @@ ipcMain.handle('generate-quotation-pdf', async (event, quotationData) => {
     const { generatePdfFromTemplate } = await import('./pdfService.js');
     const quotationTemplate = await import('./quotationTemplate.js');
 
-    // Generate PDF buffer using quotation template
+
+
+  // Resolve absolute path to billHeader5.png and read as base64
+  const imagePath = path.join(__dirname, '../assets/billHeader5.png');
+    let imageBase64 = '';
+    try {
+      const imageBuffer = fs.readFileSync(imagePath);
+      imageBase64 = imageBuffer.toString('base64');
+    } catch (err) {
+      console.warn('Could not read header image:', err);
+    }
+
+    // Generate PDF buffer using quotation template, passing imageBase64
     const pdfBuffer = await generatePdfFromTemplate(
-      quotationTemplate.default,
+      (data) => quotationTemplate.default(data, imageBase64),
       quotationData,
       {
         filename: `Quotation-${quotationData.quotationNumber}`,

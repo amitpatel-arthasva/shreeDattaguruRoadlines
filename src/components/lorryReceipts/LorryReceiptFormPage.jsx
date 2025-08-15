@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useToast } from '../common/ToastSystem';
 import { useNavigate } from 'react-router-dom';
-import BillHeader from '../../assets/images/billHeader.png';
+import BillHeader from '../../../assets/billHeader5.png';
 import companyService from '../../services/companyService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 import truckService from '../../services/truckService';
-import { useToast } from '../common/ToastSystem.jsx';
+import { downloadLorryReceiptPrintPdf } from '../../services/pdfServiceRenderer';
 
 const LorryReceiptFormPage = () => {
-  const navigate = useNavigate();
   const toast = useToast();
-  // Company autocomplete state
+  const navigate = useNavigate();    // Company autocomplete state
   const [companies, setCompanies] = useState([]);
   const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);  const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -28,7 +28,6 @@ const LorryReceiptFormPage = () => {
   const truckDropdownRef = useRef(null);
   const consignorInputRef = useRef(null);
   const consigneeInputRef = useRef(null);
-  const dateInputRef = useRef(null);
 
   // Dummy data for development
   const dummyData = [
@@ -48,7 +47,7 @@ const LorryReceiptFormPage = () => {
 	  consigneeGstin: '07XYZMA1234C1Z8',
       consigneePan: 'XYZMA1234C',
       truckNumber: 'MH 12 AB 1234',
-      date: new Date().toISOString().split('T')[0],
+      date: '2025-01-15',
       to: 'Delhi',
       from: 'Tarapur',
       nos: ['50', '25'],
@@ -60,9 +59,12 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '0',
       actualWeight: '2500',
-      chargeableWeight: '2500',
+      chargeableWeight: '2500',      paid: '16120',
+      toBeBill: '0',
+      toPay: '0',
       paymentType: 'paid',
       deliveryAt: 'Delhi Warehouse',
+      ewayBill: 'MH27EWB012345678',
       total: '16120',
       remarks: 'Handle with care'
     },
@@ -81,7 +83,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '560001',      consigneeGstin: '29RSTCO1234K1Z3',
       consigneePan: 'RSTCO1234K',
       truckNumber: 'GJ 01 AA 5678',
-      date: new Date().toISOString().split('T')[0],
+      date: '2025-01-16',
       to: 'Bangalore',
       from: 'Bhiwandi',
       nos: ['100'],
@@ -93,9 +95,12 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '200',
       actualWeight: '1800',
-      chargeableWeight: '2000',
+      chargeableWeight: '2000',      paid: '0',
+      toBeBill: '13020',
+      toPay: '0',
       paymentType: 'toBeBill',
       deliveryAt: 'RST Warehouse',
+      ewayBill: 'KA29EWB987654321',
       total: '13020',
       remarks: 'Fragile items'
     },
@@ -114,7 +119,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '395001',      consigneeGstin: '24GLTEX1234M1Z1',
       consigneePan: 'GLTEX1234M',
       truckNumber: 'KA 05 BC 3456',
-      date: new Date().toISOString().split('T')[0],
+      date: '2025-01-17',
       to: 'Surat',
       from: 'Tarapur',
       nos: ['75', '25', '10'],
@@ -126,7 +131,9 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '500',
       actualWeight: '3200',
-      chargeableWeight: '3500',
+      chargeableWeight: '3500',      paid: '0',
+      toBeBill: '0',
+      toPay: '19470',
       paymentType: 'toPay',
       deliveryAt: 'Global Textiles Factory',
       total: '19470',
@@ -147,7 +154,7 @@ const LorryReceiptFormPage = () => {
       consigneePincode: '600001',      consigneeGstin: '33INNOV1234C1Z8',
       consigneePan: 'INNOV1234C',
       truckNumber: 'DL 8C AA 9012',
-      date: new Date().toISOString().split('T')[0],
+      date: '2025-01-18',
       to: 'Chennai',
       from: 'Bhiwandi',
       nos: ['20', '15'],
@@ -159,7 +166,9 @@ const LorryReceiptFormPage = () => {
       stCharge: '20',
       extraLoading: '300',
       actualWeight: '1500',
-      chargeableWeight: '1500',
+      chargeableWeight: '1500',      paid: '26220',
+      toBeBill: '0',
+      toPay: '0',
       paymentType: 'paid',
       deliveryAt: 'Innovation Hub Data Center',
       total: '26220',
@@ -182,7 +191,7 @@ const LorryReceiptFormPage = () => {
     consigneePan: '',
     cnNumber: '',
     truckNumber: '',
-    date: new Date().toISOString().split('T')[0], // Set today's date as default
+    date: '',
     to: '',
     from: '',
     nos: [''],
@@ -194,10 +203,14 @@ const LorryReceiptFormPage = () => {
     stCharge: '20', // Default value is 20
     extraLoading: '',
     actualWeight: '',
-    chargeableWeight: '',
-    paymentType: 'paid',
+    chargeableWeight: '',paid: '',
+    toBeBill: '',
+    toPay: '',
+    paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
     deliveryAt: '',
-	total: '',    remarks: ''
+    ewayBill: '',
+    total: '',
+    remarks: ''
   });
   // Validation errors state
   const [validationErrors, setValidationErrors] = useState({});
@@ -262,26 +275,12 @@ const LorryReceiptFormPage = () => {
       case 'truckNumber':
         error = validateTruckNumber(value);
         break;
-      case 'paid':
-      case 'toBeBill':
-      case 'toPay':
-        if (value && value.trim() !== '') {
-          const numValue = parseFloat(value);
-          if (isNaN(numValue) || numValue < 0) {
-            error = 'Please enter a valid amount';
-          }
-        }
-        break;
       default:
         break;
-    }
-    
-    setValidationErrors(prev => ({
+    }    setValidationErrors(prev => ({
       ...prev,
       [name]: error
-    }));
-    
-    return error === '';
+    }));    return error === '';
   };
 
   // Validate required fields
@@ -340,6 +339,16 @@ const LorryReceiptFormPage = () => {
       hasErrors = true;
     }
 
+    // Validate payment type selection
+    const paymentAmount = parseFloat(formData.paid) || 0;
+    const toBeBillAmount = parseFloat(formData.toBeBill) || 0;
+    const toPayAmount = parseFloat(formData.toPay) || 0;
+
+    if (paymentAmount === 0 && toBeBillAmount === 0 && toPayAmount === 0) {
+      errors.paymentType = 'Please specify payment amount in at least one payment type';
+      hasErrors = true;
+    }
+
     setValidationErrors(prev => ({
       ...prev,
       ...errors
@@ -361,19 +370,10 @@ const LorryReceiptFormPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'consignorPincode' || name === 'consigneePincode') {
-      // Only allow up to 6 digits
-      if (!/^\d{0,6}$/.test(value)) return;
-    }
-    if (name === 'consignorGstin' || name === 'consigneeGstin') {
-      // Only allow up to 15 alphanumeric characters
-      if (!/^[a-zA-Z0-9]{0,15}$/.test(value)) return;
-    }
-    if (name === 'consignorPan' || name === 'consigneePan') {
-      // Only allow up to 10 alphanumeric characters
-      if (!/^[a-zA-Z0-9]{0,10}$/.test(value)) return;
-    }
+    
+    // Validate the field if it's one of the fields we validate
     validateField(name, value);
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -387,14 +387,17 @@ const LorryReceiptFormPage = () => {
     }));
   };
 
-  const removeArrayField = (index) => {
-    // Only allow removal if there's more than one row
-    if (formData.nos.length > 1 && formData.particulars.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        // Remove from both nos and particulars arrays
-        nos: prev.nos.filter((_, i) => i !== index),
-        particulars: prev.particulars.filter((_, i) => i !== index)
+  const addArrayField = (field) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: [...prev[field], '']
+    }));
+  };
+
+  const removeArrayField = (index, field) => {
+    if (formData[field].length > 1) {
+      setFormData(prev => ({        ...prev,
+        [field]: prev[field].filter((_, i) => i !== index)
       }));
     }
   };
@@ -403,16 +406,10 @@ const LorryReceiptFormPage = () => {
     const input = e.currentTarget.querySelector('input');
     if (input) {
       input.focus();
-    }
-  };
+    }  };
 
-  // Handle date field click to open date picker
-  const handleDateFieldClick = (e) => {
-    const input = e.currentTarget.querySelector('input[type="date"]');
-    if (input) {
-      input.focus();
-      input.showPicker && input.showPicker(); // Modern browsers support showPicker()
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   // Load companies on component mount
@@ -535,7 +532,7 @@ const LorryReceiptFormPage = () => {
     
     // Validate required fields first
     if (!validateRequiredFields()) {
-      toast.error('Please fill in all required fields before submitting.');
+      alert('Please fill in all required fields before submitting.');
       return;
     }
     
@@ -558,15 +555,17 @@ const LorryReceiptFormPage = () => {
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
           consignorId = existingConsignor.id;
+          console.log('Using existing consignor company:', existingConsignor.name);
         } else {
           // Create new company only if it doesn't exist
           const consignorResponse = await companyService.createCompany(consignorData);
           if (consignorResponse.success) {
             consignorId = consignorResponse.data.id;
+            console.log('Created new consignor company:', consignorData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
-            toast.error('Error creating consignor company. Please try again.');
+            alert('Error creating consignor company. Please try again.');
             return;
           }
         }
@@ -592,15 +591,17 @@ const LorryReceiptFormPage = () => {
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
           consigneeId = existingConsignee.id;
+          console.log('Using existing consignee company:', existingConsignee.name);
         } else {
           // Create new company only if it doesn't exist
           const consigneeResponse = await companyService.createCompany(consigneeData);
           if (consigneeResponse.success) {
             consigneeId = consigneeResponse.data.id;
+            console.log('Created new consignee company:', consigneeData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
-            toast.error('Error creating consignee company. Please try again.');
+            alert('Error creating consignee company. Please try again.');
             return;
           }
         }
@@ -612,7 +613,7 @@ const LorryReceiptFormPage = () => {
         }
       }// Validate that we have both company IDs
       if (!consignorId || !consigneeId) {
-        toast.error('Error: Unable to determine consignor or consignee company. Please try again.');
+        alert('Error: Unable to determine consignor or consignee company. Please try again.');
         return;
       }      // Prepare lorry receipt data (only with company references)
       const lorryReceiptData = {
@@ -632,24 +633,207 @@ const LorryReceiptFormPage = () => {
         st_charge: parseFloat(formData.stCharge) || 0,
         extra_loading: parseFloat(formData.extraLoading) || 0,
         actual_weight: parseFloat(formData.actualWeight) || 0,
-        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
+        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,        
+        paid: parseFloat(formData.paid) || 0,
+        to_be_bill: parseFloat(formData.toBeBill) || 0,
+        to_pay: parseFloat(formData.toPay) || 0,
         payment_type: formData.paymentType,
         delivery_at: formData.deliveryAt,
+        eway_bill: formData.ewayBill || '',
         total: parseFloat(formData.total) || 0,
         remarks: formData.remarks
       };// Create lorry receipt
       const response = await lorryReceiptService.createLorryReceipt(lorryReceiptData);
 
       if (response.success) {
-        toast.success('Lorry Receipt created successfully!');
-        navigate('/lorry-receipts');
+  toast.success('Lorry Receipt created successfully!');
+  navigate('/lorry-receipts');
       } else {
-        toast.error('Error creating lorry receipt');
+        alert('Error creating lorry receipt');
       }
 
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Error creating lorry receipt');
+      alert('Error creating lorry receipt');
+    }
+  };
+
+  // Handle create and download function
+  const handleCreateAndDownload = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields first
+    if (!validateRequiredFields()) {
+      alert('Please fill in all required fields before submitting.');
+      return;
+    }
+    
+    try {
+      let consignorId = null;
+      let consigneeId = null;
+
+      // Handle consignor company - create new unless selected from dropdown
+      if (!consignorSelectedFromDropdown) {
+        // Check if company already exists before creating new one
+        const consignorData = {
+          name: formData.consignorName,
+          address: formData.consignorAddress1,
+          city: formData.consignorCity,
+          state: formData.consignorState,
+          pin_code: formData.consignorPincode,
+          gstin: formData.consignorGstin,
+          pan: formData.consignorPan
+        };
+        
+        // First check if company already exists
+        const existingConsignor = findExistingCompany(consignorData);
+        if (existingConsignor) {
+          consignorId = existingConsignor.id;
+          console.log('Using existing consignor company:', existingConsignor.name);
+        } else {
+          // Create new company only if it doesn't exist
+          const consignorResponse = await companyService.createCompany(consignorData);
+          if (consignorResponse.success) {
+            consignorId = consignorResponse.data.id;
+            console.log('Created new consignor company:', consignorData.name);
+            // Refresh companies list to include the new company
+            await loadCompanies();
+          } else {
+            alert('Error creating consignor company. Please try again.');
+            return;
+          }
+        }
+      } else {
+        // Find existing consignor (was selected from dropdown)
+        const existingConsignor = companies.find(c => c.name === formData.consignorName);
+        if (existingConsignor) {
+          consignorId = existingConsignor.id;
+        }
+      }
+
+      // Handle consignee company - create new unless selected from dropdown
+      if (!consigneeSelectedFromDropdown) {
+        // Check if company already exists before creating new one
+        const consigneeData = {
+          name: formData.consigneeName,
+          address: formData.consigneeAddress1,
+          city: formData.consigneeCity,
+          state: formData.consigneeState,
+          pin_code: formData.consigneePincode,
+          gstin: formData.consigneeGstin,
+          pan: formData.consigneePan
+        };
+        
+        // First check if company already exists
+        const existingConsignee = findExistingCompany(consigneeData);
+        if (existingConsignee) {
+          consigneeId = existingConsignee.id;
+          console.log('Using existing consignee company:', existingConsignee.name);
+        } else {
+          // Create new company only if it doesn't exist
+          const consigneeResponse = await companyService.createCompany(consigneeData);
+          if (consigneeResponse.success) {
+            consigneeId = consigneeResponse.data.id;
+            console.log('Created new consignee company:', consigneeData.name);
+            // Refresh companies list to include the new company
+            await loadCompanies();
+          } else {
+            alert('Error creating consignee company. Please try again.');
+            return;
+          }
+        }
+      } else {
+        // Find existing consignee (was selected from dropdown)
+        const existingConsignee = companies.find(c => c.name === formData.consigneeName);
+        if (existingConsignee) {
+          consigneeId = existingConsignee.id;
+        }
+      }
+
+      // Validate that we have both company IDs
+      if (!consignorId || !consigneeId) {
+        alert('Error: Unable to determine consignor or consignee company. Please try again.');
+        return;
+      }
+
+      // Prepare lorry receipt data (only with company references)
+      const lorryReceiptData = {
+        truck_number: formData.truckNumber,
+        lr_date: formData.date,
+        to_location: formData.to,
+        from_location: formData.from,
+        consignor_id: consignorId,
+        consignee_id: consigneeId,
+        nos: JSON.stringify(formData.nos),
+        particulars: JSON.stringify(formData.particulars),
+        freight: parseFloat(formData.freight) || 0,
+        hamali: parseFloat(formData.hamali) || 0,
+        aoc: parseFloat(formData.aoc) || 0,
+        door_delivery: parseFloat(formData.doorDelivery) || 0,
+        collection: parseFloat(formData.collection) || 0,
+        st_charge: parseFloat(formData.stCharge) || 0,
+        extra_loading: parseFloat(formData.extraLoading) || 0,
+        actual_weight: parseFloat(formData.actualWeight) || 0,
+        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
+        paid: parseFloat(formData.paid) || 0,
+        to_be_bill: parseFloat(formData.toBeBill) || 0,
+        to_pay: parseFloat(formData.toPay) || 0,
+        payment_type: formData.paymentType,
+        delivery_at: formData.deliveryAt,
+        total: parseFloat(formData.total) || 0,
+        remarks: formData.remarks
+      };
+
+      // Create lorry receipt
+      const response = await lorryReceiptService.createLorryReceipt(lorryReceiptData);
+
+      if (response.success) {
+        // Get the created lorry receipt data with full details
+        const createdLorryReceipt = response.data;
+        
+        // Prepare data for PDF generation (need to include company details)
+        const pdfData = {
+          ...createdLorryReceipt,
+          // Add consignor details
+          consignor_name: formData.consignorName,
+          consignor_address: formData.consignorAddress1,
+          consignor_city: formData.consignorCity,
+          consignor_state: formData.consignorState,
+          consignor_pin_code: formData.consignorPincode,
+          consignor_gstin: formData.consignorGstin,
+          consignor_pan: formData.consignorPan,
+          // Add consignee details
+          consignee_name: formData.consigneeName,
+          consignee_address: formData.consigneeAddress1,
+          consignee_city: formData.consigneeCity,
+          consignee_state: formData.consigneeState,
+          consignee_pin_code: formData.consigneePincode,
+          consignee_gstin: formData.consigneeGstin,
+          consignee_pan: formData.consigneePan,
+          // Parse JSON fields back to arrays
+          nos: formData.nos,
+          particulars: formData.particulars,
+          // Include truck number
+          truck_number: formData.truckNumber
+        };
+
+        // Generate and download PDF
+        const pdfResult = await downloadLorryReceiptPrintPdf(pdfData);
+        
+        if (pdfResult.success) {
+          alert('Lorry Receipt created successfully and PDF downloaded!');
+          navigate('/lorry-receipts');
+        } else {
+          alert('Lorry Receipt created successfully, but PDF download failed. You can download it from the lorry receipts list.');
+          navigate('/lorry-receipts');
+        }
+      } else {
+        alert('Error creating lorry receipt');
+      }
+
+    } catch (error) {
+      console.error('Error in create and download:', error);
+      alert('Error creating lorry receipt and downloading PDF');
     }
   };  // Fill dummy data function
   const fillDummyData = () => {
@@ -905,23 +1089,6 @@ const LorryReceiptFormPage = () => {
     calculateTotal();
   }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
 
-  // Set payment type without amounts
-  const handlePaymentTypeChange = (paymentType) => {
-    setFormData({
-      ...formData,
-      paymentType
-    });
-  };
-
-  // Add a row to both nos and particulars together
-  const addNosAndParticularsRow = () => {
-    setFormData(prev => ({
-      ...prev,
-      nos: [...prev.nos, ''],
-      particulars: [...prev.particulars, '']
-    }));
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
 		<div className="max-w-7xl mx-auto">
@@ -942,29 +1109,47 @@ const LorryReceiptFormPage = () => {
             </button>
             <button
               onClick={handleSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
             >
               Create
+            </button>
+            <button
+              onClick={handleCreateAndDownload}
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded hover:from-green-600 hover:to-green-700 flex items-center gap-2"
+            >
+              📄⬇️ Create & Download
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
+            >
+              Print
             </button>
           </div>
         </div>
 		<div className='flex justify-center items-center relative'>
-		<div className='w-[90%] flex justify-center items-center mb-4 relative'>
-			<div className='flex-1 flex justify-left ml-18'>
-				<img src={BillHeader} alt="BillLogo" className="max-w-154 h-auto" />
-			</div>
-			<div className='absolute right-0 text-right text-xs font-medium text-gray-700 leading-tight'>
-				<div className='mb-2 font-bold'>SUBJECT TO PALGHAR JURISDICTION</div>
-				<div className='mb-2'>
-					<div className='font-semibold'>Daily Part Load Service to -</div>
-					<div>Tarapur, Bhiwandi, Palghar,</div>
-					<div>Vashi, Taloja, Kolgoan Genises</div>
-				</div>
-				<div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block'>
-					DRIVERS COPY
-				</div>
-			</div>
-		</div>
+    <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
+      <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
+        <div className='w-full flex flex-col items-center justify-center py-2'>
+          <div className='w-full flex flex-row items-start justify-between py-2'>
+            <div className='flex-shrink-0 flex items-center w-2/3'>
+              <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+            </div>
+            <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
+              <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
+              <div className='mb-2 text-right text-xs'>
+                <div className='font-semibold'>Daily Part Load Service to -</div>
+                <div>Tarapur, Bhiwandi, Palghar,</div>
+                <div>Vashi, Taloja, Kolgoan Genises</div>
+              </div>
+              <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                DRIVERS COPY
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 		</div>
         <form onSubmit={handleSubmit} className="lorry-receipt-form">
           <div className="container bg-white">
@@ -1000,7 +1185,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignor')}
-                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company
@@ -1070,12 +1255,10 @@ const LorryReceiptFormPage = () => {
                           <input
                             type="text"
                             name="consignorPincode"
-                            value={formData.consignorPincode}
-                            onChange={handleInputChange}
+                            value={formData.consignorPincode}                            onChange={handleInputChange}
                             className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
-                            maxLength={6}
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorPincode && (
@@ -1089,9 +1272,7 @@ const LorryReceiptFormPage = () => {
                             name="consignorGstin"
                             value={formData.consignorGstin}
                             onChange={handleInputChange}
-                            className={`form-input ${validationErrors.consignorGstin ? 'border-red-500' : ''}`}
-                            placeholder="GSTIN"
-                            maxLength={15}
+                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorGstin ? 'border-red-500' : ''}`}                            placeholder="GSTIN"
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorGstin && (
@@ -1104,9 +1285,7 @@ const LorryReceiptFormPage = () => {
                             name="consignorPan"
                             value={formData.consignorPan}
                             onChange={handleInputChange}
-                            className={`form-input ${validationErrors.consignorPan ? 'border-red-500' : ''}`}
-                            placeholder="PAN"
-                            maxLength={10}
+                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPan ? 'border-red-500' : ''}`}                            placeholder="PAN"
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorPan && (
@@ -1144,7 +1323,7 @@ const LorryReceiptFormPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => createNewCompany('consignee')}
-                                    className="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                    className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-2 rounded-md text-sm hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center"
                                   >
                                     <span className="mr-2">+</span>
                                     Create New Company
@@ -1216,12 +1395,10 @@ const LorryReceiptFormPage = () => {
                           <input
                             type="text"
                             name="consigneePincode"
-                            value={formData.consigneePincode}
-                            onChange={handleInputChange}
+                            value={formData.consigneePincode}                            onChange={handleInputChange}
                             className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
-                            maxLength={6}
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneePincode && (
@@ -1234,10 +1411,8 @@ const LorryReceiptFormPage = () => {
                             type="text"
                             name="consigneeGstin"
                             value={formData.consigneeGstin}
-                            onChange={handleInputChange}
-                            className={`form-input ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
+                            onChange={handleInputChange}                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
                             placeholder="GSTIN"
-                            maxLength={15}
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneeGstin && (
@@ -1250,9 +1425,7 @@ const LorryReceiptFormPage = () => {
                             name="consigneePan"
                             value={formData.consigneePan}
                             onChange={handleInputChange}
-                            className={`form-input ${validationErrors.consigneePan ? 'border-red-500' : ''}`}
-                            placeholder="PAN"
-                            maxLength={10}
+                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePan ? 'border-red-500' : ''}`}                            placeholder="PAN"
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneePan && (
@@ -1329,15 +1502,13 @@ const LorryReceiptFormPage = () => {
                   <tr>
                     <td>
                       <strong>Date - <span className="text-red-500">*</span></strong>
-                      <div className="input-container inline-block" onClick={handleDateFieldClick}>
+                      <div className="input-container inline-block" onClick={handleDivClick}>
                         <input
-                          ref={dateInputRef}
                           type="date"
                           name="date"
                           value={formData.date}
                           onChange={handleInputChange}
-                          className="form-input-small"
-                        />
+                          className="form-input-small"                        />
                       </div>
                     </td>
                   </tr>
@@ -1448,7 +1619,7 @@ const LorryReceiptFormPage = () => {
                                 {formData.nos.length > 1 && (
                                   <button
                                     type="button"
-                                    onClick={() => removeArrayField(index)}
+                                    onClick={() => removeArrayField(index, 'nos')}
                                     className="ml-1 text-red-500 hover:text-red-700 text-xs"
                                   >
                                     ×
@@ -1458,7 +1629,7 @@ const LorryReceiptFormPage = () => {
                             ))}
                             <button
                               type="button"
-                              onClick={addNosAndParticularsRow}
+                              onClick={() => addArrayField('nos')}
                               className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
                             >
                               + Add More
@@ -1481,7 +1652,7 @@ const LorryReceiptFormPage = () => {
                                 {formData.particulars.length > 1 && (
                                   <button
                                     type="button"
-                                    onClick={() => removeArrayField(index)}
+                                    onClick={() => removeArrayField(index, 'particulars')}
                                     className="ml-1 text-red-500 hover:text-red-700 text-xs"
                                   >
                                     ×
@@ -1491,7 +1662,7 @@ const LorryReceiptFormPage = () => {
                             ))}
                             <button
                               type="button"
-                              onClick={addNosAndParticularsRow}
+                              onClick={() => addArrayField('particulars')}
                               className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
                             >
                               + Add More
@@ -1621,7 +1792,7 @@ const LorryReceiptFormPage = () => {
                             </div>
                           </td>
 
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '120px' }}>
+                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
                               <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
@@ -1651,45 +1822,41 @@ const LorryReceiptFormPage = () => {
                                   )}
                                 </div>
                                 &nbsp;Chargeable <span className="text-red-500">*</span>
-                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>
-                                <div style={{ marginBottom: '4px', fontSize: '9px', color: '#666', textAlign: 'center' }}>
-                                  Select payment type
-                                </div>
-                                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
                                   <input
                                     type="radio"
                                     id="payment-paid"
                                     name="paymentType"
                                     value="paid"
                                     checked={formData.paymentType === 'paid'}
-                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-paid" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>Paid</label>
+                                  <label htmlFor="payment-paid">Paid</label>
                                 </div>
-                                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
                                   <input
                                     type="radio"
                                     id="payment-toBeBill"
                                     name="paymentType"
                                     value="toBeBill"
                                     checked={formData.paymentType === 'toBeBill'}
-                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-toBeBill" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>To be Bill</label>
+                                  <label htmlFor="payment-toBeBill">To be Bill</label>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <input
                                     type="radio"
                                     id="payment-toPay"
                                     name="paymentType"
                                     value="toPay"
                                     checked={formData.paymentType === 'toPay'}
-                                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
                                     style={{ marginRight: '4px' }}
                                   />
-                                  <label htmlFor="payment-toPay" style={{ minWidth: '20px', margin: 0, marginLeft: '-6px', paddingLeft: 0, whiteSpace: 'nowrap', textAlign: 'left', display: 'inline-block' }}>To Pay</label>
+                                  <label htmlFor="payment-toPay">To Pay</label>
                                 </div>
                               </div>
                               <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
@@ -1707,16 +1874,35 @@ const LorryReceiptFormPage = () => {
             <table>
               <tbody>
                 <tr style={{ height: '30px' }}>
-                  <td colSpan="3" style={{ verticalAlign: 'top' }}>
-                    Delivery At: <span className="text-red-500">*</span>{' '}
-                    <div className="input-container inline-block" onClick={handleDivClick}>
-                      <input
-                        type="text"
-                        name="deliveryAt"
-                        value={formData.deliveryAt}
-                        onChange={handleInputChange}
-                        className="form-input-delivery"
-                      />
+                  <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: '90px' }}>Delivery At: <span className="text-red-500">*</span></span>
+                      <div className="input-container flex-grow" onClick={handleDivClick}>
+                        <input
+                          type="text"
+                          name="deliveryAt"
+                          value={formData.deliveryAt}
+                          onChange={handleInputChange}
+                          className="form-input-delivery"
+                          style={{ width: '100%', minWidth: '180px' }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: '90px' }}>E-way Bill:</span>
+                      <div className="input-container flex-grow" onClick={handleDivClick}>
+                        <input
+                          type="text"
+                          name="ewayBill"
+                          value={formData.ewayBill || ''}
+                          onChange={handleInputChange}
+                          className="form-input-delivery"
+                          placeholder="Enter E-way Bill number"
+                          style={{ width: '100%', minWidth: '180px' }}
+                        />
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -1922,41 +2108,19 @@ const LorryReceiptFormPage = () => {
         }
 
         .form-input-payment {
-          width: 100px;
-          min-width: 100px;
-          max-width: 100px;
-          height: 22px;
+          width: 60px;
           border: none;
           background: transparent;
-          font-size: 12px;
-          text-align: center;
-          padding: 1px 2px 0 2px;
+          font-size: 9px;
+          padding: 2px 4px;
+          min-height: 14px;
           border-bottom: 1px solid #ccc;
-          margin-top: -2px;
-          box-sizing: border-box;
-          display: block;
         }
+
         .form-input-payment:focus {
           outline: 2px solid #3B82F6;
           outline-offset: 1px;
           background: #F9FAFB;
-        }
-        .payment-error-message {
-          color: #ef4444;
-          font-size: 11px;
-          margin-top: 2px;
-          margin-left: 0;
-          text-align: left;
-          width: 100%;
-          min-height: 14px;
-          line-height: 1.2;
-          white-space: normal;
-          display: block;
-        }
-        .input-container.inline-block {
-          margin: 0;
-          padding: 0;
-          min-height: auto;
         }
 
         .form-input-delivery {

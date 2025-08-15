@@ -69,19 +69,19 @@ WHERE NOT EXISTS (SELECT 1 FROM drivers WHERE phone = '9876543213');
 -- Insert sample lorry receipts (check for existing CN numbers and verify referenced data exists)
 -- TPR-001: Electronics shipment from Tarapur to Mumbai
 INSERT INTO lorry_receipts (
-	cn_number, lr_date, from_location, to_location,
-	consignor_id, consignee_id, truck_id, driver_id, truck_number,
-	nos, particulars, freight, hamali, aoc, door_delivery,
-	collection, st_charge, extra_loading, actual_weight, chargeable_weight,
-	payment_type, delivery_at, total, remarks
+  cn_number, lr_date, from_location, to_location,
+  consignor_id, consignee_id, truck_id, driver_id, truck_number,
+  nos, particulars, freight, hamali, aoc, door_delivery,
+  collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+  payment_type, delivery_at, total, remarks
 )
 SELECT 
-	'TPR-001', '2024-12-01', 'Tarapur', 'Mumbai',
-	1, 2, 1, 1, 'MH 12 AB 1234',
-	'["50", "25"]', '["Cotton Bales", "Textile Materials"]', 
-	15000.00, 500.00, 200.00, 300.00,
-	100.00, 750.00, 0.00, 2.5, 2.5,
-	'paid', 'Mumbai Warehouse', 16850.00, 'Handle with care'
+  'TPR-001', '2024-12-01', 'Tarapur', 'Mumbai',
+  1, 2, 1, 1, 'MH 12 AB 1234',
+  '["50", "25"]', '["Cotton Bales", "Textile Materials"]', 
+  15000.00, 500.00, 200.00, 300.00,
+  100.00, 750.00, 0.00, 2.5, 2.5,
+  'paid', 'Mumbai Warehouse', 16850.00, 'Handle with care'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-001')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 1)
   AND EXISTS (SELECT 1 FROM companies WHERE id = 2)
@@ -90,19 +90,19 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-001')
 
 -- BWD-001: Textiles shipment from Bhiwandi to Bangalore
 INSERT INTO lorry_receipts (
-	cn_number, lr_date, from_location, to_location,
-	consignor_id, consignee_id, truck_id, driver_id, truck_number,
-	nos, particulars, freight, hamali, aoc, door_delivery,
-	collection, st_charge, extra_loading, actual_weight, chargeable_weight,
-	payment_type, delivery_at, total, remarks
+  cn_number, lr_date, from_location, to_location,
+  consignor_id, consignee_id, truck_id, driver_id, truck_number,
+  nos, particulars, freight, hamali, aoc, door_delivery,
+  collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+  payment_type, delivery_at, total, remarks
 )
 SELECT 
-	'BWD-001', '2024-12-02', 'Bhiwandi', 'Bangalore',
-	3, 5, 2, 2, 'GJ 01 AA 5678',
-	'["100"]', '["Electronic Components"]', 
-	12000.00, 400.00, 150.00, 250.00,
-	0.00, 600.00, 200.00, 1.8, 2.0,
-	'toBeBill', 'RST Warehouse', 13600.00, 'Fragile items'
+  'BWD-001', '2024-12-02', 'Bhiwandi', 'Bangalore',
+  3, 5, 2, 2, 'GJ 01 AA 5678',
+  '["100"]', '["Electronic Components"]', 
+  12000.00, 400.00, 150.00, 250.00,
+  0.00, 600.00, 200.00, 1.8, 2.0,
+  'toBeBill', 'RST Warehouse', 13600.00, 'Fragile items'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-001')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 3)
   AND EXISTS (SELECT 1 FROM companies WHERE id = 5)
@@ -111,19 +111,19 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-001')
 
 -- TPR-002: Raw materials shipment from Tarapur to Surat
 INSERT INTO lorry_receipts (
-	cn_number, lr_date, from_location, to_location,
-	consignor_id, consignee_id, truck_id, driver_id, truck_number,
-	nos, particulars, freight, hamali, aoc, door_delivery,
-	collection, st_charge, extra_loading, actual_weight, chargeable_weight,
-	payment_type, delivery_at, total, remarks
+  cn_number, lr_date, from_location, to_location,
+  consignor_id, consignee_id, truck_id, driver_id, truck_number,
+  nos, particulars, freight, hamali, aoc, door_delivery,
+  collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+  payment_type, delivery_at, total, remarks
 )
 SELECT 
-	'TPR-002', '2024-12-03', 'Tarapur', 'Surat',
-	4, 6, 3, 3, 'DL 8C AA 9012',
-	'["75", "25", "10"]', '["Raw Materials", "Chemicals", "Dyes"]', 
-	18000.00, 600.00, 300.00, 400.00,
-	150.00, 900.00, 500.00, 3.2, 3.5,
-	'toPay', 'Global Textiles Factory', 20950.00, 'Chemical items - handle carefully'
+  'TPR-002', '2024-12-03', 'Tarapur', 'Surat',
+  4, 6, 3, 3, 'DL 8C AA 9012',
+  '["75", "25", "10"]', '["Raw Materials", "Chemicals", "Dyes"]', 
+  18000.00, 600.00, 300.00, 400.00,
+  150.00, 900.00, 500.00, 3.2, 3.5,
+  'toPay', 'Global Textiles Factory', 20950.00, 'Chemical items - handle carefully'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-002')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 4)
   AND EXISTS (SELECT 1 FROM companies WHERE id = 6)
@@ -132,19 +132,19 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-002')
 
 -- BWD-002: High-value electronics from Bhiwandi to Chennai
 INSERT INTO lorry_receipts (
-	cn_number, lr_date, from_location, to_location,
-	consignor_id, consignee_id, truck_id, driver_id, truck_number,
-	nos, particulars, freight, hamali, aoc, door_delivery,
-	collection, st_charge, extra_loading, actual_weight, chargeable_weight,
-	payment_type, delivery_at, total, remarks
+  cn_number, lr_date, from_location, to_location,
+  consignor_id, consignee_id, truck_id, driver_id, truck_number,
+  nos, particulars, freight, hamali, aoc, door_delivery,
+  collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+  payment_type, delivery_at, total, remarks
 )
 SELECT 
-	'BWD-002', '2024-12-04', 'Bhiwandi', 'Delhi',
-	1, 2, 4, 4, 'KA 05 BC 3456',
-	'["20", "15"]', '["Servers", "Networking Equipment"]', 
-	25000.00, 800.00, 400.00, 500.00,
-	200.00, 1250.00, 300.00, 1.5, 1.5,
-	'paid', 'Tech Hub Data Center', 28450.00, 'High-value electronic equipment'
+  'BWD-002', '2024-12-04', 'Bhiwandi', 'Delhi',
+  1, 2, 4, 4, 'KA 05 BC 3456',
+  '["20", "15"]', '["Servers", "Networking Equipment"]', 
+  25000.00, 800.00, 400.00, 500.00,
+  200.00, 1250.00, 300.00, 1.5, 1.5,
+  'paid', 'Tech Hub Data Center', 28450.00, 'High-value electronic equipment'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-002')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 1)
   AND EXISTS (SELECT 1 FROM companies WHERE id = 2)
@@ -153,188 +153,235 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-002')
 
 -- TPR-003: Pharmaceutical products from Tarapur to Ahmedabad
 INSERT INTO lorry_receipts (
-	cn_number, lr_date, from_location, to_location,
-	consignor_id, consignee_id, truck_id, driver_id, truck_number,
-	nos, particulars, freight, hamali, aoc, door_delivery,
-	collection, st_charge, extra_loading, actual_weight, chargeable_weight,
-	payment_type, delivery_at, total, remarks
+  cn_number, lr_date, from_location, to_location,
+  consignor_id, consignee_id, truck_id, driver_id, truck_number,
+  nos, particulars, freight, hamali, aoc, door_delivery,
+  collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+  payment_type, delivery_at, total, remarks
 )
 SELECT 
-	'TPR-003', '2024-12-05', 'Tarapur', 'Ahmedabad',
-	1, 3, 1, 1, 'MH 12 AB 1234',
-	'["25"]', '["Pharmaceutical Products"]', 
-	22000.00, 400.00, 250.00, 500.00,
-	100.00, 1100.00, 0.00, 0.52, 0.6,
-	'paid', 'Cold Storage Facility', 24350.00, 'Temperature controlled - Keep refrigerated'
+  'TPR-003', '2024-12-05', 'Tarapur', 'Ahmedabad',
+  1, 3, 1, 1, 'MH 12 AB 1234',
+  '["25"]', '["Pharmaceutical Products"]', 
+  22000.00, 400.00, 250.00, 500.00,
+  100.00, 1100.00, 0.00, 0.52, 0.6,
+  'paid', 'Cold Storage Facility', 24350.00, 'Temperature controlled - Keep refrigerated'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-003')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 1)
   AND EXISTS (SELECT 1 FROM companies WHERE id = 3)
   AND EXISTS (SELECT 1 FROM trucks WHERE id = 1)
   AND EXISTS (SELECT 1 FROM drivers WHERE id = 1);
 
--- Insert sample quotations
--- QUO-2024001: Electronics transport quotation
+-- Insert sample quotations (updated for new minimal structure)
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024001', '2024-12-01', 1, 'Tarapur', 'Mumbai',
-    'Full Load', 'One Way', 
-    '[{"materialName": "Electronics", "quantity": "500", "unit": "Units", "description": "Electronic components and devices"}]',
-    15000.00, 'Per Ton', '18%', 17700.00, 'Consignee', 5000.00,
-    'Payment within 30 days of delivery', 30, '2025-01-01', 1000.00,
-    'Demurrage charges apply after 24 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport',
-    'Active', 1
+  'QUO-2024001', '2024-12-01', 1, 'ABC Industries Ltd.', 'Tarapur', 'Mumbai', 15000.00,
+  '[{"to":"Mumbai","rate":15000},{"to":"Pune","rate":15500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024001')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 1);
 
--- QUO-2024002: Textile materials quotation
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024002', '2024-12-02', 2, 'Bhiwandi', 'Bangalore',
-    'Part Load', 'Round Trip', 
-    '[{"materialName": "Cotton Bales", "quantity": "100", "unit": "Bales", "description": "Raw cotton bales"}, {"materialName": "Textile Rolls", "quantity": "50", "unit": "Rolls", "description": "Finished textile rolls"}]',
-    12000.00, 'Per Ton', '18%', 14160.00, 'Consignor', 3000.00,
-    'Advance payment required', 15, '2024-12-17', 800.00,
-    'Demurrage charges apply after 12 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport. 4. Advance payment required',
-    'Active', 1
+  'QUO-2024002', '2024-12-02', 2, 'XYZ Manufacturing Pvt. Ltd.', 'Bhiwandi', 'Bangalore', 12000.00,
+  '[{"to":"Bangalore","rate":12000},{"to":"Chennai","rate":12500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024002')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 2);
 
--- QUO-2024003: Chemical materials quotation
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024003', '2024-12-03', 3, 'Tarapur', 'Surat',
-    'Full Load', 'One Way', 
-    '[{"materialName": "Chemical Dyes", "quantity": "200", "unit": "Kg", "description": "Industrial chemical dyes"}, {"materialName": "Raw Materials", "quantity": "500", "unit": "Kg", "description": "Raw chemical materials"}]',
-    18000.00, 'Per Ton', '18%', 21240.00, 'Consignee', 7000.00,
-    'Payment on delivery', 45, '2025-01-17', 1200.00,
-    'Demurrage charges apply after 48 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport. 4. Chemical handling charges extra',
-    'Active', 1
+  'QUO-2024003', '2024-12-03', 3, 'PQR Traders', 'Tarapur', 'Surat', 18000.00,
+  '[{"to":"Surat","rate":18000},{"to":"Vadodara","rate":18500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024003')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 3);
 
--- QUO-2024004: Pharmaceutical products quotation
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024004', '2024-12-04', 4, 'Bhiwandi', 'Ahmedabad',
-    'Part Load', 'One Way', 
-    '[{"materialName": "Pharmaceutical Products", "quantity": "100", "unit": "Boxes", "description": "Temperature controlled pharmaceutical products"}]',
-    25000.00, 'Per Ton', '18%', 29500.00, 'Consignee', 10000.00,
-    'Payment within 15 days of delivery', 20, '2024-12-24', 1500.00,
-    'Demurrage charges apply after 6 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport. 4. Temperature controlled transport required. 5. Special handling charges apply',
-    'Active', 1
+  'QUO-2024004', '2024-12-04', 4, 'LMN Enterprises', 'Bhiwandi', 'Ahmedabad', 25000.00,
+  '[{"to":"Ahmedabad","rate":25000},{"to":"Rajkot","rate":25500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024004')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 4);
 
--- QUO-2024005: Machinery transport quotation
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024005', '2024-12-05', 5, 'Pune', 'Delhi',
-    'Full Load', 'One Way', 
-    '[{"materialName": "Industrial Machinery", "quantity": "5", "unit": "Units", "description": "Heavy industrial machinery and equipment"}]',
-    30000.00, 'Per Trip', '18%', 35400.00, 'Consignor', 15000.00,
-    'Advance payment of 50% required', 60, '2025-02-03', 2000.00,
-    'Demurrage charges apply after 24 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport. 4. Heavy machinery handling charges extra. 5. Advance payment of 50% required',
-    'Active', 1
+  'QUO-2024005', '2024-12-05', 5, 'RST Corporation', 'Pune', 'Delhi', 30000.00,
+  '[{"to":"Delhi","rate":30000},{"to":"Noida","rate":30500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024005')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 5);
 
--- QUO-2024006: Textile finished goods quotation
 INSERT INTO quotations (
-    quotation_number, quotation_date, company_id, from_location, to_location,
-    load_type, trip_type, material_details, rate_per_ton, rate_type,
-    applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-    payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-    demurrage_remark, terms_conditions, status, created_by
+  quotation_number, quotation_date, company_id, to_user, from_location, to_location, freight_upto_8mt, destinations_json
 )
 SELECT 
-    'QUO-2024006', '2024-12-06', 6, 'Surat', 'Mumbai',
-    'Full Load', 'Round Trip', 
-    '[{"materialName": "Finished Textiles", "quantity": "1000", "unit": "Meters", "description": "Finished textile products"}, {"materialName": "Garments", "quantity": "500", "unit": "Pieces", "description": "Ready-made garments"}]',
-    14000.00, 'Per Ton', '18%', 16520.00, 'Consignee', 4000.00,
-    'Payment on delivery', 30, '2025-01-05', 900.00,
-    'Demurrage charges apply after 12 hours of unloading', 
-    '1. Goods are transported at owner risk. 2. Insurance is not included. 3. Delivery subject to availability of transport. 4. Handle with care - finished goods',
-    'Active', 1
+  'QUO-2024006', '2024-12-06', 6, 'Global Textiles Inc.', 'Surat', 'Mumbai', 14000.00,
+  '[{"to":"Mumbai","rate":14000},{"to":"Nagpur","rate":14500}]'
 WHERE NOT EXISTS (SELECT 1 FROM quotations WHERE quotation_number = 'QUO-2024006')
   AND EXISTS (SELECT 1 FROM companies WHERE id = 6);
+-- ...existing code...
+
+-- Insert sample memos
+INSERT INTO memos (memo_number, memo_date, company_id, to_company, from_company, subject, content, priority, status, memo_type, reference_number, remarks)
+SELECT 'MEMO-202501-0001', '2025-01-15', 1, 'ABC Industries Ltd.', 'Shree Dattaguru Roadlines', 'Updated Transportation Schedule', 
+'Dear Sir/Madam,
+
+This is to inform you about the updated transportation schedule for the upcoming week. Due to increased demand and route optimization, we have revised our delivery schedules.
+
+Effective from January 20th, 2025:
+- Morning pickups: 8:00 AM - 10:00 AM
+- Afternoon deliveries: 2:00 PM - 5:00 PM
+- Express deliveries: Available on demand
+
+Please coordinate with our dispatch team for any special requirements.
+
+Thank you for your continued trust in our services.
+
+Best regards,
+Shree Dattaguru Roadlines Team', 'medium', 'completed', 'external', 'REF-2025-001', 'Schedule update memo sent to all major clients'
+WHERE NOT EXISTS (SELECT 1 FROM memos WHERE memo_number = 'MEMO-202501-0001');
+
+INSERT INTO memos (memo_number, memo_date, company_id, to_company, from_company, subject, content, priority, status, memo_type, reference_number, remarks)
+SELECT 'MEMO-202501-0002', '2025-01-20', 2, 'XYZ Manufacturing Pvt. Ltd.', 'Shree Dattaguru Roadlines', 'Safety Protocol Update', 
+'Dear Valued Partner,
+
+We are implementing enhanced safety protocols for all transportation operations to ensure the highest standards of security for your consignments.
+
+New Safety Measures:
+1. GPS tracking for all vehicles
+2. Regular driver training programs
+3. Enhanced vehicle maintenance schedules
+4. Emergency response protocols
+5. Insurance coverage updates
+
+These measures will be effective from February 1st, 2025.
+
+We appreciate your cooperation in maintaining these safety standards.
+
+Regards,
+Safety Team
+Shree Dattaguru Roadlines', 'high', 'pending', 'external', 'SAFETY-2025-002', 'Important safety update for manufacturing clients'
+WHERE NOT EXISTS (SELECT 1 FROM memos WHERE memo_number = 'MEMO-202501-0002');
+
+INSERT INTO memos (memo_number, memo_date, company_id, to_company, from_company, subject, content, priority, status, memo_type, reference_number, remarks)
+SELECT 'MEMO-202501-0003', '2025-01-22', NULL, 'All Staff Members', 'Management', 'Monthly Team Meeting', 
+'All Team Members,
+
+Monthly team meeting is scheduled for this Friday at 4:00 PM in the conference room.
+
+Agenda:
+- Monthly performance review
+- New client acquisitions
+- Process improvements
+- Safety protocol updates
+- Upcoming holiday schedule
+
+Please confirm your attendance by Thursday evening.
+
+Best regards,
+Management Team', 'medium', 'in_progress', 'internal', 'MEET-2025-003', 'Internal staff meeting memo'
+WHERE NOT EXISTS (SELECT 1 FROM memos WHERE memo_number = 'MEMO-202501-0003');
+
+INSERT INTO memos (memo_number, memo_date, company_id, to_company, from_company, subject, content, priority, status, memo_type, reference_number, remarks)
+SELECT 'MEMO-202501-0004', '2025-01-25', 3, 'PQR Traders', 'Shree Dattaguru Roadlines', 'Service Rate Revision', 
+'Dear Sir/Madam,
+
+This memo serves to inform you about the revised transportation rates effective from February 15th, 2025.
+
+Rate Changes:
+- Local delivery: ₹50 per km (previously ₹45)
+- Interstate delivery: ₹35 per km (previously ₹32)
+- Express delivery: 25% surcharge on regular rates
+- Bulk shipments: 15% discount for orders above 10 tons
+
+These revisions are due to increased fuel costs and enhanced service quality.
+
+For any queries, please contact our billing department.
+
+Thank you for your understanding.
+
+Best regards,
+Billing Department
+Shree Dattaguru Roadlines', 'high', 'completed', 'external', 'RATE-2025-004', 'Rate revision notification to traders'
+WHERE NOT EXISTS (SELECT 1 FROM memos WHERE memo_number = 'MEMO-202501-0004');
+
+INSERT INTO memos (memo_number, memo_date, company_id, to_company, from_company, subject, content, priority, status, memo_type, reference_number, remarks)
+SELECT 'MEMO-202501-0005', '2025-01-28', NULL, 'IT Department', 'Operations Manager', 'System Maintenance Schedule', 
+'IT Department,
+
+Please schedule system maintenance for our logistics management system.
+
+Maintenance Requirements:
+- Database backup and optimization
+- Server security updates
+- Application performance tuning
+- User access review
+- Backup system testing
+
+Preferred maintenance window: Sunday 2:00 AM - 6:00 AM
+
+Please coordinate with operations team before scheduling.
+
+Thanks,
+Operations Manager', 'low', 'draft', 'internal', 'SYS-2025-005', 'Internal IT maintenance request'
+WHERE NOT EXISTS (SELECT 1 FROM memos WHERE memo_number = 'MEMO-202501-0005');
 
 /*
 -- Verify admin user exists
 SELECT 'Admin user check:' as verification, 
-	   CASE WHEN EXISTS(SELECT 1 FROM users WHERE email = 'admin@test.com' AND role = 'admin')
-			THEN 'PRESENT' ELSE 'MISSING' END as status;
+     CASE WHEN EXISTS(SELECT 1 FROM users WHERE email = 'admin@test.com' AND role = 'admin')
+      THEN 'PRESENT' ELSE 'MISSING' END as status;
 
 -- Verify companies (should be 6)
 SELECT 'Companies check:' as verification,
-	   CASE WHEN (SELECT COUNT(*) FROM companies) >= 6
-			THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM companies) || ' total)' 
-			ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM companies) END as status;
+     CASE WHEN (SELECT COUNT(*) FROM companies) >= 6
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM companies) || ' total)' 
+      ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM companies) END as status;
 
 -- Verify trucks (should be 4)
 SELECT 'Trucks check:' as verification,
-	   CASE WHEN (SELECT COUNT(*) FROM trucks) >= 4
-			THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM trucks) || ' total)'
-			ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM trucks) END as status;
+     CASE WHEN (SELECT COUNT(*) FROM trucks) >= 4
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM trucks) || ' total)'
+      ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM trucks) END as status;
 
 -- Verify drivers (should be 4)
 SELECT 'Drivers check:' as verification,
-	   CASE WHEN (SELECT COUNT(*) FROM drivers) >= 4
-			THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM drivers) || ' total)'
-			ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM drivers) END as status;
+     CASE WHEN (SELECT COUNT(*) FROM drivers) >= 4
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM drivers) || ' total)'
+      ELSE 'MISSING - Found ' || (SELECT COUNT(*) FROM drivers) END as status;
 
 -- Verify lorry receipts (should be 6)
 SELECT 'Lorry Receipts check:' as verification,
-	   CASE WHEN (SELECT COUNT(*) FROM lorry_receipts WHERE cn_number IN ('TPR-001', 'BWD-001', 'TPR-002', 'BWD-002', 'TPR-003')) >= 5
-			THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM lorry_receipts) || ' total)'
-			ELSE 'MISSING - Expected 5+, Found ' || (SELECT COUNT(*) FROM lorry_receipts WHERE cn_number IN ('TPR-001', 'BWD-001', 'TPR-002', 'BWD-002', 'TPR-003')) END as status;
+     CASE WHEN (SELECT COUNT(*) FROM lorry_receipts WHERE cn_number IN ('TPR-001', 'BWD-001', 'TPR-002', 'BWD-002', 'TPR-003')) >= 5
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM lorry_receipts) || ' total)'
+      ELSE 'MISSING - Expected 5+, Found ' || (SELECT COUNT(*) FROM lorry_receipts WHERE cn_number IN ('TPR-001', 'BWD-001', 'TPR-002', 'BWD-002', 'TPR-003')) END as status;
 
 -- Verify quotations (should be 6)
 SELECT 'Quotations check:' as verification,
-	   CASE WHEN (SELECT COUNT(*) FROM quotations WHERE quotation_number IN ('QUO-2024001', 'QUO-2024002', 'QUO-2024003', 'QUO-2024004', 'QUO-2024005', 'QUO-2024006')) >= 6
-			THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM quotations) || ' total)'
-			ELSE 'MISSING - Expected 6+, Found ' || (SELECT COUNT(*) FROM quotations WHERE quotation_number IN ('QUO-2024001', 'QUO-2024002', 'QUO-2024003', 'QUO-2024004', 'QUO-2024005', 'QUO-2024006')) END as status;
+     CASE WHEN (SELECT COUNT(*) FROM quotations WHERE quotation_number IN ('QUO-2024001', 'QUO-2024002', 'QUO-2024003', 'QUO-2024004', 'QUO-2024005', 'QUO-2024006')) >= 6
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM quotations) || ' total)'
+      ELSE 'MISSING - Expected 6+, Found ' || (SELECT COUNT(*) FROM quotations WHERE quotation_number IN ('QUO-2024001', 'QUO-2024002', 'QUO-2024003', 'QUO-2024004', 'QUO-2024005', 'QUO-2024006')) END as status;
+
+-- Verify memos (should be 5)
+SELECT 'Memos check:' as verification,
+     CASE WHEN (SELECT COUNT(*) FROM memos WHERE memo_number IN ('MEMO-202501-0001', 'MEMO-202501-0002', 'MEMO-202501-0003', 'MEMO-202501-0004', 'MEMO-202501-0005')) >= 5
+      THEN 'ALL PRESENT (' || (SELECT COUNT(*) FROM memos) || ' total)'
+      ELSE 'MISSING - Expected 5+, Found ' || (SELECT COUNT(*) FROM memos WHERE memo_number IN ('MEMO-202501-0001', 'MEMO-202501-0002', 'MEMO-202501-0003', 'MEMO-202501-0004', 'MEMO-202501-0005')) END as status;
 
 -- Overall summary
 SELECT 'SEEDER SUMMARY:' as verification, 
-	   'Users: ' || (SELECT COUNT(*) FROM users) || 
-	   ', Companies: ' || (SELECT COUNT(*) FROM companies) ||
-	   ', Trucks: ' || (SELECT COUNT(*) FROM trucks) ||
-	   ', Drivers: ' || (SELECT COUNT(*) FROM drivers) ||
-	   ', Lorry Receipts: ' || (SELECT COUNT(*) FROM lorry_receipts) ||
-	   ', Quotations: ' || (SELECT COUNT(*) FROM quotations) as status;
+     'Users: ' || (SELECT COUNT(*) FROM users) || 
+     ', Companies: ' || (SELECT COUNT(*) FROM companies) ||
+     ', Trucks: ' || (SELECT COUNT(*) FROM trucks) ||
+     ', Drivers: ' || (SELECT COUNT(*) FROM drivers) ||
+     ', Lorry Receipts: ' || (SELECT COUNT(*) FROM lorry_receipts) ||
+     ', Quotations: ' || (SELECT COUNT(*) FROM quotations) ||
+     ', Memos: ' || (SELECT COUNT(*) FROM memos) as status;
 */

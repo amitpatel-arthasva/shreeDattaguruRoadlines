@@ -2,6 +2,169 @@ import apiService from './apiService.js';
 import { generateQuotationPdf } from './pdfService.js';
 
 class QuotationService {
+  // Fill dummy quotation data for testing
+  async fillDummyQuotation() {
+    try {
+      // Ensure dummy company exists and get its ID
+      const companyName = 'Dummy Company';
+      const companyLocation = 'Dummy Location';
+      let companyId;
+      const companies = await apiService.query('SELECT * FROM companies WHERE name = ?', [companyName]);
+      if (companies && companies.length > 0) {
+        companyId = companies[0].id;
+      } else {
+        const insertResult = await apiService.query(
+          'INSERT INTO companies (name, address, city, is_active) VALUES (?, ?, ?, 1)',
+          [companyName, companyLocation, companyLocation]
+        );
+        companyId = insertResult.lastInsertRowid;
+      }
+      const dummyData = {
+        quotationNumber: 'DUMMY-001',
+        quotationDate: new Date().toISOString().split('T')[0],
+        quoteToCompany: {
+          companyName,
+          companyLocation
+        },
+        companyId,
+        toUser: 'Dummy User',
+        destinations: [
+          { destination: 'Dummy Destination 1', freight: 100 },
+          { destination: 'Dummy Destination 2', freight: 200 }
+        ]
+      };
+      const result = await this.createQuotation(dummyData);
+      if (result.success) {
+        console.log('Dummy quotation created:', result.data);
+        return { success: true, message: 'Dummy quotation created', data: result.data };
+      } else {
+        console.error('Failed to create dummy quotation:', result.error);
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      console.error('Error in fillDummyQuotation:', err);
+      return { success: false, error: err.message };
+    }
+  }
+  // Update quotation by id
+  async updateQuotation(quotationId, quotationData) {
+    try {
+      // Prepare destinations_json from quotationData.destinations (array of {destination, freight})
+      let destinationsJson = '[]';
+      if (Array.isArray(quotationData.destinations) && quotationData.destinations.length > 0) {
+        destinationsJson = JSON.stringify(
+          quotationData.destinations.map(d => ({
+            destination: d.destination || d.to || '',
+            freight: d.freight || d.rate || 0
+          }))
+        );
+      }
+
+      // Ensure companyId is set and update company details if needed
+      let companyId = quotationData.companyId;
+      let companyName = quotationData.companyName;
+      let companyLocation = quotationData.location || '';
+      let companyCity = quotationData.city || '';
+      let companyAddress = quotationData.address || companyLocation || '';
+
+      // Fetch the existing quotation for fallback values
+      const existingQuotationResp = await this.getQuotationById(quotationId);
+      const existingQuotation = (existingQuotationResp && existingQuotationResp.success && existingQuotationResp.data.quotation) ? existingQuotationResp.data.quotation : {};
+
+      // If companyId is not provided, get it from the existing quotation
+      if (!companyId) {
+        companyId = existingQuotation.companyId;
+      }
+
+      // If still not found, try to find company by name
+      if (!companyId && companyName) {
+        const inputName = companyName.trim().toLowerCase();
+        const companies = await apiService.query('SELECT * FROM companies');
+        let foundCompany = null;
+        for (const c of companies) {
+          if ((c.name || '').trim().toLowerCase() === inputName) {
+            foundCompany = c;
+            break;
+          }
+        }
+        if (foundCompany) {
+          companyId = foundCompany.id;
+          // If location/city/address changed, update company record
+          const updateFields = [];
+          const updateValues = [];
+          if (companyLocation && companyLocation !== foundCompany.address) {
+            updateFields.push('address = ?');
+            updateValues.push(companyLocation);
+          }
+          if (companyCity && companyCity !== foundCompany.city) {
+            updateFields.push('city = ?');
+            updateValues.push(companyCity);
+          }
+          if (updateFields.length > 0) {
+            await apiService.query(
+              `UPDATE companies SET ${updateFields.join(', ')} WHERE id = ?`,
+              [...updateValues, companyId]
+            );
+          }
+        } else {
+          // Create new company if not found
+          const insertResult = await apiService.query(
+            'INSERT INTO companies (name, address, city, is_active) VALUES (?, ?, ?, 1)',
+            [companyName, companyLocation, companyCity]
+          );
+          companyId = insertResult.lastInsertRowid;
+        }
+      }
+      if (!companyId) {
+        throw new Error('Company ID could not be determined.');
+      }
+
+      // Ensure required fields are set, fallback to existing quotation
+      const finalCompanyName = companyName || existingQuotation.companyName || '';
+      const finalCompanyLocation = companyLocation || existingQuotation.location || '';
+      const finalToUser = quotationData.toUser || existingQuotation.toUser || '';
+      const finalQuotationNumber = quotationData.quotationNumber || existingQuotation.quotationNumber || '';
+      const finalQuotationDate = quotationData.quotationDate || existingQuotation.quotationDate || new Date().toISOString().split('T')[0];
+
+      const sql = `UPDATE quotations SET quotation_number = ?, quotation_date = ?, company_id = ?, q_company_name = ?, company_location = ?, to_user = ?, destinations_json = ?, updated_at = ? WHERE id = ?`;
+      const values = [
+        finalQuotationNumber,
+        finalQuotationDate,
+        companyId,
+        finalCompanyName,
+        finalCompanyLocation,
+        finalToUser,
+        destinationsJson,
+        new Date().toISOString(),
+        quotationId
+      ];
+      console.log('[updateQuotation] SQL:', sql);
+      console.log('[updateQuotation] Values:', values);
+      const result = await apiService.query(sql, values);
+      console.log('[updateQuotation] SQL result:', result);
+      if (result && result.changes > 0) {
+        // Get the updated quotation with full details
+        const updatedQuotation = await this.getQuotationById(quotationId);
+        return {
+          success: true,
+          data: updatedQuotation.data.quotation,
+          message: 'Quotation updated successfully',
+          shouldRefresh: true
+        };
+      } else {
+        return {
+          success: false,
+          error: 'No rows updated. Quotation not found or no changes.'
+        };
+      }
+    } catch (error) {
+      console.error('Error in updateQuotation:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update quotation'
+      };
+    }
+  }
   // Get all quotations with pagination and filters
   async getQuotations(filters = {}) {
     try {
@@ -10,14 +173,13 @@ class QuotationService {
       
       const sql = `
         SELECT q.*, 
+               q.q_company_name as quotation_company_name,
                c.name as company_name, c.address as company_address,
                c.city as company_city, c.state as company_state,
                c.pin_code as company_pin_code, c.gstin as company_gstin,
-               c.pan as company_pan,
-               u.name as created_by_name
+               c.pan as company_pan
         FROM quotations q
         LEFT JOIN companies c ON q.company_id = c.id
-        LEFT JOIN users u ON q.created_by = u.id
         WHERE 1=1
       `;
       
@@ -57,7 +219,7 @@ class QuotationService {
       const quotations = await apiService.query(finalSql, finalParams);
       
       // Transform data to match frontend expectations
-      const transformedQuotations = quotations.map(q => this.transformQuotationData(q));
+    const transformedQuotations = quotations.map(q => this.transformQuotationData(q));
 
       return {
         success: true,
@@ -79,14 +241,14 @@ class QuotationService {
     try {
       const sql = `
         SELECT q.*, 
+               q.q_company_name as quotation_company_name,
+               q.company_location as quotation_company_location,
                c.name as company_name, c.address as company_address,
                c.city as company_city, c.state as company_state,
                c.pin_code as company_pin_code, c.gstin as company_gstin,
-               c.pan as company_pan,
-               u.name as created_by_name
+               c.pan as company_pan
         FROM quotations q
         LEFT JOIN companies c ON q.company_id = c.id
-        LEFT JOIN users u ON q.created_by = u.id
         WHERE q.id = ?
       `;
       
@@ -98,7 +260,6 @@ class QuotationService {
 
       const quotation = result[0];
       const transformedQuotation = this.transformQuotationData(quotation);
-
       return {
         success: true,
         data: {
@@ -114,157 +275,80 @@ class QuotationService {
   // Create new quotation
   async createQuotation(quotationData) {
     try {
-      // Generate quotation number
-      const quotationNumber = await this.generateQuotationNumber();
-      
-      // Calculate expiry date if validity_days is provided
-      let expiryDate = null;
-      if (quotationData.quotationValidity?.validUpTo?.type === 'Days') {
-        const validityDays = quotationData.quotationValidity.validUpTo.value || 30;
-        expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + validityDays);
-        expiryDate = expiryDate.toISOString().split('T')[0];
-      } else if (quotationData.quotationValidity?.validUpTo?.type === 'Date') {
-        expiryDate = quotationData.quotationValidity.validUpTo.value;
+      console.log('[createQuotation] Received data:', JSON.stringify(quotationData, null, 2));
+      // Use provided quotation number or generate one
+      let quotationNumber = (quotationData.quotationNumber && quotationData.quotationNumber.trim()) ? quotationData.quotationNumber.trim() : await this.generateQuotationNumber();
+
+      // Company logic: check if company exists by name, create if not
+      let companyName = quotationData.quoteToCompany?.companyName?.trim();
+      let companyLocation = quotationData.quoteToCompany?.companyLocation?.trim();
+      let companyId = quotationData.quoteToCompany?.companyId;
+      if (!companyName) throw new Error('Company name is required');
+
+      // Try to find company by name
+      let company = null;
+  const companies = await apiService.query('SELECT * FROM companies WHERE name = ?', [companyName]);
+      if (companies && companies.length > 0) {
+        company = companies[0];
+        companyId = company.id;
+        if (!companyLocation) companyLocation = company.address || company.city || '';
+      } else {
+        // Create new company
+        const insertResult = await apiService.query(
+          'INSERT INTO companies (name, address, city, is_active) VALUES (?, ?, ?, 1)',
+          [companyName, companyLocation || '', companyLocation || '']
+        );
+        companyId = insertResult.lastInsertRowid;
       }
 
-      // Prepare material details as JSON
-      const materialDetails = quotationData.materialDetails ? 
-        JSON.stringify(quotationData.materialDetails) : null;
+      // Prepare destinations_json from quotationData.destinations (array of {destination, freight})
+      let destinationsJson = '[]';
+      if (Array.isArray(quotationData.destinations) && quotationData.destinations.length > 0) {
+        destinationsJson = JSON.stringify(
+          quotationData.destinations.map(d => ({
+            destination: d.destination || d.to || '',
+            freight: d.freight || d.rate || 0
+          }))
+        );
+      }
 
-      // Calculate total freight with GST
-      const rateValue = parseFloat(quotationData.freightBreakup?.rate?.value || 0);
-      const gstPercentage = parseFloat(quotationData.freightBreakup?.applicableGST?.replace('%', '') || 18);
-      const totalFreightWithGst = rateValue * (1 + gstPercentage / 100);
-
+      // Insert into quotations table with new columns
       const sql = `
         INSERT INTO quotations (
-          quotation_number, quotation_date, company_id, from_location, to_location,
-          load_type, trip_type, material_details, rate_per_ton, rate_type,
-          applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-          payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-          demurrage_remark, terms_conditions, status, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          quotation_number, quotation_date, company_id, q_company_name, company_location, to_user, destinations_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-
       const params = [
         quotationNumber,
         quotationData.quotationDate || new Date().toISOString().split('T')[0],
-        quotationData.quoteToCompany?.companyId,
-        quotationData.tripDetails?.from,
-        quotationData.tripDetails?.to,
-        quotationData.tripDetails?.fullOrPartLoad || 'Full Load',
-        quotationData.tripDetails?.tripType || 'One Way',
-        materialDetails,
-        rateValue,
-        quotationData.freightBreakup?.rate?.type || 'Per Ton',
-        quotationData.freightBreakup?.applicableGST || '18%',
-        totalFreightWithGst,
-        quotationData.paymentTerms?.payBy || 'Consignee',
-        parseFloat(quotationData.paymentTerms?.driverCashRequired || 0),
-        quotationData.paymentTerms?.paymentRemark,
-        quotationData.quotationValidity?.validUpTo?.value || 30,
-        expiryDate,
-        parseFloat(quotationData.demurrageDetails?.demurrageRatePerDay || 0),
-        quotationData.demurrageDetails?.demurrageRemark,
-        quotationData.termsAndConditions,
-        'Active',
-        1 // created_by - assuming user ID 1 for now
+        companyId,
+        companyName,
+        companyLocation || '',
+        quotationData.toUser || '',
+        destinationsJson,
+        new Date().toISOString(),
+        new Date().toISOString()
       ];
 
       const result = await apiService.query(sql, params);
-      
+
+      console.log('[createQuotation] SQL:', sql);
+      console.log('[createQuotation] Params:', params);
+      console.log('[createQuotation] SQL result:', result);
       if (result && result.changes > 0) {
         // Get the created quotation with full details
         const newQuotation = await this.getQuotationById(result.lastInsertRowid);
         return {
           success: true,
           data: newQuotation.data.quotation,
-          message: 'Quotation created successfully'
+          message: 'Quotation created successfully',
+          shouldRefresh: true // Signal to frontend to refresh list
         };
       } else {
         throw new Error('Failed to create quotation');
       }
     } catch (error) {
       console.error('Error in createQuotation:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  // Update quotation
-  async updateQuotation(id, quotationData) {
-    try {
-      // Calculate expiry date if validity_days is provided
-      let expiryDate = null;
-      if (quotationData.quotationValidity?.validUpTo?.type === 'Days') {
-        const validityDays = quotationData.quotationValidity.validUpTo.value || 30;
-        expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + validityDays);
-        expiryDate = expiryDate.toISOString().split('T')[0];
-      } else if (quotationData.quotationValidity?.validUpTo?.type === 'Date') {
-        expiryDate = quotationData.quotationValidity.validUpTo.value;
-      }
-
-      // Prepare material details as JSON
-      const materialDetails = quotationData.materialDetails ? 
-        JSON.stringify(quotationData.materialDetails) : null;
-
-      // Calculate total freight with GST
-      const rateValue = parseFloat(quotationData.freightBreakup?.rate?.value || 0);
-      const gstPercentage = parseFloat(quotationData.freightBreakup?.applicableGST?.replace('%', '') || 18);
-      const totalFreightWithGst = rateValue * (1 + gstPercentage / 100);
-
-      const sql = `
-        UPDATE quotations SET 
-          company_id = ?, from_location = ?, to_location = ?, load_type = ?,
-          trip_type = ?, material_details = ?, rate_per_ton = ?, rate_type = ?,
-          applicable_gst = ?, total_freight_with_gst = ?, pay_by = ?,
-          driver_cash_required = ?, payment_remark = ?, validity_days = ?,
-          expiry_date = ?, demurrage_rate_per_day = ?, demurrage_remark = ?,
-          terms_conditions = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `;
-
-      const params = [
-        quotationData.quoteToCompany?.companyId,
-        quotationData.tripDetails?.from,
-        quotationData.tripDetails?.to,
-        quotationData.tripDetails?.fullOrPartLoad || 'Full Load',
-        quotationData.tripDetails?.tripType || 'One Way',
-        materialDetails,
-        rateValue,
-        quotationData.freightBreakup?.rate?.type || 'Per Ton',
-        quotationData.freightBreakup?.applicableGST || '18%',
-        totalFreightWithGst,
-        quotationData.paymentTerms?.payBy || 'Consignee',
-        parseFloat(quotationData.paymentTerms?.driverCashRequired || 0),
-        quotationData.paymentTerms?.paymentRemark,
-        quotationData.quotationValidity?.validUpTo?.value || 30,
-        expiryDate,
-        parseFloat(quotationData.demurrageDetails?.demurrageRatePerDay || 0),
-        quotationData.demurrageDetails?.demurrageRemark,
-        quotationData.termsAndConditions,
-        id
-      ];
-      
-      const result = await apiService.query(sql, params);
-      
-      if (result && result.changes > 0) {
-        // Get the updated quotation with full details
-        const updatedQuotation = await this.getQuotationById(id);
-        return {
-          success: true,
-          data: updatedQuotation.data.quotation,
-          message: 'Quotation updated successfully'
-        };
-      } else {
-        throw new Error('Failed to update quotation');
-      }
-    } catch (error) {
-      console.error('Error in updateQuotation:', error);
       return {
         success: false,
         error: error.message
@@ -295,22 +379,19 @@ class QuotationService {
     }
   }
 
-  // Generate quotation PDF
+  // Generate quotation PDF using the actual React view HTML for pixel-perfect match
   async generateQuotationPdf(quotationId) {
     try {
       const response = await this.getQuotationById(quotationId);
       if (!response.success) {
         throw new Error('Failed to fetch quotation data');
       }
-
       const quotation = response.data.quotation;
-      
-      // Check if we're in Electron environment
+      // Always use the backend template for PDF generation (matches your sample)
       if (window.electronAPI && window.electronAPI.generateQuotationPdf) {
-        // Use Electron IPC for better user experience (save dialog + open option)
         return await window.electronAPI.generateQuotationPdf(quotation);
       } else {
-        // Fallback to web-based PDF generation
+        // Fallback to template-based PDF generation in browser
         return await generateQuotationPdf(quotation);
       }
     } catch (error) {
@@ -378,86 +459,30 @@ class QuotationService {
 
   // Transform database data to frontend format
   transformQuotationData(dbQuotation) {
-    // Parse material details from JSON
-    let materialDetails = [];
-    try {
-      if (dbQuotation.material_details) {
-        materialDetails = JSON.parse(dbQuotation.material_details);
+    // Only use fields present in the minimal quotations schema
+    let destinations = [];
+    if (dbQuotation.destinations_json) {
+      try {
+        destinations = JSON.parse(dbQuotation.destinations_json);
+      } catch (e) {
+        destinations = [];
       }
-    } catch (error) {
-      console.error('Error parsing material details:', error);
     }
-
     return {
       _id: dbQuotation.id,
       quotationNumber: dbQuotation.quotation_number,
       quotationDate: dbQuotation.quotation_date,
       createdAt: dbQuotation.created_at,
       updatedAt: dbQuotation.updated_at,
-      
-      // Company details
-      quoteToCompany: {
-        companyId: dbQuotation.company_id,
-        companyName: dbQuotation.company_name,
-        address: dbQuotation.company_address,
-        city: dbQuotation.company_city,
-        state: dbQuotation.company_state,
-        pinCode: dbQuotation.company_pin_code,
-        gstNumber: dbQuotation.company_gstin,
-        panNumber: dbQuotation.company_pan
-      },
-      
-      // Trip details
-      tripDetails: {
-        from: dbQuotation.from_location,
-        to: dbQuotation.to_location,
-        fullOrPartLoad: dbQuotation.load_type,
-        tripType: dbQuotation.trip_type
-      },
-      
-      // Material details
-      materialDetails: materialDetails,
-      
-      // Freight breakup
-      freightBreakup: {
-        rate: {
-          value: dbQuotation.rate_per_ton,
-          type: dbQuotation.rate_type
-        },
-        applicableGST: dbQuotation.applicable_gst,
-        totalFreightWithGst: dbQuotation.total_freight_with_gst
-      },
-      
-      // Payment terms
-      paymentTerms: {
-        payBy: dbQuotation.pay_by,
-        driverCashRequired: dbQuotation.driver_cash_required,
-        paymentRemark: dbQuotation.payment_remark
-      },
-      
-      // Quotation validity
-      quotationValidity: {
-        validUpTo: {
-          type: dbQuotation.expiry_date ? 'Date' : 'Days',
-          value: dbQuotation.expiry_date || dbQuotation.validity_days
-        },
-        expiryDate: dbQuotation.expiry_date
-      },
-      
-      // Demurrage details
-      demurrageDetails: {
-        demurrageRatePerDay: dbQuotation.demurrage_rate_per_day,
-        demurrageRemark: dbQuotation.demurrage_remark
-      },
-      
-      // Terms and conditions
-      termsAndConditions: dbQuotation.terms_conditions,
-      
-      // Status
-      status: dbQuotation.status,
-      
-      // Created by
-      createdBy: dbQuotation.created_by_name
+      // Ensure 'date' is always mapped to quotation_date for frontend
+      date: dbQuotation.quotation_date || dbQuotation.date || dbQuotation.created_at,
+      companyId: dbQuotation.company_id,
+      companyName: dbQuotation.quotation_company_name || dbQuotation.company_name,
+      location: dbQuotation.company_location || dbQuotation.from_location,
+      toUser: dbQuotation.to_user,
+      kindAtten: dbQuotation.to_user,
+      destinations: destinations,
+      freightUpto8mt: dbQuotation.freight_upto_8mt
     };
   }
 }

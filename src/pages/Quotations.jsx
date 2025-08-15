@@ -8,6 +8,7 @@ import {
   faEye,
   faFileAlt,
   faCalendarAlt,
+  faBuilding,
   faSpinner,
   faDownload
 } from '@fortawesome/free-solid-svg-icons';
@@ -133,62 +134,27 @@ const Quotations = () => {
   const handleDownloadPdf = async (quotationId, companyName) => {
     try {
       setIsGeneratingPdf(prev => ({ ...prev, [quotationId]: true }));
-      
       const result = await quotationService.generateQuotationPdf(quotationId);
-      
-      // Check if we're in Electron environment and got a success/failure response
-      if (result && typeof result === 'object' && 'success' in result) {
-        // Electron IPC response - dialog and file saving is handled by main process
-        if (result.success) {
-          toast.success('PDF generated and saved successfully!');
-        } else {
-          toast.error(result.message || 'Failed to generate PDF. Please try again.');
-        }
+      // If running in Electron, the backend already handles the save dialog and open
+      if (window.electronAPI && result && result.success && result.filePath) {
+        toast.success('PDF downloaded and saved successfully!');
         return;
       }
-      
-      // Web environment - result is a blob, handle download manually
-      const pdfBlob = result;
-      
-      // Create download link
+      // Fallback for web: treat as Blob
+      const pdfBlob = result instanceof Blob ? result : new Blob([result], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      
-      // Generate filename similar to QuotationViewModal
-      const shortId = String(quotationId).slice(-6).toUpperCase(); // Convert to string first, then get last 6 characters
+      const shortId = String(quotationId).slice(-6).toUpperCase();
       const quotationNumber = `QUO-${shortId}`;
       const cleanCompanyName = (companyName || 'Unknown').replace(/[^a-zA-Z0-9]/g, '_');
       const filename = `${quotationNumber}_${cleanCompanyName}.pdf`;
-      
       link.download = filename;
-      
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      // Show success message with "Open Now" option
-      toast.success(
-        <div className="flex items-center justify-between">
-          <span>PDF downloaded successfully</span>
-          <button
-            onClick={() => {
-              // Create a new blob URL for opening
-              const openUrl = window.URL.createObjectURL(pdfBlob);
-              window.open(openUrl, '_blank');
-              // Clean up the URL after a delay
-              setTimeout(() => window.URL.revokeObjectURL(openUrl), 1000);
-            }}
-            className="ml-4 px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm rounded hover:from-orange-500 hover:to-red-500 transition-colors"
-          >
-            Open Now
-          </button>
-        </div>,
-        { duration: 5000 } // Show for 5 seconds to give time to click "Open Now"
-      );
+      toast.success('PDF downloaded successfully!');
     } catch (error) {
       console.error('Error downloading PDF:', error);
       toast.error('Failed to download PDF. Please try again.');
@@ -201,19 +167,32 @@ const Quotations = () => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-IN');
   };
-
-  // Helper function to check if quotation is expired
-  const isQuotationExpired = (quotation) => {
-    if (!quotation.quotationValidity?.expiryDate) {
-      return false;
-    }
-    
-    const expiryDate = new Date(quotation.quotationValidity.expiryDate);
-    const today = new Date();
-    
-    return expiryDate < today;
-  };
   
+  // Commented out to resolve linter warnings - these functions may be used for future status display features
+  // const getStatusColor = (quotation) => {
+  //   const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
+  //   const today = new Date();
+  //   
+  //   if (expiryDate < today) {
+  //     return 'text-red-600 bg-red-100';
+  //   } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) { // Within 7 days
+  //     return 'text-orange-600 bg-orange-100';
+  //   }
+  //   return 'text-primary-400 bg-primary-50';
+  // };
+
+  // const getStatusText = (quotation) => {
+  //   const expiryDate = new Date(quotation.quotationValidity?.expiryDate);
+  //   const today = new Date();
+  //   
+  //   if (expiryDate < today) {
+  //     return 'Expired';
+  //   } else if (expiryDate - today < 7 * 24 * 60 * 60 * 1000) {
+  //     return 'Expiring Soon';
+  //   }
+  //   return 'Active';
+  // };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -253,7 +232,7 @@ const Quotations = () => {
         </div>
       ) : (
         <>
-          {/* Quotations Content */}
+          {/* Quotations Layout */}
           {quotations.length === 0 ? (
             <div className="text-center py-12 flex flex-col items-center">
               <FontAwesomeIcon icon={faFileAlt} className="text-6xl text-gray-300 mb-4" />
@@ -277,16 +256,7 @@ const Quotations = () => {
                 {quotations.slice(0, 3).map((quotation) => (
                   <div key={quotation._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
                     <div className="p-6">
-                      {/* Status Badge and Action Buttons */}
-                      <div className="flex justify-between items-start mb-4">
-                        {/* Status Badge - Only show for expired quotations */}
-                        <div className="flex-1">
-                          {isQuotationExpired(quotation) && (
-                            <span className="px-3 py-1 rounded-full text-xs font-medium text-red-600 bg-red-100">
-                              Expired
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex justify-end items-end mb-1">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleViewQuotation(quotation._id)}
@@ -298,7 +268,7 @@ const Quotations = () => {
                           <button
                             onClick={() => handleDownloadPdf(quotation._id, quotation.quoteToCompany?.companyName)}
                             disabled={isGeneratingPdf[quotation._id]}
-                            className="text-green-600 hover:text-green-700 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-green-600 hover:text-green-800 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title={isGeneratingPdf[quotation._id] ? "Generating PDF..." : "Download PDF"}
                           >
                             <FontAwesomeIcon 
@@ -323,44 +293,51 @@ const Quotations = () => {
                         </div>
                       </div>
 
-                      {/* Quote Number */}
+                      {/* Company Info */}
                       <div className="mb-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                          <FontAwesomeIcon icon={faFileAlt} className="text-primary-400" />
-                          Quote No: {quotation.quotationNumber}
+                          <FontAwesomeIcon icon={faBuilding} className="text-primary-400" />
+                          {quotation.companyName || 'Unknown Company'}
                         </h3>
                       </div>
 
-                      {/* Company Info */}
+                      {/* Trip Info */}
                       <div className="mb-4">
-                        <div className="mb-2">
-                          <p className="text-sm text-gray-600 mb-1">
-                            <strong>Company:</strong> {quotation.quoteToCompany?.companyName || 'N/A'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {quotation.quoteToCompany?.companyAddress || quotation.quoteToCompany?.city || ''}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            <strong>From:</strong> {quotation.tripDetails?.from || 'N/A'} → <strong>To:</strong> {quotation.tripDetails?.to || 'N/A'}
-                          </p>
-                        </div>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>From:</strong> {quotation.tripDetails?.from || 'N/A'}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>To:</strong> {quotation.tripDetails?.to || 'N/A'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Load Type:</strong> {quotation.tripDetails?.fullOrPartLoad || 'N/A'}
+                        </p>
                       </div>
 
-                      {/* Date */}
-                      <div className="text-sm text-gray-500 border-t pt-3">
-                        <div className="flex justify-between items-center">
-                          <span className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
-                            Created: {formatDate(quotation.createdAt)}
+                      {/* Material Info */}
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-600">
+                          <strong>Materials:</strong> {quotation.materialDetails?.length || 0} item(s)
+                        </p>
+                        {quotation.materialDetails?.[0] && (
+                          <p className="text-sm text-gray-500">
+                            {quotation.materialDetails[0].materialName}
+                            {quotation.materialDetails.length > 1 && ` +${quotation.materialDetails.length - 1} more`}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Dates */}
+                      <div className="flex justify-between items-center text-sm text-gray-500 border-t pt-3">
+                        <span className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
+                          Created: {formatDate(quotation.quotationDate || quotation.date || quotation.createdAt)}
+                        </span>
+                        {quotation.quotationValidity?.expiryDate && (
+                          <span>
+                            Expires: {formatDate(quotation.quotationValidity.expiryDate)}
                           </span>
-                          {quotation.quotationValidity?.expiryDate && (
-                            <span className="text-xs">
-                              Expires: {formatDate(quotation.quotationValidity.expiryDate)}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -373,12 +350,12 @@ const Quotations = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quote No</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quotation No</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Load Type</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
@@ -388,29 +365,25 @@ const Quotations = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <FontAwesomeIcon icon={faFileAlt} className="text-primary-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{quotation.quotationNumber}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {quotation.quotationNumber || `QUO-${String(quotation._id).slice(-6).toUpperCase()}`}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {isQuotationExpired(quotation) && (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium text-red-600 bg-red-100">
-                                Expired
-                              </span>
-                            )}
+                            <div className="text-sm text-gray-900">{quotation.companyName || 'N/A'}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{quotation.quoteToCompany?.companyName || 'N/A'}</div>
-                            <div className="text-xs text-gray-500">{quotation.quoteToCompany?.city || quotation.quoteToCompany?.companyAddress || ''}</div>
+                            <div className="text-sm text-gray-900">{quotation.tripDetails?.from || 'N/A'}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{quotation.tripDetails?.from || 'N/A'} → {quotation.tripDetails?.to || 'N/A'}</div>
-                            <div className="text-xs text-gray-500">{quotation.tripDetails?.fullOrPartLoad || ''}</div>
+                            <div className="text-sm text-gray-900">{quotation.tripDetails?.to || 'N/A'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{quotation.tripDetails?.fullOrPartLoad || 'N/A'}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatDate(quotation.createdAt)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {quotation.quotationValidity?.expiryDate ? formatDate(quotation.quotationValidity.expiryDate) : 'N/A'}
+                            {formatDate(quotation.quotationDate || quotation.date || quotation.createdAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="flex justify-end gap-2">

@@ -139,31 +139,31 @@ const invoiceTemplate = (data) => {
       
       rows += `
         <tr style="height: 50px;">
-          <td>${i + 1}</td>
-          <td>${getValue(data.lorryReceiptNumber)}</td>
-          <td>${getValue(data.fromLocation)}</td>
-          <td>${getValue(data.toLocation)}</td>
-          <td>${getValue(data.invoiceNumber)}</td>
-          <td>${formatCurrency(freight)}</td>
-          <td>${formatCurrency(hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading)}</td>
-          <td>${formatCurrency(totalAmount)}</td>
+          <td style='width:40px;min-width:40px;'>${i + 1}</td>
+          <td style='width:80px;min-width:80px;'>${getValue(data.lorryReceiptNumber)}</td>
+          <td style='width:80px;min-width:80px;'>${getValue(data.fromLocation)}</td>
+          <td style='width:80px;min-width:80px;'>${getValue(data.toLocation)}</td>
+          <td style='width:100px;min-width:100px;'>${getValue(data.invoiceNumber)}</td>
+          <td style='width:80px;min-width:80px;'>${formatCurrency(freight)}</td>
+          <td style='width:100px;min-width:100px;'>${formatCurrency(hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading)}</td>
+          <td style='width:100px;min-width:100px;'>${formatCurrency(totalAmount)}</td>
         </tr>
       `;
     }
     
-    // Add empty rows to fill the space (without borders)
+    // Add empty rows to fill the space (with borders to extend columns)
     const remainingRows = Math.max(0, 10 - maxRows);
     for (let i = 0; i < remainingRows; i++) {
       rows += `
-        <tr style="border: none;">
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
-          <td style="border: none;"></td>
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
         </tr>
       `;
     }
@@ -202,12 +202,22 @@ const invoiceTemplate = (data) => {
       border-collapse: collapse;
       table-layout: fixed;
     }
+    table th, table td {
+      padding: 0;
+      margin: 0;
+    }
     th, td {
       border: 1px solid black;
-      padding: 4px;
       text-align: center;
       vertical-align: middle;
-      font-size: 13px;
+      font-size: 12px;
+      height: 36px;
+      padding: 2px 4px;
+      max-width: 100px;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+      overflow: hidden;
     }
     .no-border {
       border: none;
@@ -243,22 +253,26 @@ const invoiceTemplate = (data) => {
     <!-- Top Section -->
     <table style="border-collapse: collapse; width: 100%;">
       <tr>
-        <td colspan="5" style="height: 50px; text-align: left; border-left: 1px solid black; border-top: 1px solid black; border-bottom: none; border-right: 1px solid black;">
-          To,<br><br>
-          <b>M/s ${getValue(data.consignee?.consigneeName)}</b><br>
-          ${getValue(data.consignee?.address)}<br>
-          ${getValue(data.consignee?.city)} - ${getValue(data.consignee?.pinCode)}<br>
-          ${getValue(data.consignee?.state)}<br>
-          GSTIN: ${getValue(data.consignee?.gstin)}
+        <td colspan="5" style="height: 60px; text-align: left; vertical-align: top; border-left: 1px solid black; border-top: 1px solid black; border-bottom: none; border-right: 1px solid black; padding: 6px 8px 2px 8px;">
+          <div style="min-height: 50px; display: flex; flex-direction: column; justify-content: flex-start; gap: 0;">
+            <span style="font-size: 13px; line-height: 1.1;">To,</span>
+            <span style="font-weight: bold; font-size: 14px; line-height: 1.1;">M/s ${getValue(data.consignee?.consigneeName)}</span>
+            <span style="line-height: 1.1;">${getValue(data.consignee?.address)}</span>
+            <span style="line-height: 1.1;">${getValue(data.consignee?.city)} - ${getValue(data.consignee?.pinCode)}</span>
+            <span style="line-height: 1.1;">${getValue(data.consignee?.state)}</span>
+            <span style="line-height: 1.1;">GSTIN: ${getValue(data.consignee?.gstin)}</span>
+          </div>
         </td>
-        <td style="border-right: 1px solid black; text-align: left; width: 200px; border-top: 1px solid black; border-bottom: none;">
-          Bill No. : <strong>${getValue(data.invoiceNumber)}</strong>
+        <td style="border-right: 1px solid black; text-align: center; width: 260px; min-width: 220px; max-width: 320px; border-top: 1px solid black; border-bottom: none; padding: 0; vertical-align: middle;">
+          <div style="display: flex; align-items: center; justify-content: center; height: 60px; width: 100%;">
+            <span style="font-size: 17px; font-weight: bold; line-height: 1.1; white-space: nowrap;">Bill No. : <span style='font-size: 17px; font-weight: bold;'>${getValue(data.invoiceNumber)}</span></span>
+          </div>
         </td>
       </tr>
       <tr>
         <td colspan="5" class="no-border" style="border-left: 1px solid black; border-bottom: none; border-right: none;"></td>
-        <td style="border-right: 1px solid black; text-align: left; width: 220px; border-bottom: none;">
-          Date : <strong>${formatDate(data.date)}</strong>
+        <td style="border-right: 1px solid black; text-align: left; width: 260px; min-width: 220px; max-width: 320px; border-bottom: none; padding: 2px 8px 6px 8px; vertical-align: top;">
+          <span style="font-size: 13px; line-height: 1.1;">Date : <span style='font-size: 15px; font-weight: bold;'>${formatDate(data.date)}</span></span>
         </td>
       </tr>
     </table>
@@ -266,13 +280,13 @@ const invoiceTemplate = (data) => {
     <!-- Main Table Header -->
     <table style="height: 500px; border: 1px solid black;">
       <tr style="height: 50px;">
-        <th rowspan="2" style="width: 30px;">Sr.</th>
-        <th rowspan="2" style="width: 60px;">L.R. No.</th>
-        <th colspan="2">Particulars of Goods Transported</th>
-        <th rowspan="2" style="width: 80px;">Inv. No.</th>
-        <th rowspan="2" style="width: 50px;">Rate</th>
-        <th rowspan="2" style="width: 80px;">Other Charges</th>
-        <th rowspan="2" style="width: 80px;">Freight Amt.</th>
+        <th rowspan="2" style="width: 40px;">Sr.</th>
+        <th rowspan="2" style="width: 70px;">L.R. No.</th>
+        <th colspan="2" style="width: 140px;">Particulars of Goods Transported</th>
+        <th rowspan="2" style="width: 90px;">Inv. No.</th>
+        <th rowspan="2" style="width: 70px;">Rate</th>
+        <th rowspan="2" style="width: 90px;">Other Charges</th>
+        <th rowspan="2" style="width: 90px;">Freight Amt.</th>
       </tr>
       <tr style="height: 50px;">
         <th>From</th>
@@ -285,20 +299,20 @@ const invoiceTemplate = (data) => {
     <!-- Amount & Total Section -->
     <table>
       <tr>
-        <td colspan="5" style="border-right: none; text-align: left;"><b>Amount Rs. ${formatCurrency(totalAmount)}</b></td>
-        <td style="width: 80px; text-align: left;"><strong>Total</strong></td>
-        <td style="width: 80px;"><strong>${formatCurrency(totalAmount)}</strong></td>
+        <td colspan="5" style="border-right: none; text-align: left; padding: 4px 6px 2px 6px; font-size: 14px; line-height: 1.1;"><b>Amount Rs. ${formatCurrency(totalAmount)}</b></td>
+        <td style="width: 80px; text-align: left; padding: 4px 6px 2px 6px; font-size: 14px; line-height: 1.1;"><strong>Total</strong></td>
+        <td style="width: 80px; padding: 4px 6px 2px 6px; font-size: 14px; line-height: 1.1;"><strong>${formatCurrency(totalAmount)}</strong></td>
       </tr>
     </table>
 
     <!-- Remark Section -->
     <table>
       <tr>
-        <td colspan="3" style="text-align: left; border-right: none; height: 50px; vertical-align: top;">
+        <td colspan="3" style="text-align: left; border-right: none; padding: 4px 6px 2px 6px; font-size: 14px; line-height: 1.1; vertical-align: top;">
           <b>Remark</b><br>
           ${getValue(data.remarks)}
         </td>
-        <td style="border-left: none; height: 50px;"></td>
+        <td style="border-left: none; padding: 4px 6px 2px 6px;"></td>
       </tr>
     </table>
 
@@ -306,7 +320,7 @@ const invoiceTemplate = (data) => {
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
         <!-- PAN No. and GSTIN cell -->
-        <td style="width: 15%; text-align: left; vertical-align: top;">
+        <td style="width: 15%; text-align: left; vertical-align: top; padding: 4px 6px 2px 6px; font-size: 13px; line-height: 1.1;">
           <b>PAN No. AGTPV0112D</b><br>
           <b>GSTIN : 27AGTPV0112D1ZG</b>
         </td>
@@ -339,7 +353,7 @@ const invoiceTemplate = (data) => {
           E. & O.E.
         </td>
         <!-- Signature -->
-        <td style="width: 10%; text-align: left; vertical-align: middle;">
+        <td style="width: 10%; text-align: left; vertical-align: middle; padding: 0 8px; font-size: 15px;">
           For<br>
           <b>Shree Dattaguru Road Lines</b>
         </td>

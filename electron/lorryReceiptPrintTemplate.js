@@ -691,25 +691,43 @@ const lorryReceiptPrintTemplate = (data) => {
                 </table>
 
                 <!-- Footer Sections -->
-                <table>
-                    <tbody>                        <tr class="delivery-section">
-                            <td colspan="3">
-                                Delivery At: 
-                                <span class="form-value" style="display: inline-block; width: 450px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
+                    <tbody>
+                        <tr>
+                            <td style="width: 70%; padding: 4px 8px;">
+                                <div>
+                                    <span style="font-family: Arial; font-size: 11px;">Delivery At:</span>
+                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                                </div>
+                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
+                            </td>
+                            <td style="width: 30%; padding: 4px 8px;">
+                                <div>
+                                    <span style="font-family: Arial; font-size: 11px;">E-way Bill:</span>
+                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                                </div>
+                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
                         </tr>
-                        <tr class="remarks-section">
-                            <td colspan="3">
-                                Remarks: 
-                                <span class="form-value" style="display: inline-block; width: 450px;">${getValue(data.remarks || data.notes)}</span>
+                        <tr>
+                            <td colspan="2" style="padding: 4px 8px;">
+                                <div>
+                                    <span style="font-family: Arial; font-size: 11px;">Remarks:</span>
+                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
+                                </div>
+                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
                         </tr>
-                        <tr class="footer-section">
-                            <td style="width: 70%;">
-                                We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee
+                        <tr>
+                            <td style="padding: 4px 8px;">
+                                <div>
+                                    <span style="font-family: Arial; font-size: 11px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
+                                </div>
                             </td>
-                            <td style="width: 30%; vertical-align: bottom; text-align: center;">
-                                For <b>Shree Dattaguru Road Lines</b>
+                            <td style="padding: 4px 8px;">
+                                <div style="text-align: right;">
+                                    <span style="font-family: Arial; font-size: 11px;">For Shree Dattaguru Road Lines</span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

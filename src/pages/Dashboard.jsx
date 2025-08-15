@@ -7,6 +7,7 @@ import {
   faTruck,
   faReceipt,
   faCogs,
+  faFileAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../services/dashboardService";
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState({
     quotations: { total: 0 },
     lorryReceipts: { total: 0 },
+    memos: { total: 0 },
     invoices: { total: 0 },
     master: { trucks: 0, drivers: 0, customers: 0 },
   });
@@ -57,6 +59,10 @@ const Dashboard = () => {
     navigate("/quotations/create");
   };
 
+  const handleCreateMemo = () => {
+    navigate("/memos/create");
+  };
+
   const handleNavigate = (route) => {
     navigate(`/${route}`);
   };
@@ -79,7 +85,7 @@ const Dashboard = () => {
           <h3 className="text-base font-medium text-gray-700 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={handleCreateQuotation}
               className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center space-x-2"
@@ -95,6 +101,13 @@ const Dashboard = () => {
               <span>Create LR</span>
             </button>
             <button
+              onClick={handleCreateMemo}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center space-x-2"
+            >
+              <FontAwesomeIcon icon={faFileAlt} className="h-4 w-4" />
+              <span>New Memo</span>
+            </button>
+            <button
               onClick={() => handleNavigate("companies")}
               className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center space-x-2"
             >
@@ -105,7 +118,7 @@ const Dashboard = () => {
         </div>
 
         {/* Main Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full h-[310px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {/* Quotations */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative w-full">
             <div className="absolute top-4 left-4 bg-purple-100 rounded-lg p-2">
@@ -192,6 +205,47 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Memos */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative w-full">
+            <div className="absolute top-4 left-4 bg-purple-100 rounded-lg p-2">
+              <FontAwesomeIcon
+                icon={faFileAlt}
+                className="h-5 w-5 text-purple-600"
+              />
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-400 to-red-400 p-4 pt-16">
+              <h3 className="text-lg font-semibold text-white">Memos</h3>
+            </div>
+
+            <div className="p-4">
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Total Memos</span>
+                  <span className="text-xl font-bold text-gray-900">
+                    {dashboardStats.memos.total}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleNavigate("memos")}
+                  className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  View
+                </button>
+                <button
+                  onClick={handleCreateMemo}
+                  className="w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-2 rounded-lg text-sm font-medium hover:from-orange-500 hover:to-red-500 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <span className="text-lg">+</span>
+                  <span>Create Memo</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Invoices */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative w-full">
             <div className="absolute top-4 left-4 bg-purple-100 rounded-lg p-2">
@@ -214,12 +268,10 @@ const Dashboard = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center justify-center h-28">
-                {" "}
-                {/* Adjust height as needed */}
+              <div className="space-y-2">
                 <button
                   onClick={() => handleNavigate("invoices")}
-                  className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
                   View
                 </button>
@@ -243,16 +295,7 @@ const Dashboard = () => {
             </div>
 
             <div className="p-4">
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Total Resources</span>
-                  <span className="text-xl font-bold text-gray-900">
-                    {dashboardStats.master.trucks +
-                      dashboardStats.master.drivers +
-                      dashboardStats.master.customers}
-                  </span>
-                </div>
-              </div>
+
 
               <div className="space-y-2">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

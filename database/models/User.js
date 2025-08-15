@@ -20,14 +20,14 @@ class User {  static create(userData) {
     const users = db.query(sql, [email]);
     return users[0] || null;
   }
-  static getAll() {
-    const sql = 'SELECT id, name, email, phonenumber, role, created_at FROM users ORDER BY created_at DESC';
-    return db.query(sql);
+  static async getAll() {
+  const sql = 'SELECT id, name, email, phonenumber, role, created_at FROM users ORDER BY created_at DESC';
+  return await db.query(sql);
   }
 
-  static update(id, userData) {
-    const fields = [];
-    const values = [];
+  static async update(id, userData) {
+  const fields = [];
+  const values = [];
     
     for (const [key, value] of Object.entries(userData)) {
       if (value !== undefined) {
@@ -40,11 +40,11 @@ class User {  static create(userData) {
     
     values.push(id);
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-    return db.query(sql, values);
+    return await db.query(sql, values);
   }
-  static delete(id) {
-    const sql = 'DELETE FROM users WHERE id = ?';
-    return db.query(sql, [id]);
+  static async delete(id) {
+  const sql = 'DELETE FROM users WHERE id = ?';
+  return await db.query(sql, [id]);
   }
 }
 

@@ -15,15 +15,69 @@ const isElectron = () => {
  * @param {string} filename - Optional filename for the PDF
  * @returns {Promise<void>} - Downloads the PDF file
  */
-export const downloadLorryReceiptPrintPdf = async (lorryReceiptData, filename) => {
+// Generate PDF for a Memo using the print template (exact form layout)
+// @param {Object} memoData - Memo data
+// @param {string} filename - Optional filename for the PDF
+// @returns {Promise<void>} - Downloads the PDF file
+const downloadMemoPrintPdf = async (memoData, filename) => {
+  try {
+    if (!memoData) {
+      throw new Error('Memo data is required');
+    }
+    let memoNumber = memoData.memo_number || memoData.memoNumber || memoData.id || 'Unknown';
+    const cleanMemoNumber = String(memoNumber).replace(/[^a-zA-Z0-9-_]/g, '-');
+    const currentDate = new Date().toISOString().split('T')[0];
+    const filenameParts = ['Memo', 'Print', cleanMemoNumber, currentDate];
+    const generatedFilename = filenameParts.join('_') + '.pdf';
+    const pdfFilename = filename || generatedFilename;
+    if (isElectron()) {
+      const result = await window.electronAPI.generateMemoPrintPdf({
+        data: memoData,
+        filename: pdfFilename
+      });
+      return result;
+    } else {
+      const response = await fetch('/api/generate-memo-print-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: memoData,
+          filename: pdfFilename
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = pdfFilename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      return { success: true, filename: pdfFilename };
+    }
+  } catch (error) {
+    console.error('Error downloading memo print PDF:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Generate PDF for a Lorry Receipt using the print template (exact form layout)
+// @param {Object} lorryReceiptData - Lorry receipt data
+// @param {string} filename - Optional filename for the PDF
+// @returns {Promise<void>} - Downloads the PDF file
+const downloadLorryReceiptPrintPdf = async (lorryReceiptData, filename) => {
   try {
     if (!lorryReceiptData) {
       throw new Error('Lorry receipt data is required');
     }
-      // Simple and direct filename extraction
     let receiptNumber = null;
-    
-    // Try different possible field names in order of preference
     if (lorryReceiptData.lorryReceiptNumber) {
       receiptNumber = lorryReceiptData.lorryReceiptNumber;
     } else if (lorryReceiptData.cn_number) {
@@ -45,30 +99,18 @@ export const downloadLorryReceiptPrintPdf = async (lorryReceiptData, filename) =
     } else {
       receiptNumber = 'Unknown';
     }
-      // Clean the receipt number (remove spaces, special characters)
     const cleanReceiptNumber = String(receiptNumber).replace(/[^a-zA-Z0-9-_]/g, '-');
-    
-    // Get current date
     const currentDate = new Date().toISOString().split('T')[0];
-    
-    // Build filename parts separately
     const filenameParts = ['LorryReceipt', 'Print', cleanReceiptNumber, currentDate];
     const generatedFilename = filenameParts.join('_') + '.pdf';
-    
-    // Use provided filename or generated one
     const pdfFilename = filename || generatedFilename;
-
     if (isElectron()) {
-      // In Electron environment, use IPC to communicate with main process
       const result = await window.electronAPI.generateLorryReceiptPrintPdf({
         data: lorryReceiptData,
         filename: pdfFilename
       });
-      
-      // Return the result object so the caller can handle cancellation vs errors
       return result;
     } else {
-      // In web environment, use direct API call
       const response = await fetch('/api/generate-lorry-receipt-print-pdf', {
         method: 'POST',
         headers: {
@@ -79,12 +121,9 @@ export const downloadLorryReceiptPrintPdf = async (lorryReceiptData, filename) =
           filename: pdfFilename
         }),
       });
-
       if (!response.ok) {
         throw new Error('Failed to generate PDF');
       }
-
-      // Handle file download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -94,13 +133,17 @@ export const downloadLorryReceiptPrintPdf = async (lorryReceiptData, filename) =
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);      return { success: true, filename: pdfFilename };
-    }  } catch (error) {
+      document.body.removeChild(a);
+      return { success: true, filename: pdfFilename };
+    }
+  } catch (error) {
     console.error('Error downloading lorry receipt print PDF:', error);
     return { success: false, error: error.message };
   }
 };
 
+export { downloadLorryReceiptPrintPdf, downloadMemoPrintPdf };
 export default {
-  downloadLorryReceiptPrintPdf
+  downloadLorryReceiptPrintPdf,
+  downloadMemoPrintPdf
 };

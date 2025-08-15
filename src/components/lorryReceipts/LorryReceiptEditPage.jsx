@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import BillHeader from '../../assets/images/billHeader.png';
+import BillHeader from '../../../assets/billHeader5.png';
 import companyService from '../../services/companyService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 import truckService from '../../services/truckService';
@@ -74,6 +74,7 @@ const LorryReceiptEditPage = () => {
     toPay: '',
     paymentType: 'paid',
     deliveryAt: '',
+    ewayBill: '',
     total: '',
     remarks: '',
     consignor_id: '',
@@ -84,93 +85,101 @@ const LorryReceiptEditPage = () => {
 
   const [errors, setErrors] = useState({});
 
-  const loadLorryReceiptData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await lorryReceiptService.getLorryReceiptById(id);
-      
-      if (response.success && response.data) {
-        const lorryReceipt = response.data; // Data is directly in response.data, not nested
-        
-        // Ensure lorryReceipt is not null or undefined
-        if (!lorryReceipt) {
-          toast.error('Invalid lorry receipt data');
-          navigate('/lorry-receipts');
-          return;
-        }
-        
-        // Format the date for the date input
-        const formattedDate = lorryReceipt.date ? 
-          new Date(lorryReceipt.date).toISOString().split('T')[0] : '';
-        
-        setFormData({
-          consignorName: lorryReceipt.consignor?.consignorName || '',
-          consignorAddress1: lorryReceipt.consignor?.address || '',
-          consignorCity: lorryReceipt.consignor?.city || '',
-          consignorState: lorryReceipt.consignor?.state || '',
-          consignorPincode: lorryReceipt.consignor?.pinCode || '',
-          consignorGstin: lorryReceipt.consignor?.gstNumber || '',
-          consignorPan: lorryReceipt.consignor?.pan || '',
-          consigneeName: lorryReceipt.consignee?.consigneeName || '',
-          consigneeAddress1: lorryReceipt.consignee?.address || '',
-          consigneeCity: lorryReceipt.consignee?.city || '',
-          consigneeState: lorryReceipt.consignee?.state || '',
-          consigneePincode: lorryReceipt.consignee?.pinCode || '',
-          consigneeGstin: lorryReceipt.consignee?.gstNumber || '',
-          consigneePan: lorryReceipt.consignee?.pan || '',
-          cnNumber: lorryReceipt.cnNumber || '',
-          truckNumber: lorryReceipt.truckDetails?.truckNumber || '',
-          date: formattedDate,
-          to: lorryReceipt.toLocation || '',
-          from: lorryReceipt.fromLocation || '',
-          // Extract nos and particulars from materialDetails array
-          nos: Array.isArray(lorryReceipt.materialDetails) && lorryReceipt.materialDetails.length > 0 ? 
-            lorryReceipt.materialDetails.map(item => item.nos || '') : [''],
-          particulars: Array.isArray(lorryReceipt.materialDetails) && lorryReceipt.materialDetails.length > 0 ? 
-            lorryReceipt.materialDetails.map(item => item.particulars || '') : [''],
-          freight: lorryReceipt.freightDetails?.freight || '',
-          hamali: lorryReceipt.freightDetails?.hamali || '',
-          aoc: lorryReceipt.freightDetails?.aoc || '',
-          doorDelivery: lorryReceipt.freightDetails?.doorDelivery || '',
-          collection: lorryReceipt.freightDetails?.collection || '',
-          stCharge: lorryReceipt.freightDetails?.stCharge || '',
-          extraLoading: lorryReceipt.freightDetails?.extraLoading || '',
-          actualWeight: lorryReceipt.actualWeight || '',
-          chargeableWeight: lorryReceipt.chargeableWeight || '',
-          paymentType: lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || 'paid',
-          deliveryAt: lorryReceipt.deliveryAt || '',
-          total: lorryReceipt.freightDetails?.total || '',
-          remarks: lorryReceipt.remarks || lorryReceipt.notes || '',
-          consignor_id: lorryReceipt.consignor_id || '',
-          consignee_id: lorryReceipt.consignee_id || '',
-          truck_id: lorryReceipt.truck_id || '',
-          driver_id: lorryReceipt.driver_id || ''
-        });
-      } else {
-        toast.error('Failed to load lorry receipt data');
-        navigate('/lorry-receipts');
-      }
-    } catch (error) {
-      console.error('Error loading lorry receipt:', error);
-      toast.error('Failed to load lorry receipt data');
-      navigate('/lorry-receipts');
-    } finally {
-      setLoading(false);
-    }
-  }, [id, toast, navigate]);
-
   // Load existing lorry receipt data
   useEffect(() => {
     if (id) {
       loadLorryReceiptData();
     }
-  }, [id, loadLorryReceiptData]);
+  }, [id]);
 
   // Load companies and trucks
   useEffect(() => {
     loadCompanies();
     loadTrucks();
   }, []);
+
+  const loadLorryReceiptData = useCallback(async () => {
+    try {
+      setLoading(true);
+      console.log('Loading lorry receipt data for ID:', id);
+      const response = await lorryReceiptService.getLorryReceiptById(id);
+      console.log('API Response:', response);
+      
+      if (response.success && response.data) {
+        const lr = response.data;
+        console.log('Transformed lorry receipt data:', lr);
+        
+        // Parse JSON strings for arrays
+        let nosArray = [''];
+        let particularsArray = [''];
+        
+        // Get material details from the transformed structure
+        if (lr.materialDetails && Array.isArray(lr.materialDetails)) {
+          nosArray = lr.materialDetails.map(item => item.nos || '');
+          particularsArray = lr.materialDetails.map(item => item.particulars || '');
+        }
+        
+        console.log('Parsed arrays - nos:', nosArray, 'particulars:', particularsArray);
+        
+        // Transform the data to match form structure
+        const formDataToSet = {
+          consignorName: lr.consignor?.consignorName || '',
+          consignorAddress1: lr.consignor?.address || '',
+          consignorCity: lr.consignor?.city || '',
+          consignorState: lr.consignor?.state || '',
+          consignorPincode: lr.consignor?.pinCode || '',
+          consignorGstin: lr.consignor?.gstNumber || '',
+          consignorPan: lr.consignor?.pan || '',
+          consigneeName: lr.consignee?.consigneeName || '',
+          consigneeAddress1: lr.consignee?.address || '',
+          consigneeCity: lr.consignee?.city || '',
+          consigneeState: lr.consignee?.state || '',
+          consigneePincode: lr.consignee?.pinCode || '',
+          consigneeGstin: lr.consignee?.gstNumber || '',
+          consigneePan: lr.consignee?.pan || '',
+          cnNumber: lr.lorryReceiptNumber || '',
+          truckNumber: lr.truckDetails?.truckNumber || '',
+          date: lr.date || '',
+          to: lr.toLocation || '',
+          from: lr.fromLocation || '',
+          nos: nosArray,
+          particulars: particularsArray,
+          freight: lr.freightDetails?.freight?.toString() || '',
+          hamali: lr.freightDetails?.hamali?.toString() || '',
+          aoc: lr.freightDetails?.aoc?.toString() || '',
+          doorDelivery: lr.freightDetails?.doorDelivery?.toString() || '',
+          collection: lr.freightDetails?.collection?.toString() || '',
+          ewayBill: lr.ewayBill || '',
+          stCharge: lr.freightDetails?.stCharge?.toString() || '20',
+          extraLoading: lr.freightDetails?.extraLoading?.toString() || '',
+          actualWeight: lr.actualWeight?.toString() || '',
+          chargeableWeight: lr.chargeableWeight?.toString() || '',
+          paid: lr.freightDetails?.paid?.toString() || '',
+          toBeBill: lr.freightDetails?.toBeBill?.toString() || '',
+          toPay: lr.freightDetails?.toPay?.toString() || '',
+          paymentType: lr.paymentType || 'paid',
+          deliveryAt: lr.deliveryAt || '',
+          total: lr.freightDetails?.total?.toString() || '',
+          remarks: lr.remarks || '',
+          consignor_id: lr.consignor_id || '',
+          consignee_id: lr.consignee_id || '',
+          truck_id: lr.truck_id || '',
+          driver_id: lr.driver_id || ''
+        };
+        
+        console.log('Setting form data:', formDataToSet);
+        setFormData(formDataToSet);
+      } else {
+        console.error('No data received from API');
+        toast.error('Failed to load lorry receipt data');
+      }
+    } catch (error) {
+      console.error('Error loading lorry receipt data:', error);
+      toast.error('Failed to load lorry receipt data');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   const loadCompanies = async () => {
     try {
@@ -253,7 +262,7 @@ const LorryReceiptEditPage = () => {
     }
   };
 
-  const calculateTotal = useCallback(() => {
+  const calculateTotal = () => {
     const freight = parseFloat(formData.freight) || 0;
     const hamali = parseFloat(formData.hamali) || 0;
     const aoc = parseFloat(formData.aoc) || 0;
@@ -269,7 +278,7 @@ const LorryReceiptEditPage = () => {
     setFormData(prev => ({ ...prev, total: totalValue }));
     
     return totalValue;
-  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -286,6 +295,9 @@ const LorryReceiptEditPage = () => {
       // Calculate total
       const total = calculateTotal();
       
+      console.log('Current formData:', formData);
+      console.log('consignor_id:', formData.consignor_id);
+      console.log('consignee_id:', formData.consignee_id);
       
       // Prepare data for update - match the service method expectations
       const updateData = {
@@ -308,12 +320,14 @@ const LorryReceiptEditPage = () => {
         chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
         payment_type: formData.paymentType,
         delivery_at: formData.deliveryAt,
+        eway_bill: formData.ewayBill,
         total: parseFloat(total) || 0,
         remarks: formData.remarks,
         truck_id: formData.truck_id,
         driver_id: formData.driver_id
       };
       
+      console.log('Sending update data:', updateData);
       
       const response = await lorryReceiptService.updateLorryReceipt(id, updateData);
       
@@ -734,7 +748,7 @@ const LorryReceiptEditPage = () => {
   // Calculate total automatically when charge fields change
   useEffect(() => {
     calculateTotal();
-  }, [calculateTotal]);
+  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
 
   if (loading) {
     return (
@@ -746,9 +760,25 @@ const LorryReceiptEditPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Update and Cancel buttons */}
+      {/* Header section matching form/print style */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div className='w-full flex flex-row items-start justify-between py-2'>
+            <div className='flex-shrink-0 flex items-center w-2/3'>
+              <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+            </div>
+            <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
+              <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
+              <div className='mb-2 text-right text-xs'>
+                <div className='font-semibold'>Daily Part Load Service to -</div>
+                <div>Tarapur, Bhiwandi, Palghar,</div>
+                <div>Vashi, Taloja, Kolgoan Genises</div>
+              </div>
+              <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                DRIVERS COPY
+              </div>
+            </div>
+          </div>
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Edit Lorry Receipt</h1>
@@ -1483,17 +1513,49 @@ const LorryReceiptEditPage = () => {
             {/* Footer */}
             <table>
               <tbody>
-                <tr style={{ height: '30px' }}>
-                  <td colSpan="3" style={{ verticalAlign: 'top' }}>
-                    Delivery At: <span className="text-red-500">*</span>{' '}
-                    <div className="input-container inline-block" onClick={handleDivClick}>
-                      <input
-                        type="text"
-                        name="deliveryAt"
-                        value={formData.deliveryAt}
-                        onChange={handleInputChange}
-                        className="form-input-delivery"
-                      />
+                <tr style={{ height: '50px' }}>
+                  <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>Delivery At:</span>
+                      <span className="text-red-500" style={{ marginRight: '4px' }}>*</span>
+                      <div className="input-container flex-grow">
+                        <input
+                          type="text"
+                          name="deliveryAt"
+                          value={formData.deliveryAt}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          style={{
+                            width: '100%',
+                            border: '1px solid #000',
+                            borderRadius: '0',
+                            padding: '4px 8px',
+                            minWidth: '250px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: '80px' }}>E-way Bill:</span>
+                      <div className="input-container flex-grow">
+                        <input
+                          type="text"
+                          name="ewayBill"
+                          placeholder="Enter E-way Bill number"
+                          value={formData.ewayBill}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          style={{
+                            width: '100%',
+                            border: '1px solid #000',
+                            borderRadius: '0',
+                            padding: '4px 8px',
+                            minWidth: '250px'
+                          }}
+                        />
+                      </div>
                     </div>
                   </td>
                 </tr>

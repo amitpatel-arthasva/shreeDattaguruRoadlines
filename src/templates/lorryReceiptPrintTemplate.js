@@ -49,8 +49,11 @@
  */
 
 import { getBillHeaderAsBase64 } from '../services/imageUtils.js';
+import { clearImageCache } from '../services/imageUtils.js';
 
 const lorryReceiptPrintTemplate = (data) => {
+    // Force clear image cache to ensure latest header is used
+    clearImageCache();
   // Helper function to format currency
   const formatCurrency = (amount) => {
     if (!amount && amount !== 0) return '';
@@ -507,19 +510,18 @@ const lorryReceiptPrintTemplate = (data) => {
             <div class="container">
                 <!-- Header Section with Logo and Jurisdiction -->
                 <div class="header-section">
-                    <div class="header-inner">                    
-                        <div class="logo-container">
-                            <img src="${headerImage}" 
-                                 alt="BillLogo" class="logo-image" />
+                    <div style="display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; width: 100%;">
+                        <div style="flex-shrink:0; width: 65%; display: flex; align-items: center;">
+                            <img src="${headerImage}" alt="BillLogo" style="width: 100%; max-width: 480px; height: auto;" />
                         </div>
-                        <div class="jurisdiction-section">
-                            <div class="jurisdiction-title">SUBJECT TO PALGHAR JURISDICTION</div>
-                            <div class="service-details">
-                                <div class="service-title">Daily Part Load Service to -</div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; min-width: 320px; width: 35%; font-size: 12px; color: #374151; font-family: Arial, sans-serif;">
+                            <div style="margin-bottom: 8px; font-weight: bold; font-size: 16px;">SUBJECT TO PALGHAR JURISDICTION</div>
+                            <div style="margin-bottom: 8px; text-align: right; font-size: 12px;">
+                                <div style="font-weight: 600;">Daily Part Load Service to -</div>
                                 <div>Tarapur, Bhiwandi, Palghar,</div>
                                 <div>Vashi, Taloja, Kolgoan Genises</div>
                             </div>
-                            <div class="drivers-copy">DRIVERS COPY</div>
+                            <div style="font-weight: bold; color: #d32f2f; border: 1px solid #d32f2f; padding: 4px 12px; display: inline-block; font-size: 14px; margin-top: 8px;">DRIVERS COPY</div>
                         </div>
                     </div>
                 </div>
@@ -692,16 +694,32 @@ const lorryReceiptPrintTemplate = (data) => {
 
                 <!-- Footer Sections -->
                 <table>
-                    <tbody>                        <tr class="delivery-section">
-                            <td colspan="3">
-                                Delivery At: 
-                                <span class="form-value" style="display: inline-block; width: 250px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                    <tbody>
+                        <tr>
+                            <td style="width: 65%; border-right: none;">
+                                <div style="display: flex; align-items: center; padding: 4px;">
+                                    <span style="font-size: 12px; font-weight: normal;">Delivery At:</span>
+                                    <span style="color: red; margin: 0 4px;">*</span>
+                                    <span style="font-size: 12px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                                </div>
+                            </td>
+                            <td style="width: 35%; border-left: none;">
+                                <div style="display: flex; justify-content: space-between; padding: 4px;">
+                                    <span style="font-size: 12px;">E-way Bill:</span>
+                                    <span style="font-size: 12px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                                </div>
                             </td>
                         </tr>
-                        <tr class="remarks-section">
-                            <td colspan="3">
-                                Remarks: 
-                                <span class="form-value" style="display: inline-block; width: 450px;">${getValue(data.remarks || data.notes)}</span>
+                        <tr>
+                            <td colspan="2" style="padding: 12px;">
+                                <div style="display: flex; align-items: top;">
+                                    <span style="width: 80px; font-size: 14px; font-family: Arial;">Remarks:</span>
+                                    <div style="flex-grow: 1;">
+                                        <div style="font-size: 14px; font-family: Arial; padding: 4px 0;">
+                                            ${getValue(data.remarks || data.notes)}
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr class="footer-section">

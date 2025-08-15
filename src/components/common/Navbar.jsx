@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faSignOutAlt, faBars, faTimes, faReceipt, faFileText, faCalculator, faArrowLeft, faArrowRight, faTruck, faUser, faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faSignOutAlt, faBars, faTimes, faReceipt, faFileText, faCalculator, faArrowLeft, faArrowRight, faTruck, faUser, faBuilding, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from './ToastSystem';
 
@@ -53,6 +53,7 @@ const Navbar = () => {
     '/drivers': 'Drivers',
     '/companies': 'Companies',
     '/quotations': 'Quotations',
+    '/memos': 'Memos',
     '/invoices': 'Invoices',
     '/dashboard': 'Dashboard'
   }), []);// Check if the current page is a feature page or account settings
@@ -337,6 +338,7 @@ const Navbar = () => {
                 <DropdownItem to="/drivers" text="Drivers" icon={<FontAwesomeIcon icon={faUser} className="mr-2" />} />
                 <DropdownItem to="/companies" text="Companies" icon={<FontAwesomeIcon icon={faBuilding} className="mr-2" />} />
                 <DropdownItem to="/quotations" text="Quotations" icon={<FontAwesomeIcon icon={faCalculator} className="mr-2" />} />
+                <DropdownItem to="/memos" text="Memos" icon={<FontAwesomeIcon icon={faFileAlt} className="mr-2" />} />
                 <DropdownItem to="/invoices" text="Invoices" icon={<FontAwesomeIcon icon={faFileText} className="mr-2" />} />
               </div>
             </div>
@@ -497,6 +499,11 @@ const Navbar = () => {
                 isFinancesDropdownOpen ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'
               }`} style={{ transitionDelay: '150ms' }}>
                 <MobileNavLink to="/quotations" text="Quotations" icon={faCalculator} onClick={() => setIsMobileMenuOpen(false)} />
+              </div>
+              <div className={`transform transition-all duration-300 ease-out ${
+                isFinancesDropdownOpen ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'
+              }`} style={{ transitionDelay: '162ms' }}>
+                <MobileNavLink to="/memos" text="Memos" icon={faFileAlt} onClick={() => setIsMobileMenuOpen(false)} />
               </div>
               <div className={`transform transition-all duration-300 ease-out ${
                 isFinancesDropdownOpen ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'

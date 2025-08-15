@@ -2,26 +2,57 @@
 class ApiService {
   constructor() {
     this.isElectron = window.electronAPI !== undefined;
+    console.log('ApiService initialized');
+    console.log('window.electronAPI exists:', !!window.electronAPI);
+    console.log('isElectron:', this.isElectron);
+    console.log('userAgent contains Electron:', navigator.userAgent.includes('Electron'));
+   
  
     this.mockData = {
       companies: [
-        { id: 1, name: "ABC Transport Ltd.", company_name: "ABC Transport Ltd.", contact_person: "Rajesh Kumar", phone: "02012345678", mobile: "9876543210", email: "rajesh@abctransport.com", address: "123 Transport Street", city: "Mumbai", state: "Maharashtra", pin_code: "400001", gstin: "27AAACT1234A1Z5", pan: "AAACT1234A" },
-        { id: 2, name: "XYZ Logistics Pvt. Ltd.", company_name: "XYZ Logistics Pvt. Ltd.", contact_person: "Priya Sharma", phone: "01123456789", mobile: "9876543211", email: "priya@xyzlogistics.com", address: "456 Logistics Avenue", city: "Delhi", state: "Delhi", pin_code: "110001", gstin: "07AAXYZ5678B1Z5", pan: "AAXYZ5678B" },
-        { id: 3, name: "PQR Cargo Services", company_name: "PQR Cargo Services", contact_person: "Amit Patel", phone: "07912345678", mobile: "9876543212", email: "amit@pqrcargo.com", address: "789 Cargo Lane", city: "Pune", state: "Maharashtra", pin_code: "411001", gstin: "27AAPQR9012C1Z5", pan: "AAPQR9012C" }
+        { id: 1, name: "ABC Industries Ltd.", company_name: "ABC Industries Ltd.", address: "123 Industrial Area, Phase 1", city: "Mumbai", state: "Maharashtra", pin_code: "400001", gstin: "27ABCIN1234F1Z5", pan: "ABCIN1234F" },
+        { id: 2, name: "XYZ Manufacturing Pvt. Ltd.", company_name: "XYZ Manufacturing Pvt. Ltd.", address: "456 Manufacturing Hub, Sector 10", city: "Delhi", state: "Delhi", pin_code: "110001", gstin: "07XYZMA1234C1Z8", pan: "XYZMA1234C" },
+        { id: 3, name: "PQR Traders", company_name: "PQR Traders", address: "789 Trade Center, Main Road", city: "Ahmedabad", state: "Gujarat", pin_code: "380001", gstin: "24PQRTR1234G1Z9", pan: "PQRTR1234G" },
+        { id: 4, name: "LMN Enterprises", company_name: "LMN Enterprises", address: "321 Business Park", city: "Pune", state: "Maharashtra", pin_code: "411001", gstin: "27LMNEN1234H1Z7", pan: "LMNEN1234H" },
+        { id: 5, name: "RST Corporation", company_name: "RST Corporation", address: "654 Corporate Plaza", city: "Bangalore", state: "Karnataka", pin_code: "560001", gstin: "29RSTCO1234K1Z3", pan: "RSTCO1234K" },
+        { id: 6, name: "Global Textiles Inc.", company_name: "Global Textiles Inc.", address: "987 Textile Zone", city: "Surat", state: "Gujarat", pin_code: "395001", gstin: "24GLTEX1234M1Z1", pan: "GLTEX1234M" }
       ],
       lorryReceipts: [],
-      quotations: []
-    };
-    
-    // Load data from localStorage in browser mode
-    if (!this.isElectron) {
-      const savedLRs = localStorage.getItem('lorryReceipts');
-      if (savedLRs) {
-        try {
-          this.mockData.lorryReceipts = JSON.parse(savedLRs);
-        } catch (e) {
-          console.warn('Failed to load saved lorry receipts from localStorage');
+      quotations: [
+        {
+          id: 1,
+          quotation_number: "QUO-2024001",
+          quotation_date: "2024-12-01",
+          company_id: 1,
+          company_name: "ABC Industries Ltd.",
+          company_location: "Mumbai",
+          to_user: "ABC Industries Ltd.",
+          destinations_json: '[{"destination":"Mumbai","freight":15000},{"destination":"Pune","freight":15500}]',
+          created_at: "2025-08-10T09:40:50.000Z",
+          updated_at: "2025-08-10T09:40:50.000Z"
+        },
+        {
+          id: 2,
+          quotation_number: "QUO-2024002",
+          quotation_date: "2024-12-02",
+          company_id: 2,
+          company_name: "XYZ Manufacturing Pvt. Ltd.",
+          company_location: "Delhi",
+          to_user: "XYZ Manufacturing Pvt. Ltd.",
+          destinations_json: '[{"destination":"Bangalore","freight":12000},{"destination":"Chennai","freight":12500}]',
+          created_at: "2025-08-10T09:40:50.000Z",
+          updated_at: "2025-08-10T09:40:50.000Z"
         }
+        // Add more sample quotations as needed
+      ],
+      memos: [] // <-- Add this line to initialize memos
+    };
+    const savedLRs = localStorage.getItem('lorryReceipts');
+    if (savedLRs) {
+      try {
+        this.mockData.lorryReceipts = JSON.parse(savedLRs);
+      } catch (e) {
+        // ignore parse error
       }
     }
   }
@@ -29,7 +60,18 @@ class ApiService {
   // Database operations through Electron or browser fallback
   async query(sql, params = []) {
     if (this.isElectron) {
-      return await window.electronAPI.query(sql, params);
+      const result = await window.electronAPI.query(sql, params);
+      // For SELECT queries, unwrap the .data property for backward compatibility
+      if (sql.trim().toUpperCase().startsWith('SELECT')) {
+        if (result && result.success && Array.isArray(result.data)) {
+          return result.data;
+        } else if (Array.isArray(result)) {
+          return result;
+        } else {
+          return [];
+        }
+      }
+      return result;
     } else {
       // Browser fallback - simulate database operations
       console.warn('Running in browser mode - using mock data');
@@ -59,32 +101,19 @@ class ApiService {
       
       if (sql.includes('INSERT INTO quotations')) {
         const id = Date.now();
+        // params: [quotationNumber, quotationDate, companyId, toUser, fromLocation, toLocation, freightUpto8mt, destinationsJson, createdAt, updatedAt]
         const newQuotation = {
           id: id,
           quotation_number: params[0],
           quotation_date: params[1],
           company_id: params[2],
-          from_location: params[3],
-          to_location: params[4],
-          load_type: params[5],
-          trip_type: params[6],
-          material_details: params[7],
-          rate_per_ton: params[8],
-          rate_type: params[9],
-          applicable_gst: params[10],
-          total_freight_with_gst: params[11],
-          pay_by: params[12],
-          driver_cash_required: params[13],
-          payment_remark: params[14],
-          validity_days: params[15],
-          expiry_date: params[16],
-          demurrage_rate_per_day: params[17],
-          demurrage_remark: params[18],
-          terms_conditions: params[19],
-          status: params[20],
-          created_by: params[21],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          to_user: params[3],
+          from_location: params[4],
+          to_location: params[5],
+          freight_upto_8mt: params[6],
+          destinations_json: params[7],
+          created_at: params[8],
+          updated_at: params[9]
         };
         this.mockData.quotations.push(newQuotation);
         return { lastInsertRowid: id, changes: 1 };
@@ -96,18 +125,14 @@ class ApiService {
         if (quotationIndex !== -1) {
           // Update the quotation with the new values
           const [
-            company_id, from_location, to_location, load_type, trip_type,
-            material_details, rate_per_ton, rate_type, applicable_gst,
-            total_freight_with_gst, pay_by, driver_cash_required, payment_remark,
+            company_id, from_location, to_location,
             validity_days, expiry_date, demurrage_rate_per_day, demurrage_remark,
             terms_conditions
           ] = params;
           
           this.mockData.quotations[quotationIndex] = {
             ...this.mockData.quotations[quotationIndex],
-            company_id, from_location, to_location, load_type, trip_type,
-            material_details, rate_per_ton, rate_type, applicable_gst,
-            total_freight_with_gst, pay_by, driver_cash_required, payment_remark,
+            company_id, from_location, to_location, trip_type,
             validity_days, expiry_date, demurrage_rate_per_day, demurrage_remark,
             terms_conditions,
             updated_at: new Date().toISOString()
@@ -137,6 +162,8 @@ class ApiService {
         }
         return [];
       }
+      
+  // ...existing code...
       
       return [];
     }
@@ -348,25 +375,25 @@ class ApiService {
   async createQuotation(quotationData) {
     const {
       quotation_number, quotation_date, company_id, from_location, to_location,
-      load_type, trip_type, material_details, rate_per_ton, rate_type,
-      applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-      payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+
+      pay_by, driver_cash_required,
+      validity_days, expiry_date, demurrage_rate_per_day,
       demurrage_remark, terms_conditions, status, created_by
     } = quotationData;
     
     return await this.query(
       `INSERT INTO quotations (
         quotation_number, quotation_date, company_id, from_location, to_location,
-        load_type, trip_type, material_details, rate_per_ton, rate_type,
-        applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-        payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+
+        pay_by, driver_cash_required,
+        validity_days, expiry_date, demurrage_rate_per_day,
         demurrage_remark, terms_conditions, status, created_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         quotation_number, quotation_date, company_id, from_location, to_location,
-        load_type, trip_type, material_details, rate_per_ton, rate_type,
-        applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-        payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
+        trip_type,
+        pay_by, driver_cash_required,
+        validity_days, expiry_date, demurrage_rate_per_day,
         demurrage_remark, terms_conditions, status, created_by
       ]
     );

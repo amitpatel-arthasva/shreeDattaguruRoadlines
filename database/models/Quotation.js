@@ -4,28 +4,25 @@ class Quotation {
   static create(quotationData) {
     const {
       quotation_number, quotation_date, company_id, from_location, to_location,
-      load_type, trip_type, material_details, rate_per_ton, rate_type,
-      applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-      payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-      demurrage_remark, terms_conditions, status, created_by
+
+
+      status, created_by
     } = quotationData;
     
     const sql = `
       INSERT INTO quotations (
         quotation_number, quotation_date, company_id, from_location, to_location,
-        load_type, trip_type, material_details, rate_per_ton, rate_type,
-        applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-        payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-        demurrage_remark, terms_conditions, status, created_by
+
+
+        status, created_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     return db.query(sql, [
       quotation_number, quotation_date, company_id, from_location, to_location,
-      load_type, trip_type, material_details, rate_per_ton, rate_type,
-      applicable_gst, total_freight_with_gst, pay_by, driver_cash_required,
-      payment_remark, validity_days, expiry_date, demurrage_rate_per_day,
-      demurrage_remark, terms_conditions, status, created_by
+
+
+      status, created_by
     ]);
   }
 

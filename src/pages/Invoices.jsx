@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFileInvoice, 
@@ -123,8 +124,6 @@ const Invoices = () => {
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
-
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -157,7 +156,7 @@ const Invoices = () => {
         </div>
       ) : (
         <>
-          {/* Invoice Content */}
+          {/* Invoice Layout */}
           {invoices.length === 0 ? (
             <div className="text-center py-12 flex flex-col items-center">
               <FontAwesomeIcon icon={faFileAlt} className="text-6xl text-gray-300 mb-4" />
@@ -173,13 +172,13 @@ const Invoices = () => {
                 {invoices.slice(0, 3).map((invoice) => (
                   <div key={invoice.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
                     <div className="p-6">
-                      {/* Action Buttons */}
-                      <div className="flex justify-end items-start mb-4">
+                      {/* Download button */}
+                      <div className="flex justify-end items-end mb-1">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleDownloadPdf(invoice.id)}
                             disabled={isGeneratingPdf[invoice.id]}
-                            className="text-green-600 hover:text-green-700 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-primary-400 hover:text-primary-300 p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title={isGeneratingPdf[invoice.id] ? "Generating PDF..." : "Download PDF"}
                           >
                             <FontAwesomeIcon 
@@ -190,7 +189,7 @@ const Invoices = () => {
                         </div>
                       </div>
 
-                      {/* Invoice Number */}
+                      {/* Invoice Info */}
                       <div className="mb-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
                           <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400" />
@@ -199,7 +198,7 @@ const Invoices = () => {
                         <p className="text-sm text-gray-600">LR: {invoice.lorryReceiptNumber}</p>
                       </div>
 
-                      {/* Consignor & Consignee Info */}
+                      {/* Consignor/Consignee Info */}
                       <div className="mb-4">
                         <div className="mb-2">
                           <p className="text-sm text-gray-600 mb-1">
@@ -213,9 +212,9 @@ const Invoices = () => {
                         </div>
                       </div>
 
-                      {/* Truck & Amount */}
+                      {/* Truck & Amount Info */}
                       <div className="mb-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-2">
                           <FontAwesomeIcon icon={faTruck} className="text-primary-400" />
                           <span className="text-sm font-medium text-gray-700">Truck:</span>
                           <span className="text-sm text-gray-600">{invoice.truckNumber || 'N/A'}</span>
@@ -223,16 +222,14 @@ const Invoices = () => {
                       </div>
 
                       {/* Date & Amount */}
-                      <div className="text-sm text-gray-500 border-t pt-3">
-                        <div className="flex justify-between items-center">
-                          <span className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
-                            {formatDate(invoice.date)}
-                          </span>
-                          <span className="text-lg font-bold text-primary-400">
-                            ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
-                          </span>
-                        </div>
+                      <div className="flex justify-between items-center text-sm text-gray-500 border-t pt-3">
+                        <span className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
+                          {formatDate(invoice.date)}
+                        </span>
+                        <span className="text-lg font-bold text-primary-400">
+                          ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -246,7 +243,7 @@ const Invoices = () => {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice No</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LR No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LR Number</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck</th>
@@ -261,11 +258,11 @@ const Invoices = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <FontAwesomeIcon icon={faFileInvoice} className="text-primary-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">#{invoice.invoiceNumber}</span>
+                              <span className="text-sm font-medium text-gray-900">{invoice.invoiceNumber}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {invoice.lorryReceiptNumber}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{invoice.lorryReceiptNumber}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{invoice.consignor?.consignorName || 'N/A'}</div>
@@ -273,14 +270,16 @@ const Invoices = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{invoice.consignee?.consigneeName || 'N/A'}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {invoice.truckNumber || 'N/A'}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{invoice.truckNumber || 'N/A'}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {formatDate(invoice.date)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-400">
-                            ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-bold text-primary-400">
+                              ₹{(typeof invoice.totalAmount === 'number' ? invoice.totalAmount : parseFloat(invoice.totalAmount) || 0).toFixed(2)}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="flex justify-end gap-2">

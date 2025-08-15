@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 class UserController {
   static async getAll(req, res) {
     try {
-      const users = User.getAll();
+      const users = await User.getAll();
       res.json({ success: true, data: users });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -14,7 +14,7 @@ class UserController {
   static async getById(req, res) {
     try {
       const { id } = req.params;
-      const user = User.findById(id);
+      const user = await User.findById(id);
       
       if (!user) {
         return res.status(404).json({ success: false, error: 'User not found' });
@@ -30,13 +30,14 @@ class UserController {
       const { name, email, phonenumber, password, role = 'user' } = req.body;
       
       // Check if user already exists
-      const existingUser = User.findByEmail(email);
+      const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ 
           success: false, 
           error: 'User with this email already exists' 
         });
-      }      // Hash password
+      }
+      // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
       
       const result = User.create({
@@ -65,7 +66,7 @@ class UserController {
         delete updateData.password;
       }
       
-      const result = User.update(id, updateData);
+      const result = await User.update(id, updateData);
       
       if (result.changes === 0) {
         return res.status(404).json({ success: false, error: 'User not found' });
@@ -80,7 +81,7 @@ class UserController {
   static async delete(req, res) {
     try {
       const { id } = req.params;
-      const result = User.delete(id);
+      const result = await User.delete(id);
       
       if (result.changes === 0) {
         return res.status(404).json({ success: false, error: 'User not found' });
@@ -95,17 +96,16 @@ class UserController {
     try {
       const { email, password } = req.body;
       
-      const user = User.findByEmail(email);
+      const user = await User.findByEmail(email);
       if (!user) {
         return res.status(401).json({ success: false, error: 'Invalid credentials' });
-      }      const isValid = await bcrypt.compare(password, user.password_hash);
+      }
+      const isValid = await bcrypt.compare(password, user.password_hash);
       if (!isValid) {
         return res.status(401).json({ success: false, error: 'Invalid credentials' });
       }
-      
       // Remove password hash from response
       delete user.password_hash;
-      
       res.json({ success: true, data: user });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });

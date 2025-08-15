@@ -1,334 +1,144 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faBuilding, 
-  faMapMarkerAlt, 
-  faBox, 
-  faMoneyBill, 
-  faCalendarAlt,
-  faPlus,
-  faTrash,
   faSave,
   faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../components/common/ToastSystem';
 import quotationService from '../services/quotationService';
-import companyService from '../services/companyService';
 
 const QuotationForm = () => {
+  // Add row handler for destinations
+  const handleAddDestinationRow = () => {
+    setFormData(prev => ({
+      ...prev,
+      destinations: [
+        ...prev.destinations,
+        { srNo: prev.destinations.length + 1, destination: '', freight: '' }
+      ]
+    }));
+  };
   const navigate = useNavigate();
   const { id } = useParams();
   const toast = useToast();
   
   const [formData, setFormData] = useState({
-    // Company details
-    quoteToCompany: {
-      companyId: '',
-      companyName: '',
-      address: '',
-      city: '',
-      state: '',
-      pinCode: '',
-      gstNumber: '',
-      panNumber: ''
-    },
-    
-    // Trip details
-    tripDetails: {
-      from: '',
-      to: '',
-      fullOrPartLoad: 'Full Load',
-      tripType: 'One Way'
-    },
-    
-    // Material details
-    materialDetails: [
-      {
-        materialName: '',
-        quantity: '',
-        unit: 'Units',
-        description: ''
-      }
-    ],
-    
-    // Freight breakup
-    freightBreakup: {
-      rate: {
-        value: '',
-        type: 'Per Ton'
-      },
-      applicableGST: '18%',
-      totalFreightWithGst: 0
-    },
-    
-    // Payment terms
-    paymentTerms: {
-      payBy: 'Consignee',
-      driverCashRequired: '',
-      paymentRemark: ''
-    },
-    
-    // Quotation validity
-    quotationValidity: {
-      validUpTo: {
-        type: 'Days',
-        value: 30
-      },
-      expiryDate: null
-    },
-    
-    // Demurrage details
-    demurrageDetails: {
-      demurrageRatePerDay: '',
-      demurrageRemark: ''
-    },
-    
-    // Terms and conditions
-    termsAndConditions: ''
+  quotationNumber: '',
+    date: new Date().toISOString().split('T')[0],
+    companyName: '',
+    location: '',
+    attentionTo: '',
+    destinations: [
+      { srNo: 1, destination: '', freight: '' },
+      { srNo: 2, destination: '', freight: '' },
+      { srNo: 3, destination: '', freight: '' },
+      { srNo: 4, destination: '', freight: '' },
+      { srNo: 5, destination: '', freight: '' },
+      { srNo: 6, destination: '', freight: '' }
+    ]
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [companies, setCompanies] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [quotationNumber, setQuotationNumber] = useState('');
 
   useEffect(() => {
-    loadCompanies();
+    const loadQuotation = async (quotationId) => {
+      try {
+        const response = await quotationService.getQuotationById(quotationId);
+        if (response.success) {
+          const quotation = response.data.quotation;
+          setFormData({
+            quotationNumber: quotation.quotationNumber || '',
+            date: quotation.date || new Date().toISOString().split('T')[0],
+            companyName: quotation.companyName || '',
+            location: quotation.location || '',
+            attentionTo: quotation.toUser || '',
+            destinations: quotation.destinations || [
+              { srNo: 1, destination: '', freight: '' },
+              { srNo: 2, destination: '', freight: '' },
+              { srNo: 3, destination: '', freight: '' },
+              { srNo: 4, destination: '', freight: '' },
+              { srNo: 5, destination: '', freight: '' },
+              { srNo: 6, destination: '', freight: '' }
+            ]
+          });
+          setQuotationNumber(quotation.quotationNumber);
+        }
+      } catch (error) {
+        console.error('Error loading quotation:', error);
+        toast.error('Failed to load quotation details');
+      }
+    };
+
+    const generateQuotationNumber = async () => {
+      try {
+        const response = await quotationService.generateQuotationNumber();
+        setQuotationNumber(response);
+      } catch (error) {
+        console.error('Error generating quotation number:', error);
+        const fallbackNumber = `QUO-${new Date().getFullYear()}${Date.now().toString().slice(-3)}`;
+        setQuotationNumber(fallbackNumber);
+      }
+    };
+
     if (id) {
       setIsEditMode(true);
       loadQuotation(id);
     } else {
       generateQuotationNumber();
     }
-  }, [id]);
+  }, [id, toast]);
 
-  const loadCompanies = async () => {
-    try {
-      const response = await companyService.getCompanies();
-      if (response.success) {
-        setCompanies(response.data.companies || []);
-      }
-    } catch (error) {
-      console.error('Error loading companies:', error);
-      toast.error('Failed to load companies');
-    }
-  };
-
-  const loadQuotation = async (quotationId) => {
-    try {
-      const response = await quotationService.getQuotationById(quotationId);
-      if (response.success) {
-        const quotation = response.data.quotation;
-        setFormData({
-          quoteToCompany: {
-            companyId: quotation.quoteToCompany?.companyId || '',
-            companyName: quotation.quoteToCompany?.companyName || '',
-            address: quotation.quoteToCompany?.address || '',
-            city: quotation.quoteToCompany?.city || '',
-            state: quotation.quoteToCompany?.state || '',
-            pinCode: quotation.quoteToCompany?.pinCode || '',
-            gstNumber: quotation.quoteToCompany?.gstNumber || '',
-            panNumber: quotation.quoteToCompany?.panNumber || ''
-          },
-          tripDetails: {
-            from: quotation.tripDetails?.from || '',
-            to: quotation.tripDetails?.to || '',
-            fullOrPartLoad: quotation.tripDetails?.fullOrPartLoad || 'Full Load',
-            tripType: quotation.tripDetails?.tripType || 'One Way'
-          },
-          materialDetails: quotation.materialDetails?.length > 0 ? quotation.materialDetails : [
-            {
-              materialName: '',
-              quantity: '',
-              unit: 'Units',
-              description: ''
-            }
-          ],
-          freightBreakup: {
-            rate: {
-              value: quotation.freightBreakup?.rate?.value || '',
-              type: quotation.freightBreakup?.rate?.type || 'Per Ton'
-            },
-            applicableGST: quotation.freightBreakup?.applicableGST || '18%',
-            totalFreightWithGst: quotation.freightBreakup?.totalFreightWithGst || 0
-          },
-          paymentTerms: {
-            payBy: quotation.paymentTerms?.payBy || 'Consignee',
-            driverCashRequired: quotation.paymentTerms?.driverCashRequired || '',
-            paymentRemark: quotation.paymentTerms?.paymentRemark || ''
-          },
-          quotationValidity: {
-            validUpTo: {
-              type: quotation.quotationValidity?.validUpTo?.type || 'Days',
-              value: quotation.quotationValidity?.validUpTo?.value || 30
-            },
-            expiryDate: quotation.quotationValidity?.expiryDate || null
-          },
-          demurrageDetails: {
-            demurrageRatePerDay: quotation.demurrageDetails?.demurrageRatePerDay || '',
-            demurrageRemark: quotation.demurrageDetails?.demurrageRemark || ''
-          },
-          termsAndConditions: quotation.termsAndConditions || ''
-        });
-        setQuotationNumber(quotation.quotationNumber);
-      }
-    } catch (error) {
-      console.error('Error loading quotation:', error);
-      toast.error('Failed to load quotation details');
-    }
-  };
-
-  const generateQuotationNumber = async () => {
-    try {
-      const response = await quotationService.generateQuotationNumber();
-      setQuotationNumber(response);
-    } catch (error) {
-      console.error('Error generating quotation number:', error);
-      const fallbackNumber = `QUO-${new Date().getFullYear()}${Date.now().toString().slice(-3)}`;
-      setQuotationNumber(fallbackNumber);
-    }
-  };
-
-  const handleInputChange = (section, field, value) => {
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
+      [field]: value
     }));
     
     // Clear error when user starts typing
-    if (errors[`${section}.${field}`]) {
+    if (errors[field]) {
       setErrors(prev => ({
         ...prev,
-        [`${section}.${field}`]: ''
+        [field]: ''
       }));
     }
   };
 
-  const handleNestedInputChange = (section, nestedSection, field, value) => {
+  const handleDestinationChange = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [nestedSection]: {
-          ...prev[section][nestedSection],
-          [field]: value
-        }
-      }
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[`${section}.${nestedSection}.${field}`]) {
-      setErrors(prev => ({
-        ...prev,
-        [`${section}.${nestedSection}.${field}`]: ''
-      }));
-    }
-  };
-
-  const handleMaterialChange = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      materialDetails: prev.materialDetails.map((material, i) => 
-        i === index ? { ...material, [field]: value } : material
+      destinations: prev.destinations.map((dest, i) => 
+        i === index ? { ...dest, [field]: value } : dest
       )
     }));
   };
 
-  const addMaterial = () => {
-    setFormData(prev => ({
-      ...prev,
-      materialDetails: [
-        ...prev.materialDetails,
-        {
-          materialName: '',
-          quantity: '',
-          unit: 'Units',
-          description: ''
-        }
-      ]
-    }));
-  };
-
-  const removeMaterial = (index) => {
-    if (formData.materialDetails.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        materialDetails: prev.materialDetails.filter((_, i) => i !== index)
-      }));
-    }
-  };
-
-  const handleCompanySelect = (companyId) => {
-    const selectedCompany = companies.find(company => company.id == companyId);
-    if (selectedCompany) {
-      setFormData(prev => ({
-        ...prev,
-        quoteToCompany: {
-          companyId: selectedCompany.id,
-          companyName: selectedCompany.name,
-          address: selectedCompany.address || '',
-          city: selectedCompany.city || '',
-          state: selectedCompany.state || '',
-          pinCode: selectedCompany.pin_code || '',
-          gstNumber: selectedCompany.gstin || '',
-          panNumber: selectedCompany.pan || ''
-        }
-      }));
-    }
-  };
-
-  const calculateTotalFreight = () => {
-    const rateValue = parseFloat(formData.freightBreakup.rate.value) || 0;
-    const gstPercentage = parseFloat(formData.freightBreakup.applicableGST.replace('%', '')) || 18;
-    const totalWithGst = rateValue * (1 + gstPercentage / 100);
-    
-    setFormData(prev => ({
-      ...prev,
-      freightBreakup: {
-        ...prev.freightBreakup,
-        totalFreightWithGst: totalWithGst
-      }
-    }));
-  };
-
-  useEffect(() => {
-    calculateTotalFreight();
-  }, [formData.freightBreakup.rate.value, formData.freightBreakup.applicableGST]);
-
   const validateForm = () => {
     const newErrors = {};
 
-    // Company validation
-    if (!formData.quoteToCompany.companyId) {
-      newErrors['quoteToCompany.companyId'] = 'Company is required';
+    // Basic validation
+    if (!formData.quotationNumber.trim()) {
+      newErrors['quotationNumber'] = 'Quotation number is required';
+    }
+    
+    if (!formData.companyName.trim()) {
+      newErrors['companyName'] = 'Company name is required';
+    }
+    
+    if (!formData.location.trim()) {
+      newErrors['location'] = 'Location is required';
     }
 
-    // Trip details validation
-    if (!formData.tripDetails.from.trim()) {
-      newErrors['tripDetails.from'] = 'From location is required';
-    }
-    if (!formData.tripDetails.to.trim()) {
-      newErrors['tripDetails.to'] = 'To location is required';
-    }
-
-    // Material details validation
-    formData.materialDetails.forEach((material, index) => {
-      if (!material.materialName.trim()) {
-        newErrors[`materialDetails.${index}.materialName`] = 'Material name is required';
-      }
-      if (!material.quantity.trim()) {
-        newErrors[`materialDetails.${index}.quantity`] = 'Quantity is required';
-      }
-    });
-
-    // Freight validation
-    if (!formData.freightBreakup.rate.value || parseFloat(formData.freightBreakup.rate.value) <= 0) {
-      newErrors['freightBreakup.rate.value'] = 'Valid rate is required';
+    // Destination validation - at least one destination should have both destination and freight
+    const hasValidDestination = formData.destinations.some(dest => 
+      dest.destination.trim() && dest.freight.trim()
+    );
+    
+    if (!hasValidDestination) {
+      newErrors['destinations'] = 'At least one destination with freight rate is required';
     }
 
     setErrors(newErrors);
@@ -344,12 +154,29 @@ const QuotationForm = () => {
 
     setIsSubmitting(true);
 
+    // Map formData to backend structure
+    const mappedData = {
+      quotationNumber: formData.quotationNumber,
+      quotationDate: formData.date,
+      quoteToCompany: {
+        companyName: formData.companyName,
+        companyLocation: formData.location,
+      },
+      toUser: formData.attentionTo,
+      destinations: (formData.destinations || [])
+        .filter(dest => dest.destination && dest.freight)
+        .map(dest => ({
+          destination: dest.destination,
+          freight: dest.freight
+        })),
+    };
+
     try {
       let response;
       if (isEditMode) {
-        response = await quotationService.updateQuotation(id, formData);
+        response = await quotationService.updateQuotation(id, mappedData);
       } else {
-        response = await quotationService.createQuotation(formData);
+        response = await quotationService.createQuotation(mappedData);
       }
       
       if (response.success) {
@@ -368,55 +195,19 @@ const QuotationForm = () => {
 
   const resetForm = () => {
     setFormData({
-      quoteToCompany: {
-        companyId: '',
-        companyName: '',
-        address: '',
-        city: '',
-        state: '',
-        pinCode: '',
-        gstNumber: '',
-        panNumber: ''
-      },
-      tripDetails: {
-        from: '',
-        to: '',
-        fullOrPartLoad: 'Full Load',
-        tripType: 'One Way'
-      },
-      materialDetails: [
-        {
-          materialName: '',
-          quantity: '',
-          unit: 'Units',
-          description: ''
-        }
-      ],
-      freightBreakup: {
-        rate: {
-          value: '',
-          type: 'Per Ton'
-        },
-        applicableGST: '18%',
-        totalFreightWithGst: 0
-      },
-      paymentTerms: {
-        payBy: 'Consignee',
-        driverCashRequired: '',
-        paymentRemark: ''
-      },
-      quotationValidity: {
-        validUpTo: {
-          type: 'Days',
-          value: 30
-        },
-        expiryDate: null
-      },
-      demurrageDetails: {
-        demurrageRatePerDay: '',
-        demurrageRemark: ''
-      },
-      termsAndConditions: ''
+      quotationNumber: '',
+      date: new Date().toISOString().split('T')[0],
+      companyName: '',
+      location: '',
+      attentionTo: '',
+      destinations: [
+        { srNo: 1, destination: '', freight: '' },
+        { srNo: 2, destination: '', freight: '' },
+        { srNo: 3, destination: '', freight: '' },
+        { srNo: 4, destination: '', freight: '' },
+        { srNo: 5, destination: '', freight: '' },
+        { srNo: 6, destination: '', freight: '' }
+      ]
     });
     setErrors({});
   };
@@ -456,507 +247,215 @@ const QuotationForm = () => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Company Information */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faBuilding} className="text-primary-400" />
-            Company Information
-          </h2>
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md print:shadow-none">
+        {/* Printable Form Content */}
+        <div className="p-8 print:p-6">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Section 2: Reference & Date */}
+          <div className="flex justify-between items-end mb-8">
+            <div className="flex-1 mr-8">
+              <span className="text-sm font-medium">Ref. No.</span>
+              <input
+                type="text"
+                value={formData.quotationNumber}
+                onChange={(e) => handleInputChange('quotationNumber', e.target.value)}
+                className="block w-full border-0 border-b border-gray-400 bg-transparent px-0 py-1 text-base focus:border-black focus:ring-0"
+                placeholder="Enter quotation number"
+                required
+              />
+              {getError('quotationNumber') && (
+                <p className="text-red-500 text-sm mt-1">{getError('quotationNumber')}</p>
+              )}
+            </div>
+            <div className="flex-1">
+              <span className="text-sm font-medium">Date</span>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => handleInputChange('date', e.target.value)}
+                className="block w-full border-0 border-b border-gray-400 bg-transparent px-0 py-1 text-base focus:border-black focus:ring-0"
+                required
+              />
+              {getError('date') && (
+                <p className="text-red-500 text-sm mt-1">{getError('date')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Section 3: Recipient */}
+          <div className="space-y-4 mb-8">
+            <div className="text-base font-medium">To,</div>
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Company *
-              </label>
-              <select
-                value={formData.quoteToCompany.companyId}
-                onChange={(e) => handleCompanySelect(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                  getError('quoteToCompany.companyId') ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select a company</option>
-                {companies.map(company => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
-                  </option>
+              <span className="text-sm">Company Name</span>
+              <input
+                type="text"
+                value={formData.companyName}
+                onChange={(e) => handleInputChange('companyName', e.target.value)}
+                className="block w-full border-0 border-b border-gray-400 bg-transparent px-0 py-1 text-base focus:border-black focus:ring-0 mt-1"
+                placeholder="Enter company name"
+                required
+              />
+              {getError('companyName') && (
+                <p className="text-red-500 text-sm mt-1">{getError('companyName')}</p>
+              )}
+            </div>
+            
+            <div>
+              <span className="text-sm">Location</span>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                className="block w-full border-0 border-b border-gray-400 bg-transparent px-0 py-1 text-base focus:border-black focus:ring-0 mt-1"
+                placeholder="Enter location"
+                required
+              />
+              {getError('location') && (
+                <p className="text-red-500 text-sm mt-1">{getError('location')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Section 4: Subject */}
+          <div className="space-y-3 mb-8">
+            <div className="text-base font-medium">
+              Sub: Quotation for Transportation Ex Palghar to Various Destination
+            </div>
+            
+            <div className="flex items-end">
+              <span className="text-sm font-medium mr-3">Kind Attn:</span>
+              <input
+                type="text"
+                value={formData.attentionTo}
+                onChange={(e) => handleInputChange('attentionTo', e.target.value)}
+                className="flex-1 border-0 border-b border-gray-400 bg-transparent px-0 py-1 text-base focus:border-black focus:ring-0"
+                placeholder="Enter name"
+              />
+            </div>
+          </div>
+
+          {/* Section 5: Opening Paragraph */}
+          <div className="space-y-3 mb-8">
+            <div className="text-base">Respected sir,</div>
+            <div className="text-base">
+              With ref. to the above subject we are giving most competitive rates as under:
+            </div>
+          </div>
+
+          {/* Section 6: Rates Table */}
+          <div className="mb-8">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-black">
+                  <th className="text-left py-2 w-16 font-medium">Sr. No.</th>
+                  <th className="text-left py-2 font-medium">Destination</th>
+                  <th className="text-right py-2 w-48 font-medium">Freight up to 8MT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.destinations.map((dest, index) => (
+                  <tr key={index} className="border-b border-gray-300">
+                    <td className="py-3 text-center font-medium">{dest.srNo}</td>
+                    <td className="py-3">
+                      <input
+                        type="text"
+                        value={dest.destination}
+                        onChange={(e) => handleDestinationChange(index, 'destination', e.target.value)}
+                        className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-1 focus:border-gray-600 focus:ring-0"
+                        placeholder="Enter destination"
+                      />
+                    </td>
+                    <td className="py-3">
+                      <input
+                        type="text"
+                        value={dest.freight}
+                        onChange={(e) => handleDestinationChange(index, 'freight', e.target.value)}
+                        className="w-full text-right border-0 border-b border-gray-300 bg-transparent px-0 py-1 focus:border-gray-600 focus:ring-0"
+                        placeholder="Enter freight rate"
+                      />
+                    </td>
+                  </tr>
                 ))}
-              </select>
-              {getError('quoteToCompany.companyId') && (
-                <p className="text-red-500 text-sm mt-1">{getError('quoteToCompany.companyId')}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                GST Number
-              </label>
-              <input
-                type="text"
-                value={formData.quoteToCompany.gstNumber}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                placeholder="GST Number"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address
-              </label>
-              <input
-                type="text"
-                value={formData.quoteToCompany.address}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                placeholder="Company Address"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                City
-              </label>
-              <input
-                type="text"
-                value={formData.quoteToCompany.city}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                placeholder="City"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                State
-              </label>
-              <input
-                type="text"
-                value={formData.quoteToCompany.state}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                placeholder="State"
-              />
+              </tbody>
+            </table>
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={handleAddDestinationRow}
+                className="px-4 py-2 bg-amber-400 text-white rounded-lg hover:bg-orange-500 transition-colors"
+              >
+                + Add Row
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Trip Details */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-green-600" />
-            Trip Details
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                From Location *
-              </label>
-              <input
-                type="text"
-                value={formData.tripDetails.from}
-                onChange={(e) => handleInputChange('tripDetails', 'from', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                  getError('tripDetails.from') ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="From Location"
-              />
-              {getError('tripDetails.from') && (
-                <p className="text-red-500 text-sm mt-1">{getError('tripDetails.from')}</p>
-              )}
-            </div>
+          {/* Section 7: Notes */}
+          <div className="space-y-2 mb-8">
+            <ul className="space-y-1 text-sm">
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Kindly Insure your valued material at your end.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Loading / unloading charges & other charges will be extra as actual paid by us.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Detention charges will be extra as per destination / vehicle.</span>
+              </li>
+            </ul>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                To Location *
-              </label>
-              <input
-                type="text"
-                value={formData.tripDetails.to}
-                onChange={(e) => handleInputChange('tripDetails', 'to', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                  getError('tripDetails.to') ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="To Location"
-              />
-              {getError('tripDetails.to') && (
-                <p className="text-red-500 text-sm mt-1">{getError('tripDetails.to')}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Load Type
-              </label>
-              <select
-                value={formData.tripDetails.fullOrPartLoad}
-                onChange={(e) => handleInputChange('tripDetails', 'fullOrPartLoad', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="Full Load">Full Load</option>
-                <option value="Part Load">Part Load</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Trip Type
-              </label>
-              <select
-                value={formData.tripDetails.tripType}
-                onChange={(e) => handleInputChange('tripDetails', 'tripType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="One Way">One Way</option>
-                <option value="Round Trip">Round Trip</option>
-              </select>
+          {/* Section 8: Closing Paragraph */}
+          <div className="mb-12">
+            <div className="text-base">
+              Thanking you & awaiting your favorable reply.
             </div>
           </div>
-        </div>
 
-        {/* Material Details */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <FontAwesomeIcon icon={faBox} className="text-orange-600" />
-              Material Details
-            </h2>
+          {/* Section 9: Signature Block */}
+          <div className="flex justify-end mb-8">
+            <div className="text-right space-y-2">
+              <div className="text-base">Yours faithfully,</div>
+              <div className="text-base font-medium mt-8">For Shree Dattaguru Road Lines</div>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 print:hidden">
             <button
               type="button"
-              onClick={addMaterial}
-              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-colors"
+              onClick={async () => {
+                const result = await quotationService.fillDummyQuotation();
+                if (result.success) {
+                  toast.success('Dummy quotation created');
+                  navigate('/quotations');
+                } else {
+                  toast.error(result.error || 'Failed to create dummy quotation');
+                }
+              }}
+              className="px-6 py-3 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              <FontAwesomeIcon icon={faPlus} />
-              Add Material
+              Fill Dummy Data
+            </button>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Reset
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FontAwesomeIcon icon={faSave} />
+              {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Quotation' : 'Create Quotation')}
             </button>
           </div>
-          
-          <div className="space-y-4">
-            {formData.materialDetails.map((material, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-medium text-gray-900">Material {index + 1}</h3>
-                  {formData.materialDetails.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeMaterial(index)}
-                      className="text-red-600 hover:text-red-800 p-1"
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Material Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={material.materialName}
-                      onChange={(e) => handleMaterialChange(index, 'materialName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                        getError(`materialDetails.${index}.materialName`) ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Material Name"
-                    />
-                    {getError(`materialDetails.${index}.materialName`) && (
-                      <p className="text-red-500 text-sm mt-1">{getError(`materialDetails.${index}.materialName`)}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Quantity *
-                    </label>
-                    <input
-                      type="text"
-                      value={material.quantity}
-                      onChange={(e) => handleMaterialChange(index, 'quantity', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                        getError(`materialDetails.${index}.quantity`) ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Quantity"
-                    />
-                    {getError(`materialDetails.${index}.quantity`) && (
-                      <p className="text-red-500 text-sm mt-1">{getError(`materialDetails.${index}.quantity`)}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Unit
-                    </label>
-                    <select
-                      value={material.unit}
-                      onChange={(e) => handleMaterialChange(index, 'unit', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                    >
-                      <option value="Units">Units</option>
-                      <option value="Kg">Kg</option>
-                      <option value="Tons">Tons</option>
-                      <option value="Bags">Bags</option>
-                      <option value="Boxes">Boxes</option>
-                      <option value="Pieces">Pieces</option>
-                      <option value="Meters">Meters</option>
-                      <option value="Bales">Bales</option>
-                      <option value="Rolls">Rolls</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      value={material.description}
-                      onChange={(e) => handleMaterialChange(index, 'description', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                      placeholder="Description"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Freight Details */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faMoneyBill} className="text-green-600" />
-            Freight Details
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rate *
-              </label>
-              <input
-                type="number"
-                value={formData.freightBreakup.rate.value}
-                onChange={(e) => handleNestedInputChange('freightBreakup', 'rate', 'value', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-                  getError('freightBreakup.rate.value') ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Rate"
-                step="0.01"
-                min="0"
-              />
-              {getError('freightBreakup.rate.value') && (
-                <p className="text-red-500 text-sm mt-1">{getError('freightBreakup.rate.value')}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rate Type
-              </label>
-              <select
-                value={formData.freightBreakup.rate.type}
-                onChange={(e) => handleNestedInputChange('freightBreakup', 'rate', 'type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="Per Ton">Per Ton</option>
-                <option value="Per Trip">Per Trip</option>
-                <option value="Per KM">Per KM</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Applicable GST
-              </label>
-              <select
-                value={formData.freightBreakup.applicableGST}
-                onChange={(e) => handleInputChange('freightBreakup', 'applicableGST', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="0%">0%</option>
-                <option value="5%">5%</option>
-                <option value="12%">12%</option>
-                <option value="18%">18%</option>
-                <option value="28%">28%</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-medium text-gray-900">Total Freight with GST:</span>
-              <span className="text-2xl font-bold text-primary-600">
-                ₹{formData.freightBreakup.totalFreightWithGst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Terms */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Terms</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pay By
-              </label>
-              <select
-                value={formData.paymentTerms.payBy}
-                onChange={(e) => handleInputChange('paymentTerms', 'payBy', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="Consignee">Consignee</option>
-                <option value="Consignor">Consignor</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Driver Cash Required
-              </label>
-              <input
-                type="number"
-                value={formData.paymentTerms.driverCashRequired}
-                onChange={(e) => handleInputChange('paymentTerms', 'driverCashRequired', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                placeholder="Amount"
-                step="0.01"
-                min="0"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Remark
-              </label>
-              <textarea
-                value={formData.paymentTerms.paymentRemark}
-                onChange={(e) => handleInputChange('paymentTerms', 'paymentRemark', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                rows="3"
-                placeholder="Payment terms and conditions..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Quotation Validity */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-600" />
-            Quotation Validity
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Valid Up To
-              </label>
-              <select
-                value={formData.quotationValidity.validUpTo.type}
-                onChange={(e) => handleNestedInputChange('quotationValidity', 'validUpTo', 'type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-              >
-                <option value="Days">Days</option>
-                <option value="Date">Specific Date</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {formData.quotationValidity.validUpTo.type === 'Days' ? 'Number of Days' : 'Expiry Date'}
-              </label>
-              {formData.quotationValidity.validUpTo.type === 'Days' ? (
-                <input
-                  type="number"
-                  value={formData.quotationValidity.validUpTo.value}
-                  onChange={(e) => handleNestedInputChange('quotationValidity', 'validUpTo', 'value', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                  placeholder="30"
-                  min="1"
-                />
-              ) : (
-                <input
-                  type="date"
-                  value={formData.quotationValidity.validUpTo.value || ''}
-                  onChange={(e) => handleNestedInputChange('quotationValidity', 'validUpTo', 'value', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Demurrage Details */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Demurrage Details</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Demurrage Rate Per Day
-              </label>
-              <input
-                type="number"
-                value={formData.demurrageDetails.demurrageRatePerDay}
-                onChange={(e) => handleInputChange('demurrageDetails', 'demurrageRatePerDay', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                placeholder="Rate per day"
-                step="0.01"
-                min="0"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Demurrage Remark
-              </label>
-              <input
-                type="text"
-                value={formData.demurrageDetails.demurrageRemark}
-                onChange={(e) => handleInputChange('demurrageDetails', 'demurrageRemark', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                placeholder="Demurrage terms..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Terms and Conditions */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Terms and Conditions</h2>
-          
-          <textarea
-            value={formData.termsAndConditions}
-            onChange={(e) => setFormData(prev => ({ ...prev, termsAndConditions: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-            rows="6"
-            placeholder="Enter terms and conditions..."
-          />
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={resetForm}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FontAwesomeIcon icon={faSave} />
-            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Quotation' : 'Create Quotation')}
-          </button>
         </div>
       </form>
     </div>

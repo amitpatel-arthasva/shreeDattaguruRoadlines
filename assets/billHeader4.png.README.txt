@@ -1,0 +1,3 @@
+// This is a placeholder for the billHeader4.png image used in the PDF header.
+// Place your actual header image at: assets/billHeader4.png
+// Example usage: The Electron PDF template expects this file to exist for the header.

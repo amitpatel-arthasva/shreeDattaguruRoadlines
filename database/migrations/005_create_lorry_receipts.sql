@@ -3,12 +3,13 @@ CREATE TABLE IF NOT EXISTS lorry_receipts (
     
     -- LR Details
     cn_number TEXT NOT NULL UNIQUE,
-    truck_number TEXT,
+    truck_number TEXT, -- Only one column for lorry/truck number
     lr_date DATE NOT NULL,
     to_location TEXT NOT NULL,
     from_location TEXT NOT NULL,
     
     -- Company References
+    company_id INTEGER,
     consignor_id INTEGER NOT NULL,
     consignee_id INTEGER NOT NULL,
     
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS lorry_receipts (
     
     -- Other Details
     delivery_at TEXT,
+    eway_bill TEXT,
     total REAL DEFAULT 0,
     remarks TEXT,
     
@@ -45,6 +47,7 @@ CREATE TABLE IF NOT EXISTS lorry_receipts (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     -- Foreign Keys
+    FOREIGN KEY (company_id) REFERENCES companies(id),
     FOREIGN KEY (consignor_id) REFERENCES companies(id),
     FOREIGN KEY (consignee_id) REFERENCES companies(id),
     FOREIGN KEY (truck_id) REFERENCES trucks(id),

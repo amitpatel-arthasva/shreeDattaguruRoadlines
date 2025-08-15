@@ -1,4 +1,46 @@
 /**
+ * Generate a PDF for a Memo using the memo print template (exact form layout)
+ * @param {Object} memoData - Memo data
+ * @param {Object} options - PDF generation options
+ * @returns {Promise<Blob>} - PDF blob
+ */
+const generateMemoPrintPdf = async (memoData, options = {}) => {
+  try {
+    if (!memoData || typeof memoData !== 'object') {
+      throw new Error('Memo data is missing or invalid');
+    }
+    // Import the template dynamically
+    const { default: memoPrintTemplate } = await import('../templates/memoPrintTemplate.js');
+    // Generate HTML content using the print template
+    const htmlContent = memoPrintTemplate(memoData);
+    // Extract memo number for filename
+    let memoNumber = memoData.memo_number || memoData.memoNumber || memoData.id || 'Unknown';
+    const cleanMemoNumber = String(memoNumber).replace(/[^a-zA-Z0-9-_]/g, '-');
+    const finalFilename = 'Memo_' + cleanMemoNumber;
+    // Set default PDF options for memo print
+    const defaultOptions = {
+      filename: finalFilename,
+      pdfOptions: {
+        format: 'A4',
+        landscape: false,
+        printBackground: true,
+        margin: {
+          top: '1cm',
+          right: '1cm',
+          bottom: '1cm',
+          left: '1cm'
+        },
+        preferCSSPageSize: false
+      },
+      ...options
+    };
+    return generatePdfFromHtml(htmlContent, defaultOptions);
+  } catch (error) {
+    console.error('Error generating memo print PDF:', error);
+    throw error;
+  }
+};
+/**
  * PDF Service for generating PDFs in Electron environment
  * Uses Electron's built-in webContents.printToPDF instead of Puppeteer
  */
@@ -298,6 +340,7 @@ export {
   generatePdfFromTemplate,
   generateLorryReceiptPrintPdf,
   generateQuotationPdf,
+  generateMemoPrintPdf,
   closeBrowserInstance
 };
 

@@ -12,6 +12,17 @@ class DashboardService {
       const lorryReceiptsResult = await apiService.query('SELECT COUNT(*) as total FROM lorry_receipts');
       const totalLorryReceipts = lorryReceiptsResult[0]?.total || 0;
 
+      // Get memos count
+      let totalMemos = 0;
+      try {
+        const memosResult = await apiService.query('SELECT COUNT(*) as total FROM memos');
+        totalMemos = memosResult[0]?.total || 0;
+      } catch {
+        // If memos table doesn't exist yet, default to 0
+        console.log('Memos table not found, defaulting to 0');
+        totalMemos = 0;
+      }
+
       // Get companies count (only active)
       const companiesResult = await apiService.query('SELECT COUNT(*) as total FROM companies WHERE is_active = 1');
       const totalCompanies = companiesResult[0]?.total || 0;
@@ -29,6 +40,7 @@ class DashboardService {
         data: {
           quotations: { total: totalQuotations },
           lorryReceipts: { total: totalLorryReceipts },
+          memos: { total: totalMemos },
           invoices: { total: totalLorryReceipts }, // Same as lorry receipts
           master: {
             trucks: totalTrucks,

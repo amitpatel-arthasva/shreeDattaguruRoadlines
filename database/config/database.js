@@ -9,7 +9,13 @@ const __dirname = path.dirname(__filename);
 class DatabaseManager {
   constructor() {
     this.db = null;
-    this.dbPath = path.join(__dirname, '../../data/roadlines.db');
+  // Use user data directory in production, project root in development
+    if (process.env.NODE_ENV === 'production') {
+      const userDataPath = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME + "/.local/share");
+      this.dbPath = path.join(userDataPath, 'ShreeDattaguruRoadlines', 'roadlines.db');
+    } else {
+      this.dbPath = path.join(__dirname, '../../roadlines.db');
+    }
   }
   async initialize() {
     try {
@@ -18,6 +24,7 @@ class DatabaseManager {
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
+      console.log('Database path:', this.dbPath); // Debug log
 
       // Initialize database
       this.db = new Database(this.dbPath);
@@ -30,7 +37,64 @@ class DatabaseManager {
       // Run seeders
       await this.runSeeders();
       
-      console.log('Database initialized successfully at:', this.dbPath);
+    console.log('Database initialized successfully at:', this.dbPath);
+    console.log('SQLite DB Path:', path.resolve(this.dbPath)); // Debug log to confirm database file path
+
+      // Ensure quotations table has all required columns from migration file, with correct types/order
+      try {
+        const columns = this.db.prepare('PRAGMA table_info(quotations);').all();
+        const columnNames = columns.map(col => col.name);
+        // Columns and types as per migration file
+        const requiredColumns = [
+          { name: 'quotation_number', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'quotation_date', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'company_id', type: 'INTEGER NOT NULL DEFAULT 0' },
+          { name: 'to_user', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'destination', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'freight_upto_8mt', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'created_at', type: 'TEXT DEFAULT CURRENT_TIMESTAMP' },
+          { name: 'updated_at', type: 'TEXT DEFAULT CURRENT_TIMESTAMP' },
+          { name: 'q_company_name', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'company_location', type: 'TEXT NOT NULL DEFAULT ""' },
+          { name: 'destinations_json', type: 'TEXT NOT NULL DEFAULT ""' }
+        ];
+        for (const col of requiredColumns) {
+          if (!columnNames.includes(col.name)) {
+            this.db.exec(`ALTER TABLE quotations ADD COLUMN ${col.name} ${col.type}`);
+            console.log(`Added missing column ${col.name} to quotations table`);
+          }
+        }
+      } catch (err) {
+        console.error('Error ensuring quotations table schema:', err);
+      }
+      // Only drop and recreate quotations table if running in production/exe, not in VS Code/dev
+      try {
+        const columns = this.db.prepare('PRAGMA table_info(quotations);').all();
+        const columnNames = columns.map(col => col.name);
+        const isProduction = process.env.NODE_ENV === 'production' || process.env.IS_ELECTRON === 'true' || !!process.env.ELECTRON_RUN_AS_NODE;
+        if (!columnNames.includes('id') && isProduction) {
+          console.warn('Quotations table missing id column. Dropping and recreating table (production only).');
+          this.db.exec('DROP TABLE IF EXISTS quotations;');
+          // Migration SQL for quotations table
+          this.db.exec(`CREATE TABLE IF NOT EXISTS quotations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quotation_number TEXT NOT NULL,
+            quotation_date TEXT NOT NULL,
+            company_id INTEGER NOT NULL,
+            q_company_name TEXT NOT NULL,
+            company_location TEXT NOT NULL,
+            to_user TEXT NOT NULL,
+            destinations_json TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (company_id) REFERENCES companies(id)
+          );`);
+          console.log('Quotations table recreated with correct schema.');
+        }
+      } catch (err) {
+        console.error('Error ensuring quotations table primary key:', err);
+      }
+  // ...existing code...
     } catch (error) {
       console.error('Database initialization failed:', error);
       throw error;
@@ -38,7 +102,17 @@ class DatabaseManager {
   }
 
   async runMigrations() {
-    const migrationsDir = path.join(__dirname, '../migrations');
+    // Use correct migrations path for production and development
+    let migrationsDir;
+    if (process.env.NODE_ENV === 'production') {
+      // In production, migrations should be bundled with the app
+      migrationsDir = path.join(process.resourcesPath || __dirname, 'database', 'migrations');
+      if (!fs.existsSync(migrationsDir)) {
+        migrationsDir = path.join(__dirname, '../migrations'); // fallback for dev/test
+      }
+    } else {
+      migrationsDir = path.join(__dirname, '../migrations');
+    }
     if (!fs.existsSync(migrationsDir)) {
       console.log('No migrations directory found');
       return;
@@ -139,16 +213,26 @@ class DatabaseManager {
     }
 
     try {
+      // Debug log: print SQL and params before executing
+      console.log('Executing SQL:', sql);
+      console.log('With params:', params);
       if (sql.trim().toUpperCase().startsWith('SELECT')) {
         const stmt = this.db.prepare(sql);
         return stmt.all(params);
       } else {
         const stmt = this.db.prepare(sql);
-        return stmt.run(params);
+        const result = stmt.run(params);
+        console.log('Non-SELECT DB result:', JSON.stringify(result, null, 2));
+        // Always return a consistent object for non-SELECT queries
+        return {
+          success: typeof result.changes === 'number' ? result.changes > 0 : true,
+          changes: result.changes,
+          lastInsertRowid: result.lastInsertRowid
+        };
       }
     } catch (error) {
       console.error('Database query error:', error);
-      throw error;
+      return { success: false, error: error.message };
     }
   }
 

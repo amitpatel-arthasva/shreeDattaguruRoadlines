@@ -128,6 +128,7 @@ class LorryReceiptService {
           truckNumber: lr.truck_number || lr.truck_reg_number,
           driverName: lr.driver_name,
           driverPhone: lr.driver_phone,
+          ewayBill: lr.eway_bill,
           fromLocation: lr.from_location,
           toLocation: lr.to_location,
           freight: lr.freight,
@@ -290,6 +291,7 @@ class LorryReceiptService {
         actualWeight: lr.actual_weight,
         chargeableWeight: lr.chargeable_weight,
         deliveryAt: lr.delivery_at,
+        ewayBill: lr.eway_bill,
         remarks: lr.remarks,
         notes: lr.remarks, // Using remarks as notes for compatibility
         paymentType: lr.payment_type
@@ -339,8 +341,8 @@ class LorryReceiptService {
           nos, particulars,
           freight, hamali, aoc, door_delivery, collection, st_charge, extra_loading,
           actual_weight, chargeable_weight,
-          payment_type, delivery_at, total, remarks
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          payment_type, delivery_at, eway_bill, total, remarks
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;      const params = [
         cnNumber, // Auto-generated CN number
         lrData.truck_number,
@@ -364,6 +366,7 @@ class LorryReceiptService {
         lrData.chargeable_weight || 0,
         lrData.payment_type || 'paid',
         lrData.delivery_at,
+        lrData.eway_bill || '',
         lrData.total || 0,
         lrData.remarks || ''
       ];
@@ -416,6 +419,7 @@ class LorryReceiptService {
           chargeable_weight = ?,
           payment_type = ?,
           delivery_at = ?,
+          eway_bill = ?,
           total = ?,
           remarks = ?
         WHERE id = ?
@@ -443,6 +447,7 @@ class LorryReceiptService {
         lrData.chargeable_weight || 0,
         lrData.payment_type || 'paid',
         lrData.delivery_at,
+        lrData.eway_bill || '',
         lrData.total || 0,
         lrData.remarks || '',
         id

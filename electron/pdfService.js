@@ -5,6 +5,48 @@ import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import process from 'process';
 import lorryReceiptPrintTemplate from './lorryReceiptPrintTemplate.js';
+import lorryReceiptTermsHtml from './lorryReceiptTermsHtml.js';
+import memoPrintTemplate from './memoPrintTemplate.js';
+/**
+ * Generate a PDF for a Memo using the memo print template (exact form layout)
+ * @param {Object} memoData - Memo data
+ * @param {Object} options - PDF generation options
+ * @returns {Promise<Buffer>} - PDF buffer
+ */
+const generateMemoPrintPdf = async (memoData, options = {}) => {
+  try {
+    if (!memoData || typeof memoData !== 'object') {
+      throw new Error('Memo data is missing or invalid');
+    }
+    // Generate HTML content using the print template
+    const htmlContent = memoPrintTemplate(memoData);
+    // Extract memo number for filename
+    let memoNumber = memoData.memo_number || memoData.memoNumber || memoData.id || 'Unknown';
+    const cleanMemoNumber = String(memoNumber).replace(/[^a-zA-Z0-9-_]/g, '-');
+    const finalFilename = 'Memo_' + cleanMemoNumber;
+    // Set default PDF options for memo print
+    const defaultOptions = {
+      filename: finalFilename,
+      pdfOptions: {
+        format: 'A4',
+        landscape: false,
+        printBackground: true,
+        margin: {
+          top: '1cm',
+          right: '1cm',
+          bottom: '1cm',
+          left: '1cm'
+        },
+        preferCSSPageSize: false
+      },
+      ...options
+    };
+    return generatePdfFromHtml(htmlContent, defaultOptions);
+  } catch (error) {
+    console.error('Error generating memo print PDF:', error);
+    throw error;
+  }
+};
 import chromeManager from './chromeManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -243,8 +285,16 @@ const generateLorryReceiptPrintPdf = async (lorryReceiptData, options = {}) => {
       throw new Error('Lorry receipt data is missing or invalid');
     }
     
-    // Generate HTML content using the print template
-    const htmlContent = lorryReceiptPrintTemplate(lorryReceiptData);
+  // Generate HTML content using the print template
+  const mainHtml = lorryReceiptPrintTemplate(lorryReceiptData);
+  // Add Terms & Conditions as a second page with a page break
+  const termsHtml = lorryReceiptTermsHtml();
+  // Remove </body></html> from mainHtml if present, then append page break and terms
+  const mainHtmlClean = mainHtml.replace(/<\/body>\s*<\/html>\s*$/i, '');
+  const htmlContent = `${mainHtmlClean}
+  <div style="page-break-before: always;"></div>
+  ${termsHtml}
+  </body></html>`;
     
     // Simple and direct filename extraction
     let receiptNumber = null;
@@ -308,6 +358,7 @@ export {
   generatePdfFromUrl,
   generatePdfFromTemplate,
   generateLorryReceiptPrintPdf,
+  generateMemoPrintPdf,
   closeBrowserInstance
 };
 

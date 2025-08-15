@@ -24,39 +24,87 @@ const Register = () => {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
     
-    // Clear password error when user types in either password field
-    if (name === 'password' || name === 'confirmPassword') {
+    // Special handling for phone numbers
+    if (name === 'phone') {
+      // Only allow numbers, limit to 10 digits
+      const numbersOnly = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({ ...prev, [name]: numbersOnly.slice(0, 10) }));
+    }
+    // Special handling for email
+    else if (name === 'email') {
+      setFormData(prev => ({ ...prev, [name]: value.toLowerCase() }));
+    }
+    // Handle password fields
+    else if (name === 'password' || name === 'confirmPassword') {
       setPasswordError('');
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    // Default handling for other fields
+    else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError('Passwords do not match');
-      return;
-    }    if (!formData.name || !formData.email || !formData.phone || !formData.password) {
-      error('Please fill in all required fields');
-      return;
+    if (loading) {
+      return; // Prevent double submission
     }
+    
+    try {
+      // Validate all required fields
+      if (!formData.name || !formData.email || !formData.phone || !formData.password) {
+        error('Please fill in all required fields');
+        return;
+      }
 
-    setLoading(true);
-      try {      
-		const registrationData = {
-			name: formData.name,
-			email: formData.email,
-			phonenumber: formData.phone, // Note: backend expects 'phonenumber' not 'phone'
-			password: formData.password
+      // Validate password length
+      if (formData.password.length < 6) {
+        setPasswordError('Password must be at least 6 characters long');
+        error('Password must be at least 6 characters long');
+        return;
+      }
+
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        setPasswordError('Passwords do not match');
+        error('Passwords do not match');
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        error('Please enter a valid email address');
+        return;
+      }
+
+      // Validate phone number
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(formData.phone.replace(/[^0-9]/g, ''))) {
+        error('Please enter a valid 10-digit phone number');
+        return;
+      }
+
+      setLoading(true);
+
+      const registrationData = {
+        name: formData.name.trim(),
+        email: formData.email.toLowerCase().trim(),
+        phonenumber: formData.phone.replace(/[^0-9]/g, ''), // Remove non-numeric characters
+        password: formData.password
       };
+
+      console.log('Attempting registration with:', { ...registrationData, password: '[REDACTED]' });
 
       await register(registrationData);
       success('Registration successful! Welcome aboard.');
       navigate('/dashboard');
     } catch (err) {
+      console.error('Registration error:', err);
       error(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
@@ -104,7 +152,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="email" className="block text-white mb-2">
-                Email
+                Email <span className="text-orange-200">*</span>
               </label>
               <input
                 type="email"
@@ -113,14 +161,19 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
+                autoComplete="email"
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                className={`w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border ${
+                  formData.email ? 'border-white/20' : 'border-orange-300/50'
+                }`}
                 placeholder="your@email.com"
               />
+              <small className="text-orange-200 text-xs mt-1">Enter a valid email address</small>
             </div>
 
             <div>
               <label htmlFor="phone" className="block text-white mb-2">
-                Phone Number
+                Phone Number <span className="text-orange-200">*</span>
               </label>
               <input
                 type="tel"
@@ -129,14 +182,19 @@ const Register = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
-                placeholder="Your phone number"
+                maxLength="10"
+                autoComplete="tel"
+                className={`w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border ${
+                  formData.phone && formData.phone.length === 10 ? 'border-white/20' : 'border-orange-300/50'
+                }`}
+                placeholder="10-digit phone number"
               />
+              <small className="text-orange-200 text-xs mt-1">Enter a 10-digit phone number</small>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-white mb-2">
-                Password
+                Password <span className="text-orange-200">*</span>
               </label>
               <input
                 type="password"
@@ -145,14 +203,19 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
-                placeholder="Create a password"
+                minLength="6"
+                autoComplete="new-password"
+                className={`w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border ${
+                  formData.password && formData.password.length >= 6 ? 'border-white/20' : 'border-orange-300/50'
+                }`}
+                placeholder="Create a password (min. 6 characters)"
               />
+              <small className="text-orange-200 text-xs mt-1">Password must be at least 6 characters long</small>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-white mb-2">
-                Confirm Password
+                Confirm Password <span className="text-orange-200">*</span>
               </label>
               <input
                 type="password"
@@ -161,16 +224,29 @@ const Register = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border border-white/20"
+                autoComplete="new-password"
+                className={`w-full px-4 py-3 bg-white/10 text-white placeholder-orange-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 border ${
+                  formData.confirmPassword && formData.confirmPassword === formData.password 
+                    ? 'border-white/20' 
+                    : 'border-orange-300/50'
+                }`}
                 placeholder="Confirm your password"
               />
-              {passwordError && (
-                <p className="text-red-400 text-sm mt-1">{passwordError}</p>
+              {passwordError ? (
+                <small className="text-red-400 text-xs mt-1">{passwordError}</small>
+              ) : (
+                <small className="text-orange-200 text-xs mt-1">Re-enter your password to confirm</small>
               )}
             </div>
 
             <div className="flex items-center text-sm mt-4">
-              <input type="checkbox" id="termsConditions" className="mr-2" required />              <label htmlFor="termsConditions" className="text-white">
+              <input 
+                type="checkbox" 
+                id="termsConditions" 
+                className="mr-2 w-4 h-4 accent-orange-400" 
+                required 
+              />
+              <label htmlFor="termsConditions" className="text-white text-sm">
                 I agree to the{' '}
                 <a href="/terms" className="text-orange-200 hover:text-white transition-colors">
                   Terms of Service
@@ -181,12 +257,26 @@ const Register = () => {
                 </a>
               </label>
             </div>            
-			<button
+
+            <button
               type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 text-white text-base font-medium rounded-full transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+              disabled={loading || !formData.name || !formData.email || !formData.phone || 
+                       !formData.password || !formData.confirmPassword || 
+                       formData.password !== formData.confirmPassword}
+              className="w-full h-12 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-orange-500 hover:to-red-500 
+                       text-white text-base font-medium rounded-full transition-all duration-200 transform 
+                       hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed 
+                       disabled:transform-none disabled:hover:scale-100 mt-6"
             >
-              {loading ? "CREATING ACCOUNT..." : "REGISTER"}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  CREATING ACCOUNT...
+                </span>
+              ) : "CREATE ACCOUNT"}
             </button>
 
             <div className="text-center mt-6">

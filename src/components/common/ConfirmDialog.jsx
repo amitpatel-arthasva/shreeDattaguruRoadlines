@@ -23,9 +23,18 @@ const ConfirmDialog = ({
     setTimeout(() => onClose(), 300);
   }, [onClose]);
 
-  const handleConfirm = useCallback(() => {
-    onConfirm();
-    handleClose();
+  // Support async onConfirm, only close after it completes
+  const handleConfirm = useCallback(async () => {
+    try {
+      if (onConfirm) {
+        await onConfirm();
+      }
+    } catch (err) {
+      // Optionally log or toast error here
+      console.error('Error in confirm dialog onConfirm:', err);
+    } finally {
+      handleClose();
+    }
   }, [onConfirm, handleClose]);
 
   // Handle ESC key and animations

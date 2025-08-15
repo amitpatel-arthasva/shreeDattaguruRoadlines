@@ -6,8 +6,15 @@ console.log('Preload script loaded (CommonJS version)');
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
   // Database operations
-  query: (sql, params) => {
-    return ipcRenderer.invoke('db-query', sql, params);
+  query: async (sql, params) => {
+    const result = await ipcRenderer.invoke('db-query', sql, params);
+    // If not a SELECT, wrap in { success: true, ...result }
+    if (typeof sql === 'string' && !sql.trim().toUpperCase().startsWith('SELECT')) {
+      if (result && typeof result === 'object' && !Array.isArray(result)) {
+        return { success: true, ...result };
+      }
+    }
+    return result;
   },
     // Database path management
   selectDatabaseFolder: (shouldMigrate = true) => {
@@ -27,6 +34,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateLorryReceiptPrintPdf: (options) => {
     console.log('electronAPI.generateLorryReceiptPrintPdf called with:', options);
     return ipcRenderer.invoke('generate-lorry-receipt-print-pdf', options);
+  },
+  generateMemoPrintPdf: (options) => {
+    console.log('electronAPI.generateMemoPrintPdf called with:', options);
+    return ipcRenderer.invoke('generate-memo-print-pdf', options);
   },
   generateInvoicePdf: (invoiceData) => {
     console.log('electronAPI.generateInvoicePdf called with:', invoiceData);

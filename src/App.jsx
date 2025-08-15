@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import './App.css'
 import Background from './components/common/Background.jsx'
 import ProtectedLayout from './components/common/ProtectedLayout.jsx'
@@ -20,8 +21,12 @@ import Settings from './pages/Settings.jsx'
 import Invoices from './pages/Invoices.jsx'
 import Quotations from './pages/Quotations.jsx'
 import QuotationForm from './pages/QuotationForm.jsx'
+import Memos from './pages/Memos.jsx'
+import MemoForm from './pages/MemoForm.jsx'
+import initializeSampleData from './utils/initializeSampleData.js'
 
 function App() {
+  // ...existing code...
   return (
     <AuthProvider>
       <ToastProvider>
@@ -52,6 +57,9 @@ function App() {
                 <Route path="quotations" element={<Quotations />} />
                 <Route path="quotations/create" element={<QuotationForm />} />
                 <Route path="quotations/edit/:id" element={<QuotationForm />} />
+                <Route path="memos" element={<Memos />} />
+                <Route path="memos/create" element={<MemoForm />} />
+                <Route path="memos/edit/:id" element={<MemoForm />} />
                 <Route path="trucks" element={<Trucks />} />
                 <Route path="drivers" element={<Drivers />} />
                 <Route path="companies" element={<Companies />} />

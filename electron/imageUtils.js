@@ -126,7 +126,7 @@ let logosCache = null;
  * @returns {string} - Base64 data URL for billHeader.png
  */
 const getBillHeaderAsBase64 = () => {
-  return getImageAsBase64('billHeader.png');
+  return getImageAsBase64('billHeader4.png');
 };
 
 /**
