@@ -108,7 +108,7 @@ async function initializeDatabase() {
     }
   } catch (error) {
     console.error('Database initialization failed:', error);
-    dialog.showErrorBox('Database Error', 'Failed to initialize database: ' + error.message);
+  // dialog.showErrorBox('Database Error', 'Failed to initialize database: ' + error.message);
     throw error; // Re-throw to prevent app from starting with broken DB
   }
 }
@@ -120,8 +120,8 @@ async function createWindow() {
   } catch (error) {
     console.error('Failed to initialize database:', error);
     // Show error dialog and quit
-    dialog.showErrorBox('Database Error', 
-      'Failed to initialize database. The application will now close.\n\nError: ' + error.message);
+  // dialog.showErrorBox('Database Error', 
+  //   'Failed to initialize database. The application will now close.\n\nError: ' + error.message);
     app.quit();
     return;
   }

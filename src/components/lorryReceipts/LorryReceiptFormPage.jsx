@@ -194,23 +194,25 @@ const LorryReceiptFormPage = () => {
     date: '',
     to: '',
     from: '',
-    nos: [''],
-    particulars: [''],    freight: '',
-    hamali: '',
-    aoc: '',
-    doorDelivery: '',
-    collection: '',
-    stCharge: '20', // Default value is 20
-    extraLoading: '',
-    actualWeight: '',
-    chargeableWeight: '',paid: '',
-    toBeBill: '',
-    toPay: '',
-    paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
-    deliveryAt: '',
-    ewayBill: '',
-    total: '',
-    remarks: ''
+  nos: [''],
+  particulars: [''],
+  freight: '',
+  hamali: '',
+  aoc: '',
+  doorDelivery: '',
+  collection: '',
+  stCharge: '20', // Default value is 20
+  extraLoading: '',
+  actualWeight: '',
+  chargeableWeight: '',
+  paid: '20', // Default to 20 if paid is selected
+  toBeBill: '',
+  toPay: '',
+  paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
+  deliveryAt: '',
+  ewayBill: '',
+  total: '',
+  remarks: ''
   });
   // Validation errors state
   const [validationErrors, setValidationErrors] = useState({});
@@ -320,23 +322,41 @@ const LorryReceiptFormPage = () => {
     const errors = {};
     let hasErrors = false;
 
-    // Check required fields
+    // Check required fields using latest values and log for debugging
     Object.keys(requiredFields).forEach(field => {
-      if (!formData[field] || formData[field].toString().trim() === '') {
+      const value = typeof formData[field] === 'string' ? formData[field].trim() : formData[field];
+      if (Array.isArray(value)) {
+        if (!value.length || value.every(item => !item || item.trim() === '')) {
+          errors[field] = requiredFields[field];
+          hasErrors = true;
+          console.log('Validation failed (array):', field, 'Value:', value);
+        } else {
+          console.log('Validation passed (array):', field, 'Value:', value);
+        }
+      } else if (value === undefined || value === null || value === '') {
         errors[field] = requiredFields[field];
         hasErrors = true;
+        console.log('Validation failed:', field, 'Value:', value);
+      } else {
+        console.log('Validation passed:', field, 'Value:', value);
       }
     });
 
     // Check nos and particulars arrays
-    if (!formData.nos || formData.nos.length === 0 || formData.nos.every(item => !item || item.trim() === '')) {
+    if (!formData.nos || formData.nos.filter(item => item && item.trim() !== '').length === 0) {
       errors.nos = 'At least one item quantity is required';
       hasErrors = true;
+      console.log('Validation failed (array): nos', formData.nos);
+    } else {
+      console.log('Validation passed (array): nos', formData.nos);
     }
 
-    if (!formData.particulars || formData.particulars.length === 0 || formData.particulars.every(item => !item || item.trim() === '')) {
+    if (!formData.particulars || formData.particulars.filter(item => item && item.trim() !== '').length === 0) {
       errors.particulars = 'At least one item description is required';
       hasErrors = true;
+      console.log('Validation failed (array): particulars', formData.particulars);
+    } else {
+      console.log('Validation passed (array): particulars', formData.particulars);
     }
 
     // Validate payment type selection
@@ -344,15 +364,24 @@ const LorryReceiptFormPage = () => {
     const toBeBillAmount = parseFloat(formData.toBeBill) || 0;
     const toPayAmount = parseFloat(formData.toPay) || 0;
 
-    if (paymentAmount === 0 && toBeBillAmount === 0 && toPayAmount === 0) {
+    if (paymentAmount <= 0 && toBeBillAmount <= 0 && toPayAmount <= 0) {
       errors.paymentType = 'Please specify payment amount in at least one payment type';
       hasErrors = true;
+      console.log('Validation failed (payment): paid', paymentAmount, 'toBeBill', toBeBillAmount, 'toPay', toPayAmount);
+    } else {
+      console.log('Validation passed (payment): paid', paymentAmount, 'toBeBill', toBeBillAmount, 'toPay', toPayAmount);
     }
 
     setValidationErrors(prev => ({
       ...prev,
       ...errors
     }));    return !hasErrors;
+    // Log summary of errors before returning
+    if (hasErrors) {
+      console.log('Validation failed. Errors:', errors);
+    } else {
+      console.log('Validation passed. No errors.');
+    }
   };
 
   // Check if company already exists with same data
@@ -532,7 +561,7 @@ const LorryReceiptFormPage = () => {
     
     // Validate required fields first
     if (!validateRequiredFields()) {
-      alert('Please fill in all required fields before submitting.');
+      toast.error('Please fill in all required fields before submitting.');
       return;
     }
     
@@ -1627,13 +1656,6 @@ const LorryReceiptFormPage = () => {
                                 )}
                               </div>
                             ))}
-                            <button
-                              type="button"
-                              onClick={() => addArrayField('nos')}
-                              className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                            >
-                              + Add More
-                            </button>
                           </td>
 
                           {/* Particulars */}
@@ -1660,14 +1682,22 @@ const LorryReceiptFormPage = () => {
                                 )}
                               </div>
                             ))}
-                            <button
-                              type="button"
-                              onClick={() => addArrayField('particulars')}
-                              className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                            >
-                              + Add More
-                            </button>
-                          </td>                          
+                            <div style={{textAlign: 'left', marginTop: '8px'}}>
+                              <button
+                                type="button"
+                                className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
+                                onClick={() => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    nos: [...prev.nos, ''],
+                                    particulars: [...prev.particulars, '']
+                                  }));
+                                }}
+                              >
+                                + Add More
+                              </button>
+                            </div>
+                          </td>
 						  {/* Left Rate Rs. subcolumn */}
                           <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
@@ -1829,7 +1859,13 @@ const LorryReceiptFormPage = () => {
                                     name="paymentType"
                                     value="paid"
                                     checked={formData.paymentType === 'paid'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      paymentType: e.target.value,
+                                      paid: '20',
+                                      toBeBill: '0',
+                                      toPay: '0'
+                                    }))}
                                     style={{ marginRight: '4px' }}
                                   />
                                   <label htmlFor="payment-paid">Paid</label>
@@ -1841,7 +1877,13 @@ const LorryReceiptFormPage = () => {
                                     name="paymentType"
                                     value="toBeBill"
                                     checked={formData.paymentType === 'toBeBill'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      paymentType: e.target.value,
+                                      paid: '0',
+                                      toBeBill: '20',
+                                      toPay: '0'
+                                    }))}
                                     style={{ marginRight: '4px' }}
                                   />
                                   <label htmlFor="payment-toBeBill">To be Bill</label>
@@ -1853,7 +1895,13 @@ const LorryReceiptFormPage = () => {
                                     name="paymentType"
                                     value="toPay"
                                     checked={formData.paymentType === 'toPay'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                    onChange={(e) => setFormData(prev => ({
+                                      ...prev,
+                                      paymentType: e.target.value,
+                                      paid: '0',
+                                      toBeBill: '0',
+                                      toPay: '20'
+                                    }))}
                                     style={{ marginRight: '4px' }}
                                   />
                                   <label htmlFor="payment-toPay">To Pay</label>

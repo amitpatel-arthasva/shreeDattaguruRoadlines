@@ -161,8 +161,8 @@ const LorryReceiptForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
+      toast.error('Please fill in all required fields before submitting.');
       return;
     }
 
@@ -237,8 +237,8 @@ const LorryReceiptForm = () => {
         }
       }
     } catch (error) {
-      console.error('Error saving lorry receipt:', error);
-      alert('Error saving lorry receipt. Please try again.');
+  console.error('Error saving lorry receipt:', error);
+  toast.error('Error saving lorry receipt. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
