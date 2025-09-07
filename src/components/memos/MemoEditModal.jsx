@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import BillHeader from '../../assets/images/billHeader.png';
+import lorryReceiptService from '../../services/lorryReceiptService';
 
 const MemoEditModal = ({ memo, onClose, onSave }) => {
   if (!memo) return null;
@@ -24,6 +25,47 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
   }
   const [form, setForm] = useState({ ...memo });
   const [tableRows, setTableRows] = useState(tableData);
+  
+  // State for LR dropdown
+  const [lorryReceipts, setLorryReceipts] = useState([]);
+  const [isLoadingLRs, setIsLoadingLRs] = useState(true);
+
+  // Load lorry receipts from API
+  const loadLorryReceipts = useCallback(async () => {
+    setIsLoadingLRs(true);
+    try {
+      console.log('🔄 Loading lorry receipts for memo edit modal...');
+      
+      const response = await lorryReceiptService.getLorryReceipts({ limit: 1000 });
+      console.log('📦 Raw LR Service Response:', response);
+      
+      if (response && response.success) {
+        console.log('✅ API call successful');
+        
+        if (response.data && response.data.lorryReceipts) {
+          console.log(`✅ Found ${response.data.lorryReceipts.length} lorry receipts`);
+          setLorryReceipts(response.data.lorryReceipts);
+        } else {
+          console.warn('⚠️ No lorryReceipts array in response.data');
+          setLorryReceipts([]);
+        }
+      } else {
+        console.error('❌ API call failed or response.success is false');
+        setLorryReceipts([]);
+      }
+    } catch (error) {
+      console.error('💥 Exception during API call:', error);
+      setLorryReceipts([]);
+    } finally {
+      setIsLoadingLRs(false);
+      console.log('🏁 Loading process completed');
+    }
+  }, []);
+
+  // Load lorry receipts on component mount
+  useEffect(() => {
+    loadLorryReceipts();
+  }, [loadLorryReceipts]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,6 +74,19 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
 
   const handleTableRowChange = (idx, field, value) => {
     setTableRows((prev) => prev.map((row, i) => i === idx ? { ...row, [field]: value } : row));
+  };
+
+  // Select LR for table row
+  const selectLRForRow = (rowIdx, lr) => {
+    console.log('🎯 selectLRForRow called with:', { rowIdx, lr });
+    setTableRows(prev => prev.map((row, i) => 
+      i === rowIdx ? {
+        ...row,
+        lr_no: lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A',
+        consignor: lr.consignor?.consignorName || lr.consignor_name || 'N/A',
+        consignee: lr.consignee?.consigneeName || lr.consignee_name || 'N/A'
+      } : row
+    ));
   };
 
   const addTableRow = () => {
@@ -129,15 +184,16 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
                 </thead>
                 <tbody>
                   {tableRows.map((row, idx) => (
-                    <tr key={idx}>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.lr_no || ''} onChange={e => handleTableRowChange(idx, 'lr_no', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.articles || ''} onChange={e => handleTableRowChange(idx, 'articles', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.consignor || ''} onChange={e => handleTableRowChange(idx, 'consignor', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.consignee || ''} onChange={e => handleTableRowChange(idx, 'consignee', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.kgs || ''} onChange={e => handleTableRowChange(idx, 'kgs', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1"><input type="text" value={row.freight || ''} onChange={e => handleTableRowChange(idx, 'freight', e.target.value)} className="bg-transparent border-b border-black w-full" /></td>
-                      <td className="border border-black px-2 py-1 text-center"><button type="button" onClick={() => removeTableRow(idx)} className="text-red-500 font-bold">X</button></td>
-                    </tr>
+                    <TableRowEdit 
+                      key={idx}
+                      row={row}
+                      index={idx}
+                      lorryReceipts={lorryReceipts}
+                      isLoadingLRs={isLoadingLRs}
+                      handleTableRowChange={handleTableRowChange}
+                      selectLRForRow={selectLRForRow}
+                      removeTableRow={removeTableRow}
+                    />
                   ))}
                   <tr>
                     <td colSpan={7} className="text-center py-2">
@@ -162,6 +218,382 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
         </div>
       </form>
     </Modal>
+  );
+};
+
+// TableRowEdit component with LR selection dropdown
+const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowChange, selectLRForRow, removeTableRow }) => {
+  const [showLRDropdown, setShowLRDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredLRs, setFilteredLRs] = useState([]);
+
+  // Filter lorry receipts based on search term
+  useEffect(() => {
+    if (showLRDropdown) {
+      let filtered = lorryReceipts;
+      
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase();
+        filtered = lorryReceipts.filter(lr => {
+          return (
+            // Search by CN/LR number (new structure)
+            (lr.lorryReceiptNumber && lr.lorryReceiptNumber.toLowerCase().includes(searchLower)) ||
+            // Search by CN number (fallback)
+            (lr.cn_number && lr.cn_number.toLowerCase().includes(searchLower)) ||
+            // Search by LR number (fallback)
+            (lr.lr_number && lr.lr_number.toLowerCase().includes(searchLower)) ||
+            // Search by consignor name (new structure)
+            (lr.consignor?.consignorName && lr.consignor.consignorName.toLowerCase().includes(searchLower)) ||
+            // Search by consignor name (fallback)
+            (lr.consignor_name && lr.consignor_name.toLowerCase().includes(searchLower)) ||
+            // Search by consignee name (new structure)
+            (lr.consignee?.consigneeName && lr.consignee.consigneeName.toLowerCase().includes(searchLower)) ||
+            // Search by consignee name (fallback)
+            (lr.consignee_name && lr.consignee_name.toLowerCase().includes(searchLower)) ||
+            // Search by truck number (new structure)
+            (lr.truckNumber && lr.truckNumber.toLowerCase().includes(searchLower)) ||
+            // Search by truck number (fallback)
+            (lr.truck_reg_number && lr.truck_reg_number.toLowerCase().includes(searchLower)) ||
+            (lr.truck_number && lr.truck_number.toLowerCase().includes(searchLower))
+          );
+        });
+      }
+      
+      // Limit to 25 results for better performance
+      setFilteredLRs(filtered.slice(0, 25));
+    }
+  }, [searchTerm, lorryReceipts, showLRDropdown]);
+
+  const selectLR = (lr) => {
+    console.log('🎯 Selecting LR for edit:', lr);
+    selectLRForRow(index, lr);
+    setShowLRDropdown(false);
+    setSearchTerm('');
+  };
+
+  const openDropdown = () => {
+    if (!isLoadingLRs) {
+      console.log('🔽 Opening dropdown for edit row:', index);
+      console.log('📊 Available lorryReceipts count:', lorryReceipts.length);
+      
+      setShowLRDropdown(true);
+      setFilteredLRs(lorryReceipts.slice(0, 25)); // Show first 25 items initially
+    } else {
+      console.log('⏳ Cannot open dropdown - still loading LRs');
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(`#lr-dropdown-edit-${index}`)) {
+        setShowLRDropdown(false);
+        setSearchTerm('');
+      }
+    };
+
+    if (showLRDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLRDropdown, index]);
+
+  return (
+    <tr>
+      {/* L.R. No. with Searchable Dropdown */}
+      <td className="border border-black px-2 py-1" style={{ position: 'relative' }}>
+        <div style={{ position: 'relative' }} id={`lr-dropdown-edit-${index}`}>
+          <button
+            type="button"
+            onClick={openDropdown}
+            disabled={isLoadingLRs}
+            style={{ 
+              width: '100%',
+              textAlign: 'left',
+              cursor: isLoadingLRs ? 'not-allowed' : 'pointer',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid #ccc',
+              fontSize: '11px',
+              padding: '4px 6px',
+              opacity: isLoadingLRs ? 0.6 : 1
+            }}
+          >
+            {isLoadingLRs ? 'Loading...' : (row.lr_no || 'Select LR...')}
+            <span style={{ float: 'right' }}>{isLoadingLRs ? '⏳' : '▼'}</span>
+          </button>
+          
+          {showLRDropdown && (
+            <div style={{ 
+              position: 'absolute', 
+              top: '100%', 
+              left: '0', 
+              right: '0',
+              minWidth: '450px', // Make dropdown wider
+              background: 'white', 
+              border: '2px solid #000', 
+              boxShadow: '0 8px 16px rgba(0,0,0,0.15)', 
+              zIndex: 1000, 
+              maxHeight: '400px', 
+              overflowY: 'auto',
+              borderRadius: '4px'
+            }}>
+              {/* Search Input */}
+              <div style={{ 
+                padding: '12px', 
+                borderBottom: '2px solid #e5e7eb', 
+                background: '#f8fafc',
+                borderRadius: '4px 4px 0 0'
+              }}>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="🔍 Search by LR No, Consignor, Consignee..."
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Clear Selection Option */}
+              <div
+                style={{ 
+                  padding: '10px 12px', 
+                  cursor: 'pointer', 
+                  fontSize: '11px',
+                  fontStyle: 'italic',
+                  color: '#dc2626',
+                  background: '#fef3c7',
+                  borderBottom: '1px solid #e5e7eb'
+                }}
+                onClick={() => {
+                  handleTableRowChange(index, 'lr_no', '');
+                  handleTableRowChange(index, 'consignor', '');
+                  handleTableRowChange(index, 'consignee', '');
+                  setShowLRDropdown(false);
+                  setSearchTerm('');
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#fde68a'}
+                onMouseLeave={(e) => e.target.style.background = '#fef3c7'}
+              >
+                <span style={{ marginRight: '8px' }}>❌</span>
+                Clear Selection
+              </div>
+
+              {/* Loading State */}
+              {isLoadingLRs && (
+                <div style={{ 
+                  padding: '20px 12px', 
+                  textAlign: 'center', 
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontStyle: 'italic'
+                }}>
+                  <span style={{ marginRight: '8px' }}>⏳</span>
+                  Loading lorry receipts...
+                </div>
+              )}
+
+              {/* No LRs Available */}
+              {!isLoadingLRs && lorryReceipts.length === 0 && (
+                <div style={{ 
+                  padding: '20px 12px', 
+                  textAlign: 'center', 
+                  fontSize: '12px',
+                  color: '#dc2626',
+                  fontStyle: 'italic'
+                }}>
+                  <span style={{ marginRight: '8px' }}>⚠️</span>
+                  No lorry receipts available
+                </div>
+              )}
+
+              {/* No Results State */}
+              {!isLoadingLRs && lorryReceipts.length > 0 && filteredLRs.length === 0 && searchTerm && (
+                <div style={{ 
+                  padding: '20px 12px', 
+                  textAlign: 'center', 
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontStyle: 'italic'
+                }}>
+                  <span style={{ marginRight: '8px' }}>🔍</span>
+                  No results found for "{searchTerm}"
+                </div>
+              )}
+
+              {/* LR Options */}
+              {filteredLRs.map((lr, lrIndex) => (
+                <div
+                  key={lrIndex}
+                  style={{
+                    padding: '10px 12px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    borderBottom: lrIndex < filteredLRs.length - 1 ? '1px solid #f3f4f6' : 'none',
+                    background: 'white'
+                  }}
+                  onClick={() => selectLR(lr)}
+                  onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+                  onMouseLeave={(e) => e.target.style.background = 'white'}
+                >
+                  {/* LR Number - Primary */}
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '6px',
+                    color: '#1d4ed8',
+                    fontSize: '12px'
+                  }}>
+                    <span style={{ marginRight: '8px' }}>📋</span>
+                    {lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A'}
+                  </div>
+                  
+                  {/* Consignor to Consignee */}
+                  <div style={{ 
+                    color: '#374151', 
+                    fontSize: '10px',
+                    marginBottom: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{ 
+                      fontWeight: 'bold', 
+                      minWidth: '45px',
+                      marginRight: '6px' 
+                    }}>From:</span>
+                    <span style={{ 
+                      flex: 1,
+                      marginRight: '8px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {lr.consignor?.consignorName || lr.consignor_name || 'N/A'}
+                    </span>
+                  </div>
+                  
+                  <div style={{ 
+                    color: '#374151', 
+                    fontSize: '10px',
+                    marginBottom: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{ 
+                      fontWeight: 'bold', 
+                      minWidth: '45px',
+                      marginRight: '6px' 
+                    }}>To:</span>
+                    <span style={{ 
+                      flex: 1,
+                      marginRight: '8px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {lr.consignee?.consigneeName || lr.consignee_name || 'N/A'}
+                    </span>
+                  </div>
+
+                  {/* Additional Info */}
+                  <div style={{ 
+                    fontSize: '9px', 
+                    color: '#6b7280', 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}>
+                    <span>
+                      {lr.truckNumber || lr.truck_reg_number || lr.truck_number ? (
+                        <>🚛 {lr.truckNumber || lr.truck_reg_number || lr.truck_number}</>
+                      ) : ''}
+                    </span>
+                    <span>
+                      {lr.lr_date ? (
+                        <>📅 {new Date(lr.lr_date).toLocaleDateString()}</>
+                      ) : ''}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Show more indicator */}
+              {!searchTerm && lorryReceipts.length > 25 && filteredLRs.length === 25 && (
+                <div style={{ 
+                  padding: '8px 12px', 
+                  textAlign: 'center', 
+                  fontSize: '10px',
+                  color: '#6b7280',
+                  fontStyle: 'italic',
+                  background: '#f9fafb',
+                  borderTop: '1px solid #e5e7eb'
+                }}>
+                  Showing first 25 results of {lorryReceipts.length} total. Use search to find specific LR.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </td>
+      
+      {/* Other table cells remain as inputs */}
+      <td className="border border-black px-2 py-1">
+        <input 
+          type="text" 
+          value={row.articles || ''} 
+          onChange={e => handleTableRowChange(index, 'articles', e.target.value)} 
+          className="bg-transparent border-b border-black w-full" 
+        />
+      </td>
+      <td className="border border-black px-2 py-1">
+        <input 
+          type="text" 
+          value={row.consignor || ''} 
+          onChange={e => handleTableRowChange(index, 'consignor', e.target.value)} 
+          className="bg-transparent border-b border-black w-full" 
+        />
+      </td>
+      <td className="border border-black px-2 py-1">
+        <input 
+          type="text" 
+          value={row.consignee || ''} 
+          onChange={e => handleTableRowChange(index, 'consignee', e.target.value)} 
+          className="bg-transparent border-b border-black w-full" 
+        />
+      </td>
+      <td className="border border-black px-2 py-1">
+        <input 
+          type="text" 
+          value={row.kgs || ''} 
+          onChange={e => handleTableRowChange(index, 'kgs', e.target.value)} 
+          className="bg-transparent border-b border-black w-full" 
+        />
+      </td>
+      <td className="border border-black px-2 py-1">
+        <input 
+          type="text" 
+          value={row.freight || ''} 
+          onChange={e => handleTableRowChange(index, 'freight', e.target.value)} 
+          className="bg-transparent border-b border-black w-full" 
+        />
+      </td>
+      <td className="border border-black px-2 py-1 text-center">
+        <button 
+          type="button" 
+          onClick={() => removeTableRow(index)} 
+          className="text-red-500 font-bold"
+        >
+          X
+        </button>
+      </td>
+    </tr>
   );
 };
 

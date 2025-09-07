@@ -693,7 +693,7 @@ const LorryReceiptFormPage = () => {
     
     // Validate required fields first
     if (!validateRequiredFields()) {
-      alert('Please fill in all required fields before submitting.');
+      toast.error('Please fill in all required fields before submitting.');
       return;
     }
     
@@ -843,7 +843,10 @@ const LorryReceiptFormPage = () => {
           nos: formData.nos,
           particulars: formData.particulars,
           // Include truck number
-          truck_number: formData.truckNumber
+          truck_number: formData.truckNumber,
+          // Include E-way Bill data
+          eway_bill: formData.ewayBill || '',
+          ewayBill: formData.ewayBill || ''
         };
 
         // Generate and download PDF
@@ -1137,6 +1140,7 @@ const LorryReceiptFormPage = () => {
               Fill Dummy Data
             </button>
             <button
+              type="submit"
               onClick={handleSubmit}
               className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
             >

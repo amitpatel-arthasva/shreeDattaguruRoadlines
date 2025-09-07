@@ -134,7 +134,7 @@ const QuotationForm = () => {
 
     // Destination validation - at least one destination should have both destination and freight
     const hasValidDestination = formData.destinations.some(dest => 
-      dest.destination.trim() && dest.freight.trim()
+      dest.destination && dest.destination.trim() && dest.freight && dest.freight.toString().trim()
     );
     
     if (!hasValidDestination) {
@@ -158,10 +158,8 @@ const QuotationForm = () => {
     const mappedData = {
       quotationNumber: formData.quotationNumber,
       quotationDate: formData.date,
-      quoteToCompany: {
-        companyName: formData.companyName,
-        companyLocation: formData.location,
-      },
+      companyName: formData.companyName,
+      location: formData.location,
       toUser: formData.attentionTo,
       destinations: (formData.destinations || [])
         .filter(dest => dest.destination && dest.freight)

@@ -60,71 +60,28 @@ class QuotationService {
         );
       }
 
-      // Ensure companyId is set and update company details if needed
-      let companyId = quotationData.companyId;
-      let companyName = quotationData.companyName;
-      let companyLocation = quotationData.location || '';
-      let companyCity = quotationData.city || '';
-      let companyAddress = quotationData.address || companyLocation || '';
+      // Get existing quotation to get company_id
+      let existingQuotation = {};
+      try {
+        const existingQuotationResp = await this.getQuotationById(quotationId);
+        existingQuotation = (existingQuotationResp && existingQuotationResp.success && existingQuotationResp.data.quotation) ? existingQuotationResp.data.quotation : {};
+      } catch (error) {
+        console.error('[updateQuotation] Error getting existing quotation:', error);
+        throw new Error('Failed to get existing quotation for update');
+      }
 
-      // Fetch the existing quotation for fallback values
-      const existingQuotationResp = await this.getQuotationById(quotationId);
-      const existingQuotation = (existingQuotationResp && existingQuotationResp.success && existingQuotationResp.data.quotation) ? existingQuotationResp.data.quotation : {};
-
-      // If companyId is not provided, get it from the existing quotation
+      // Use existing company_id to maintain referential integrity
+      const companyId = existingQuotation.companyId;
       if (!companyId) {
-        companyId = existingQuotation.companyId;
+        throw new Error('Could not determine company ID from existing quotation');
       }
 
-      // If still not found, try to find company by name
-      if (!companyId && companyName) {
-        const inputName = companyName.trim().toLowerCase();
-        const companies = await apiService.query('SELECT * FROM companies');
-        let foundCompany = null;
-        for (const c of companies) {
-          if ((c.name || '').trim().toLowerCase() === inputName) {
-            foundCompany = c;
-            break;
-          }
-        }
-        if (foundCompany) {
-          companyId = foundCompany.id;
-          // If location/city/address changed, update company record
-          const updateFields = [];
-          const updateValues = [];
-          if (companyLocation && companyLocation !== foundCompany.address) {
-            updateFields.push('address = ?');
-            updateValues.push(companyLocation);
-          }
-          if (companyCity && companyCity !== foundCompany.city) {
-            updateFields.push('city = ?');
-            updateValues.push(companyCity);
-          }
-          if (updateFields.length > 0) {
-            await apiService.query(
-              `UPDATE companies SET ${updateFields.join(', ')} WHERE id = ?`,
-              [...updateValues, companyId]
-            );
-          }
-        } else {
-          // Create new company if not found
-          const insertResult = await apiService.query(
-            'INSERT INTO companies (name, address, city, is_active) VALUES (?, ?, ?, 1)',
-            [companyName, companyLocation, companyCity]
-          );
-          companyId = insertResult.lastInsertRowid;
-        }
-      }
-      if (!companyId) {
-        throw new Error('Company ID could not be determined.');
-      }
-
-      // Ensure required fields are set, fallback to existing quotation
-      const finalCompanyName = companyName || existingQuotation.companyName || '';
-      const finalCompanyLocation = companyLocation || existingQuotation.location || '';
-      const finalToUser = quotationData.toUser || existingQuotation.toUser || '';
+      // Simple update with provided data, fallback to existing for missing fields
       const finalQuotationNumber = quotationData.quotationNumber || existingQuotation.quotationNumber || '';
       const finalQuotationDate = quotationData.quotationDate || existingQuotation.quotationDate || new Date().toISOString().split('T')[0];
+      const finalCompanyName = quotationData.companyName || existingQuotation.companyName || '';
+      const finalCompanyLocation = quotationData.location || existingQuotation.location || '';
+      const finalToUser = quotationData.toUser || existingQuotation.toUser || '';
 
       const sql = `UPDATE quotations SET quotation_number = ?, quotation_date = ?, company_id = ?, q_company_name = ?, company_location = ?, to_user = ?, destinations_json = ?, updated_at = ? WHERE id = ?`;
       const values = [
@@ -138,10 +95,9 @@ class QuotationService {
         new Date().toISOString(),
         quotationId
       ];
-      console.log('[updateQuotation] SQL:', sql);
-      console.log('[updateQuotation] Values:', values);
+      
       const result = await apiService.query(sql, values);
-      console.log('[updateQuotation] SQL result:', result);
+      
       if (result && result.changes > 0) {
         // Get the updated quotation with full details
         const updatedQuotation = await this.getQuotationById(quotationId);
@@ -154,7 +110,7 @@ class QuotationService {
       } else {
         return {
           success: false,
-          error: 'No rows updated. Quotation not found or no changes.'
+          error: 'No rows updated. Quotation not found or no changes made.'
         };
       }
     } catch (error) {
@@ -280,9 +236,9 @@ class QuotationService {
       let quotationNumber = (quotationData.quotationNumber && quotationData.quotationNumber.trim()) ? quotationData.quotationNumber.trim() : await this.generateQuotationNumber();
 
       // Company logic: check if company exists by name, create if not
-      let companyName = quotationData.quoteToCompany?.companyName?.trim();
-      let companyLocation = quotationData.quoteToCompany?.companyLocation?.trim();
-      let companyId = quotationData.quoteToCompany?.companyId;
+      let companyName = quotationData.companyName?.trim();
+      let companyLocation = quotationData.location?.trim();
+      let companyId = quotationData.companyId;
       if (!companyName) throw new Error('Company name is required');
 
       // Try to find company by name

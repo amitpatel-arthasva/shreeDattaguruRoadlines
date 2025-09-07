@@ -302,13 +302,60 @@ const MemoFormPage = () => {
     }
   };
 
+  // Validate required fields
+  const validateRequiredFields = () => {
+    const requiredFields = {
+      memo_number: 'Memo number is required',
+      memo_date: 'Memo date is required',
+      lorry_no: 'Lorry number is required',
+      driver_name: 'Driver name is required',
+      from_location: 'From location is required',
+      to_location: 'To location is required',
+      lorry_hire: 'Lorry hire amount is required'
+    };
+
+    const errors = {};
+    let hasErrors = false;
+
+    // Check required fields
+    Object.keys(requiredFields).forEach(field => {
+      const value = typeof formData[field] === 'string' ? formData[field].trim() : formData[field];
+      if (value === undefined || value === null || value === '') {
+        errors[field] = requiredFields[field];
+        hasErrors = true;
+        console.log('Validation failed:', field, 'Value:', value);
+      } else {
+        console.log('Validation passed:', field, 'Value:', value);
+      }
+    });
+
+    // Validate table data
+    console.log('Table rows:', tableRows);
+    if (tableRows.length === 0 || tableRows.every(row => !row.lr_no && !row.articles)) {
+      console.log('No valid LR entries found');
+      hasErrors = true;
+    }
+
+    // Log summary of errors before returning
+    if (hasErrors) {
+      console.log('Validation failed. Errors:', errors);
+    } else {
+      console.log('Validation passed. No errors.');
+    }
+
+    return !hasErrors;
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.memo_number || !formData.memo_date) {
-      alert('Please fill in required fields (Memo Number and Date)');
+    console.log('Form submitted, validating fields...');
+    console.log('Form data:', formData);
+    
+    // Validate required fields first
+    if (!validateRequiredFields()) {
+      toast.error('Please fill in all required fields before submitting.');
       return;
     }
     
@@ -373,58 +420,65 @@ const MemoFormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      {/* Control Buttons - Hidden in Print */}
-      <div className="flex justify-between items-center mb-4 print:hidden">
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          Back
-        </button>
-        <h1 className="text-xl font-bold text-gray-800">Create Memo</h1>
-        <div className="flex gap-2">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Control Buttons - Hidden in Print */}
+        <div className="flex justify-between items-center mb-4 print:hidden">
           <button
-            type="button"
-            onClick={fillDummyData}
-            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+            onClick={() => navigate(-1)}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
           >
-            Fill Dummy Data
+            Back
           </button>
-          <button
-            onClick={handlePrint}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Print
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Save Memo
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={fillDummyData}
+              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+            >
+              Fill Dummy Data
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
+            >
+              Print
+            </button>
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
+            >
+              Create Memo
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Header Section - Exact Copy from Lorry Receipt */}
-      <div className='flex justify-center items-center relative'>
-        <div className='w-[90%] flex justify-center items-center mb-4 relative'>
-          <div className='flex-1 flex justify-left ml-18'>
-            <img src={BillHeader} alt="BillLogo" className="max-w-154 h-auto" />
-          </div>
-          <div className='absolute right-0 text-right text-xs font-medium text-gray-700 leading-tight'>
-            <div className='mb-2 font-bold'>SUBJECT TO PALGHAR JURISDICTION</div>
-            <div className='mb-2'>
-              <div className='font-semibold'>Daily Part Load Service to -</div>
-              <div>Tarapur, Bhiwandi, Palghar,</div>
-              <div>Vashi, Taloja, Kolgoan Genises</div>
-            </div>
-            <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block'>
-              MEMO COPY
+        {/* Header Section - Consistent with Lorry Receipt */}
+        <div className='flex justify-center items-center relative'>
+          <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
+            <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
+              <div className='w-full flex flex-col items-center justify-center py-2'>
+                <div className='w-full flex flex-row items-start justify-between py-2'>
+                  <div className='flex-shrink-0 flex items-center w-2/3'>
+                    <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+                  </div>
+                  <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
+                    <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
+                    <div className='mb-2 text-right text-xs'>
+                      <div className='font-semibold'>Daily Part Load Service to -</div>
+                      <div>Tarapur, Bhiwandi, Palghar,</div>
+                      <div>Vashi, Taloja, Kolgoan Genises</div>
+                    </div>
+                    <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                      MEMO COPY
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
 
 
@@ -448,6 +502,7 @@ const MemoFormPage = () => {
                               onChange={(e) => setFormData(prev => ({ ...prev, memo_number: `TRP-${e.target.value}` }))}
                               className="form-input font-bold"
                               placeholder="001"
+                              required
                             />
                           </div>
                         </div>
@@ -463,6 +518,7 @@ const MemoFormPage = () => {
                               onChange={handleInputChange}
                               className="form-input uppercase"
                               placeholder="MH 12 AB 1234"
+                              required
                             />
                           </div>
                         </div>
@@ -478,6 +534,7 @@ const MemoFormPage = () => {
                               onChange={handleInputChange}
                               className="form-input"
                               placeholder="Full name"
+                              required
                             />
                           </div>
                         </div>
@@ -523,6 +580,7 @@ const MemoFormPage = () => {
                               onChange={handleInputChange}
                               className="form-input"
                               placeholder="Origin"
+                              required
                             />
                           </div>
                         </div>
@@ -536,6 +594,7 @@ const MemoFormPage = () => {
                               onChange={handleInputChange}
                               className="form-input"
                               placeholder="Destination"
+                              required
                             />
                           </div>
                         </div>
@@ -560,6 +619,7 @@ const MemoFormPage = () => {
                               onChange={handleInputChange}
                               className="form-input text-right"
                               placeholder="0.00"
+                              required
                             />
                           </div>
                         </div>
@@ -720,16 +780,6 @@ const MemoFormPage = () => {
                 <div style={{ borderBottom: '1px solid #000', width: '200px', marginBottom: '5px' }}></div>
                 <div style={{ fontSize: '10px', fontWeight: 'bold' }}>Authorised Signatory</div>
               </div>
-            </div>
-
-            {/* Submit Button - Hidden in Print */}
-            <div className="flex justify-center print:hidden" style={{ marginTop: '20px', marginBottom: '20px' }}>
-              <button
-                type="submit"
-                className="bg-blue-700 text-white px-8 py-2 text-base font-bold hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded shadow-lg"
-              >
-                CREATE MEMO
-              </button>
             </div>
           </div>
         </form>
@@ -962,6 +1012,7 @@ const MemoFormPage = () => {
           }
         `}</style>
       </div>
+    </div>
   );
 };
 

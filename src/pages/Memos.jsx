@@ -283,139 +283,182 @@ const Memos = () => {
         </div>
       ) : (
         <>
-          {/* Card/List View */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {memos.map((memo) => (
-              <div key={memo.id} className="bg-white shadow rounded-lg p-6 flex flex-col justify-between">
-                <div className="flex justify-end gap-2 mb-2">
-                  <button
-                    onClick={() => handleViewMemo(memo.id)}
-                    className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
-                    title="View Details"
-                  >
-                    <FontAwesomeIcon icon={faEye} />
-                  </button>
-                  <button
-                    className="text-green-600 hover:text-green-700 p-1 transition-colors"
-                    title="Download Memo"
-                    onClick={() => handleDownloadMemo(memo.id)}
-                  >
-                    <FontAwesomeIcon icon={faDownload} />
-                  </button>
-                  <button
-                    onClick={() => handleEditMemo(memo)}
-                    className="text-primary-300 hover:text-primary-200 p-1 transition-colors"
-                    title="Edit Memo"
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteMemo(memo.id)}
-                    className="text-red-600 hover:text-red-800 p-1 transition-colors"
-                    title="Delete Memo"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                </div>
-                {/* Memo Number */}
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faFileAlt} className="text-primary-400" />
-                    {memo.memo_number}
-                  </h3>
-                  <p className="text-sm text-gray-600 font-medium truncate">
-                    {memo.subject || 'No Subject'}
-                  </p>
-                </div>
-                {/* Company Info */}
-                <div className="mb-4">
-                  <div className="mb-2">
-                    <p className="text-sm text-gray-600 mb-1">
-                      <strong>Company:</strong> {memo.q_company_name || memo.company_name || 'N/A'}
-                    </p>
+          {/* Memos Layout */}
+          {memos.length === 0 ? (
+            <div className="text-center py-12 flex flex-col items-center">
+              <FontAwesomeIcon icon={faFileAlt} className="text-6xl text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No memos found</h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm ? 'No memos match your search criteria.' : 'Create your first memo to get started.'}
+              </p>
+              {!searchTerm && (
+                <Button
+                  text="Create Your First Memo"
+                  onClick={handleCreateMemo}
+                  className="text-white font-semibold"
+                  width="w-auto"
+                />
+              )}
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Top 3 Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {memos.slice(0, 3).map((memo) => (
+                  <div key={memo.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border">
+                    <div className="p-6">
+                      {/* Action Buttons */}
+                      <div className="flex justify-end items-start mb-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleViewMemo(memo.id)}
+                            className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
+                            title="View Details"
+                          >
+                            <FontAwesomeIcon icon={faEye} />
+                          </button>
+                          <button
+                            className="text-green-600 hover:text-green-700 p-1 transition-colors"
+                            title="Download Memo"
+                            onClick={() => handleDownloadMemo(memo.id)}
+                          >
+                            <FontAwesomeIcon icon={faDownload} />
+                          </button>
+                          <button
+                            onClick={() => handleEditMemo(memo)}
+                            className="text-primary-300 hover:text-primary-200 p-1 transition-colors"
+                            title="Edit Memo"
+                          >
+                            <FontAwesomeIcon icon={faEdit} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMemo(memo.id)}
+                            className="text-red-600 hover:text-red-800 p-1 transition-colors"
+                            title="Delete Memo"
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Memo Number */}
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faFileAlt} className="text-primary-400" />
+                          {memo.memo_number}
+                        </h3>
+                        <p className="text-sm text-gray-600 font-medium truncate">
+                          {memo.subject || 'No Subject'}
+                        </p>
+                      </div>
+
+                      {/* Company Info */}
+                      <div className="mb-4">
+                        <div className="mb-2">
+                          <p className="text-sm text-gray-600 mb-1">
+                            <strong>Company:</strong> {memo.q_company_name || memo.company_name || 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {memo.address || ''}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            <strong>To:</strong> {memo.to_location || memo.to_company || 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {memo.from_location ? `From: ${memo.from_location}` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div className="text-sm text-gray-500 border-t pt-3">
+                        <span className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
+                          Date: {formatDate(memo.memo_date)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      <strong>To:</strong> {memo.to_location || memo.to_company || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-                {/* Date */}
-                <div className="text-sm text-gray-500 border-t pt-3">
-                  <span className="flex items-center gap-1">
-                    <FontAwesomeIcon icon={faCalendarAlt} className="text-primary-400" />
-                    Date: {formatDate(memo.memo_date)}
-                  </span>
+                ))}
+              </div>
+
+              {/* List View */}
+              <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Memo No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {memos.map((memo) => (
+                        <tr key={memo.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <FontAwesomeIcon icon={faFileAlt} className="text-primary-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{memo.memo_number}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{memo.q_company_name || memo.company_name || 'N/A'}</div>
+                            <div className="text-xs text-gray-500">{memo.subject || 'No Subject'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {memo.from_location && memo.to_location ? `${memo.from_location} → ${memo.to_location}` : 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-500">{memo.driver_name || ''}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(memo.memo_date)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => handleViewMemo(memo.id)}
+                                className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
+                                title="View Details"
+                              >
+                                <FontAwesomeIcon icon={faEye} />
+                              </button>
+                              <button
+                                className="text-green-600 hover:text-green-700 p-1 transition-colors"
+                                title="Download Memo"
+                                onClick={() => handleDownloadMemo(memo.id)}
+                              >
+                                <FontAwesomeIcon icon={faDownload} />
+                              </button>
+                              <button
+                                onClick={() => handleEditMemo(memo)}
+                                className="text-primary-300 hover:text-primary-200 p-1 transition-colors"
+                                title="Edit Memo"
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteMemo(memo.id)}
+                                className="text-red-600 hover:text-red-800 p-1 transition-colors"
+                                title="Delete Memo"
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* List/Table View */}
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Memo No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {memos.map((memo) => (
-                    <tr key={memo.id}>
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-primary-700 flex items-center gap-2">
-                        <FontAwesomeIcon icon={faFileAlt} className="text-primary-400" />
-                        {memo.memo_number}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(memo.status)}`}>
-                          {memo.status || 'Draft'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{memo.subject || 'No Subject'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{memo.q_company_name || memo.company_name || 'N/A'}<br/>{memo.to_location || memo.to_company || ''}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{formatDate(memo.memo_date)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                        <button
-                          onClick={() => handleViewMemo(memo.id)}
-                          className="text-primary-400 hover:text-primary-300 p-1 transition-colors"
-                          title="View Details"
-                        >
-                          <FontAwesomeIcon icon={faEye} />
-                        </button>
-                        <button
-                          className="text-green-600 hover:text-green-700 p-1 transition-colors"
-                          title="Download Memo"
-                          onClick={() => handleDownloadMemo(memo.id)}
-                        >
-                          <FontAwesomeIcon icon={faDownload} />
-                        </button>
-                        <button
-                          onClick={() => handleEditMemo(memo)}
-                          className="text-primary-300 hover:text-primary-200 p-1 transition-colors"
-                          title="Edit Memo"
-                        >
-                          <FontAwesomeIcon icon={faEdit} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMemo(memo.id)}
-                          className="text-red-600 hover:text-red-800 p-1 transition-colors"
-                          title="Delete Memo"
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
-          </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
