@@ -83,7 +83,7 @@ const QuotationViewModal = ({ isOpen, onClose, quotation }) => {
           
           <div className="text-xs text-gray-600 space-y-1">
             <div className="flex justify-between">
-              <span><strong>TARAPUR:</strong> Plot No. K-36, Next to Ganesh Hotel, MIDC, Tarapur. M.: 9923964283 / 7276272828</span>
+              <span><strong>TARAPUR:</strong> Plot No. W - 4, Camlin Naka, MIDC, Tarapur. M.: 9923964283 / 7276272828</span>
             </div>
             <div className="flex justify-between">
               <span><strong>BHIWANDI:</strong> Shop No. 3, Opp. Capital Roadlines, Khandagale Estate,</span>

@@ -14,6 +14,23 @@ const MemoPrintTemplate = ({ memo }) => {
             <div className="border border-red-500 text-red-500 px-2 py-1 inline-block mt-1 text-xs">MEMO COPY</div>
           </div>
         </div>
+        {/* 📌 Addresses */}
+        <div className="w-[90%] mx-auto -mt-2 mb-6 ml-20">
+          <div className="text-xs font-medium text-gray-700 leading-snug space-y-2">
+            <div>
+              <span className="text-red-600 font-bold">TARAPUR:</span>
+              Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+              M.: 9823364283 / 7276272828
+            </div>
+            <div>
+              <span className="text-red-600 font-bold">BHIWANDI:</span>
+              Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+              <div className="ml-20">
+                Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Main Memo Box */}
         <div className="border border-black mx-2 mb-2 bg-white">
           <div className="flex flex-row">
@@ -22,7 +39,7 @@ const MemoPrintTemplate = ({ memo }) => {
               <div className="flex mb-1"><span className="font-bold w-32">MEMO No. TPR</span><span className="border-b border-black flex-1 ml-1">{memo.memo_number}</span></div>
               <div className="flex mb-1"><span className="font-bold w-32">Lorry No.</span><span className="border-b border-black flex-1 ml-1">{memo.lorry_no}</span></div>
               <div className="flex mb-1"><span className="font-bold w-32">Driver's Name</span><span className="border-b border-black flex-1 ml-1">{memo.driver_name}</span></div>
-              <div className="flex mb-1"><span className="font-bold w-32">Ac No.</span><span className="border-b border-black flex-1 ml-1">{memo.ac_no}</span></div>
+              <div className="flex mb-1"><span className="font-bold w-32">Contact No.</span><span className="border-b border-black flex-1 ml-1">{memo.ac_no}</span></div>
               <div className="flex mb-1"><span className="font-bold w-32">Address</span><span className="border-b border-black flex-1 ml-1">{memo.address}</span></div>
               <div className="flex mb-1"><span className="font-bold w-16">From</span><span className="border-b border-black flex-1 ml-1">{memo.from_location}</span><span className="font-bold w-8 ml-2">To</span><span className="border-b border-black flex-1 ml-1">{memo.to_location}</span></div>
             </div>

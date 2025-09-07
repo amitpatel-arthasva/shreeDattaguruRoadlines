@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../common/ToastSystem';
 import { useNavigate } from 'react-router-dom';
-import BillHeader from '../../../assets/billHeader5.png';
+import truckHeader from '../../../assets/truck_image.png';
+import nameHeader from '../../../assets/shree_datta_guru.png';
 import companyService from '../../services/companyService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 import truckService from '../../services/truckService';
@@ -11,7 +12,7 @@ const LorryReceiptFormPage = () => {
   const toast = useToast();
   const navigate = useNavigate();    // Company autocomplete state
   const [companies, setCompanies] = useState([]);
-  const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);  const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
+  const [showConsignorDropdown, setShowConsignorDropdown] = useState(false); const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showTruckDropdown, setShowTruckDropdown] = useState(false);
   const [trucks, setTrucks] = useState([]);
@@ -23,7 +24,7 @@ const LorryReceiptFormPage = () => {
   const [consigneeSelectedFromDropdown, setConsigneeSelectedFromDropdown] = useState(false);
   const [dummyDataIndex, setDummyDataIndex] = useState(0);
   const [focusedConsignorIndex, setFocusedConsignorIndex] = useState(-1); // -1 means input focused, 0+ means dropdown item focused
-  const [focusedConsigneeIndex, setFocusedConsigneeIndex] = useState(-1);  const consignorDropdownRef = useRef(null);  const consigneeDropdownRef = useRef(null);
+  const [focusedConsigneeIndex, setFocusedConsigneeIndex] = useState(-1); const consignorDropdownRef = useRef(null); const consigneeDropdownRef = useRef(null);
   const fromDropdownRef = useRef(null);
   const truckDropdownRef = useRef(null);
   const consignorInputRef = useRef(null);
@@ -43,8 +44,8 @@ const LorryReceiptFormPage = () => {
       consigneeAddress1: '456 Manufacturing Hub, Sector 10',
       consigneeCity: 'Delhi',
       consigneeState: 'Delhi',
-      consigneePincode: '110001',      
-	  consigneeGstin: '07XYZMA1234C1Z8',
+      consigneePincode: '110001',
+      consigneeGstin: '07XYZMA1234C1Z8',
       consigneePan: 'XYZMA1234C',
       truckNumber: 'MH 12 AB 1234',
       date: '2025-01-15',
@@ -52,14 +53,15 @@ const LorryReceiptFormPage = () => {
       from: 'Tarapur',
       nos: ['50', '25'],
       particulars: ['Cotton Bales', 'Textile Materials'],
-      freight: '15000',      hamali: '500',
+      freight: '15000', hamali: '500',
       aoc: '200',
       doorDelivery: '300',
+      detention: '100',
       collection: '100',
       stCharge: '20',
       extraLoading: '0',
       actualWeight: '2500',
-      chargeableWeight: '2500',      paid: '16120',
+      chargeableWeight: '2500', paid: '16120',
       toBeBill: '0',
       toPay: '0',
       paymentType: 'paid',
@@ -80,7 +82,7 @@ const LorryReceiptFormPage = () => {
       consigneeAddress1: '654 Corporate Plaza',
       consigneeCity: 'Bangalore',
       consigneeState: 'Karnataka',
-      consigneePincode: '560001',      consigneeGstin: '29RSTCO1234K1Z3',
+      consigneePincode: '560001', consigneeGstin: '29RSTCO1234K1Z3',
       consigneePan: 'RSTCO1234K',
       truckNumber: 'GJ 01 AA 5678',
       date: '2025-01-16',
@@ -88,14 +90,15 @@ const LorryReceiptFormPage = () => {
       from: 'Bhiwandi',
       nos: ['100'],
       particulars: ['Electronic Components'],
-      freight: '12000',      hamali: '400',
+      freight: '12000', hamali: '400',
       aoc: '150',
       doorDelivery: '250',
+      detention: '0',
       collection: '0',
       stCharge: '20',
       extraLoading: '200',
       actualWeight: '1800',
-      chargeableWeight: '2000',      paid: '0',
+      chargeableWeight: '2000', paid: '0',
       toBeBill: '13020',
       toPay: '0',
       paymentType: 'toBeBill',
@@ -116,7 +119,7 @@ const LorryReceiptFormPage = () => {
       consigneeAddress1: '987 Textile Zone',
       consigneeCity: 'Surat',
       consigneeState: 'Gujarat',
-      consigneePincode: '395001',      consigneeGstin: '24GLTEX1234M1Z1',
+      consigneePincode: '395001', consigneeGstin: '24GLTEX1234M1Z1',
       consigneePan: 'GLTEX1234M',
       truckNumber: 'KA 05 BC 3456',
       date: '2025-01-17',
@@ -124,14 +127,15 @@ const LorryReceiptFormPage = () => {
       from: 'Tarapur',
       nos: ['75', '25', '10'],
       particulars: ['Raw Materials', 'Chemicals', 'Dyes'],
-      freight: '18000',      hamali: '600',
+      freight: '18000', hamali: '600',
       aoc: '300',
       doorDelivery: '400',
+      detention: '150',
       collection: '150',
       stCharge: '20',
       extraLoading: '500',
       actualWeight: '3200',
-      chargeableWeight: '3500',      paid: '0',
+      chargeableWeight: '3500', paid: '0',
       toBeBill: '0',
       toPay: '19470',
       paymentType: 'toPay',
@@ -151,7 +155,7 @@ const LorryReceiptFormPage = () => {
       consigneeAddress1: '777 Tech Valley, Phase 2',
       consigneeCity: 'Chennai',
       consigneeState: 'Tamil Nadu',
-      consigneePincode: '600001',      consigneeGstin: '33INNOV1234C1Z8',
+      consigneePincode: '600001', consigneeGstin: '33INNOV1234C1Z8',
       consigneePan: 'INNOV1234C',
       truckNumber: 'DL 8C AA 9012',
       date: '2025-01-18',
@@ -159,14 +163,15 @@ const LorryReceiptFormPage = () => {
       from: 'Bhiwandi',
       nos: ['20', '15'],
       particulars: ['Servers', 'Networking Equipment'],
-      freight: '25000',      hamali: '800',
+      freight: '25000', hamali: '800',
       aoc: '400',
       doorDelivery: '500',
+      detention: '200',
       collection: '200',
       stCharge: '20',
       extraLoading: '300',
       actualWeight: '1500',
-      chargeableWeight: '1500',      paid: '26220',
+      chargeableWeight: '1500', paid: '26220',
       toBeBill: '0',
       toPay: '0',
       paymentType: 'paid',
@@ -174,7 +179,7 @@ const LorryReceiptFormPage = () => {
       total: '26220',
       remarks: 'High-value electronic equipment'
     }
-  ];    const [formData, setFormData] = useState({
+  ]; const [formData, setFormData] = useState({
     consignorName: '',
     consignorAddress1: '',
     consignorCity: '',
@@ -194,25 +199,26 @@ const LorryReceiptFormPage = () => {
     date: '',
     to: '',
     from: '',
-  nos: [''],
-  particulars: [''],
-  freight: '',
-  hamali: '',
-  aoc: '',
-  doorDelivery: '',
-  collection: '',
-  stCharge: '20', // Default value is 20
-  extraLoading: '',
-  actualWeight: '',
-  chargeableWeight: '',
-  paid: '20', // Default to 20 if paid is selected
-  toBeBill: '',
-  toPay: '',
-  paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
-  deliveryAt: '',
-  ewayBill: '',
-  total: '',
-  remarks: ''
+    nos: [''],
+    particulars: [''],
+    freight: '',
+    hamali: '',
+    aoc: '',
+    doorDelivery: '',
+    detention: '',
+    collection: '',
+    stCharge: '20', // Default value is 20
+    extraLoading: '',
+    actualWeight: '',
+    chargeableWeight: '',
+    paid: '20', // Default to 20 if paid is selected
+    toBeBill: '',
+    toPay: '',
+    paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
+    deliveryAt: '',
+    ewayBill: '',
+    total: '',
+    remarks: ''
   });
   // Validation errors state
   const [validationErrors, setValidationErrors] = useState({});
@@ -260,7 +266,7 @@ const LorryReceiptFormPage = () => {
   // Validate field on change
   const validateField = (name, value) => {
     let error = '';
-    
+
     switch (name) {
       case 'consignorGstin':
       case 'consigneeGstin':
@@ -282,7 +288,7 @@ const LorryReceiptFormPage = () => {
     }    setValidationErrors(prev => ({
       ...prev,
       [name]: error
-    }));    return error === '';
+    })); return error === '';
   };
 
   // Validate required fields
@@ -296,7 +302,7 @@ const LorryReceiptFormPage = () => {
       consignorPincode: 'Consignor PIN code is required',
       consignorGstin: 'Consignor GSTIN is required',
       consignorPan: 'Consignor PAN is required',
-      
+
       // Consignee details
       consigneeName: 'Consignee name is required',
       consigneeAddress1: 'Consignee address is required',
@@ -305,16 +311,16 @@ const LorryReceiptFormPage = () => {
       consigneePincode: 'Consignee PIN code is required',
       consigneeGstin: 'Consignee GSTIN is required',
       consigneePan: 'Consignee PAN is required',
-        // Transport details
+      // Transport details
       truckNumber: 'Truck number is required',
       date: 'Date is required',
       from: 'From location is required',
       to: 'To location is required',
-      
+
       // Weight details
       actualWeight: 'Actual weight is required',
       chargeableWeight: 'Chargeable weight is required',
-      
+
       // Payment details
       deliveryAt: 'Delivery location is required'
     };
@@ -375,7 +381,7 @@ const LorryReceiptFormPage = () => {
     setValidationErrors(prev => ({
       ...prev,
       ...errors
-    }));    return !hasErrors;
+    })); return !hasErrors;
     // Log summary of errors before returning
     if (hasErrors) {
       console.log('Validation failed. Errors:', errors);
@@ -386,7 +392,7 @@ const LorryReceiptFormPage = () => {
 
   // Check if company already exists with same data
   const findExistingCompany = (companyData) => {
-    return companies.find(company => 
+    return companies.find(company =>
       company.name === companyData.name &&
       company.address === companyData.address &&
       company.city === companyData.city &&
@@ -399,10 +405,10 @@ const LorryReceiptFormPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Validate the field if it's one of the fields we validate
     validateField(name, value);
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -425,7 +431,8 @@ const LorryReceiptFormPage = () => {
 
   const removeArrayField = (index, field) => {
     if (formData[field].length > 1) {
-      setFormData(prev => ({        ...prev,
+      setFormData(prev => ({
+        ...prev,
         [field]: prev[field].filter((_, i) => i !== index)
       }));
     }
@@ -435,7 +442,8 @@ const LorryReceiptFormPage = () => {
     const input = e.currentTarget.querySelector('input');
     if (input) {
       input.focus();
-    }  };
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -455,7 +463,8 @@ const LorryReceiptFormPage = () => {
         setCompanies(response.data.companies || []);
         setFilteredConsignorCompanies(response.data.companies || []);
         setFilteredConsigneeCompanies(response.data.companies || []);
-      }    } catch (error) {
+      }
+    } catch (error) {
       console.error('Error loading companies:', error);
     }
   };
@@ -475,7 +484,7 @@ const LorryReceiptFormPage = () => {
   // Handle company name input changes with search
   const handleCompanyNameChange = (e, type) => {
     const { value } = e.target;
-    
+
     if (type === 'consignor') {
       setFormData(prev => ({ ...prev, consignorName: value }));
       filterCompanies(value, 'consignor');
@@ -558,13 +567,13 @@ const LorryReceiptFormPage = () => {
   // Handle form submission with company creation
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
       return;
     }
-    
+
     try {
       let consignorId = null;
       let consigneeId = null;      // Handle consignor company - create new unless selected from dropdown
@@ -579,7 +588,7 @@ const LorryReceiptFormPage = () => {
           gstin: formData.consignorGstin,
           pan: formData.consignorPan
         };
-        
+
         // First check if company already exists
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
@@ -611,11 +620,11 @@ const LorryReceiptFormPage = () => {
           name: formData.consigneeName,
           address: formData.consigneeAddress1,
           city: formData.consigneeCity,
-          state: formData.consigneeState,          pin_code: formData.consigneePincode,
+          state: formData.consigneeState, pin_code: formData.consigneePincode,
           gstin: formData.consigneeGstin,
           pan: formData.consigneePan
         };
-        
+
         // First check if company already exists
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
@@ -658,11 +667,12 @@ const LorryReceiptFormPage = () => {
         hamali: parseFloat(formData.hamali) || 0,
         aoc: parseFloat(formData.aoc) || 0,
         door_delivery: parseFloat(formData.doorDelivery) || 0,
+        detention: parseFloat(formData.detention) || 0,
         collection: parseFloat(formData.collection) || 0,
         st_charge: parseFloat(formData.stCharge) || 0,
         extra_loading: parseFloat(formData.extraLoading) || 0,
         actual_weight: parseFloat(formData.actualWeight) || 0,
-        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,        
+        chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
         paid: parseFloat(formData.paid) || 0,
         to_be_bill: parseFloat(formData.toBeBill) || 0,
         to_pay: parseFloat(formData.toPay) || 0,
@@ -675,8 +685,8 @@ const LorryReceiptFormPage = () => {
       const response = await lorryReceiptService.createLorryReceipt(lorryReceiptData);
 
       if (response.success) {
-  toast.success('Lorry Receipt created successfully!');
-  navigate('/lorry-receipts');
+        toast.success('Lorry Receipt created successfully!');
+        navigate('/lorry-receipts');
       } else {
         alert('Error creating lorry receipt');
       }
@@ -690,13 +700,13 @@ const LorryReceiptFormPage = () => {
   // Handle create and download function
   const handleCreateAndDownload = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
       return;
     }
-    
+
     try {
       let consignorId = null;
       let consigneeId = null;
@@ -713,7 +723,7 @@ const LorryReceiptFormPage = () => {
           gstin: formData.consignorGstin,
           pan: formData.consignorPan
         };
-        
+
         // First check if company already exists
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
@@ -752,7 +762,7 @@ const LorryReceiptFormPage = () => {
           gstin: formData.consigneeGstin,
           pan: formData.consigneePan
         };
-        
+
         // First check if company already exists
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
@@ -799,6 +809,7 @@ const LorryReceiptFormPage = () => {
         hamali: parseFloat(formData.hamali) || 0,
         aoc: parseFloat(formData.aoc) || 0,
         door_delivery: parseFloat(formData.doorDelivery) || 0,
+        detention: parseFloat(formData.detention) || 0,
         collection: parseFloat(formData.collection) || 0,
         st_charge: parseFloat(formData.stCharge) || 0,
         extra_loading: parseFloat(formData.extraLoading) || 0,
@@ -819,7 +830,7 @@ const LorryReceiptFormPage = () => {
       if (response.success) {
         // Get the created lorry receipt data with full details
         const createdLorryReceipt = response.data;
-        
+
         // Prepare data for PDF generation (need to include company details)
         const pdfData = {
           ...createdLorryReceipt,
@@ -851,7 +862,7 @@ const LorryReceiptFormPage = () => {
 
         // Generate and download PDF
         const pdfResult = await downloadLorryReceiptPrintPdf(pdfData);
-        
+
         if (pdfResult.success) {
           alert('Lorry Receipt created successfully and PDF downloaded!');
           navigate('/lorry-receipts');
@@ -876,7 +887,7 @@ const LorryReceiptFormPage = () => {
       ...dummyDataWithoutCN
     }));
     setDummyDataIndex((prev) => (prev + 1) % dummyData.length);
-    
+
     // Reset company creation flags
     setAddConsignorCompany(false);
     setAddConsigneeCompany(false);
@@ -888,12 +899,12 @@ const LorryReceiptFormPage = () => {
     setTimeout(() => {
       const companyName = type === 'consignor' ? formData.consignorName : formData.consigneeName;
       const isDropdownOpen = type === 'consignor' ? showConsignorDropdown : showConsigneeDropdown;
-      
+
       if (!isDropdownOpen && companyName && companyName.trim() !== '') {
-        const existingCompany = companies.find(c => 
+        const existingCompany = companies.find(c =>
           c.name.toLowerCase() === companyName.toLowerCase()
         );
-        
+
         if (!existingCompany) {
           if (type === 'consignor') {
             setAddConsignorCompany(true);
@@ -910,7 +921,7 @@ const LorryReceiptFormPage = () => {
     const filteredCompanies = isConsignor ? filteredConsignorCompanies : filteredConsigneeCompanies;
     const focusedIndex = isConsignor ? focusedConsignorIndex : focusedConsigneeIndex;
     const setFocusedIndex = isConsignor ? setFocusedConsignorIndex : setFocusedConsigneeIndex;
-    
+
     // Total options = filtered companies only (no create new company option in dropdown anymore)
     const totalOptions = filteredCompanies.length;
 
@@ -991,11 +1002,11 @@ const LorryReceiptFormPage = () => {
       if (!companyName || companyName.trim() === '') {
         return;
       }
-      
-      const existingCompany = companies.find(c => 
+
+      const existingCompany = companies.find(c =>
         c.name.toLowerCase() === companyName.toLowerCase()
       );
-      
+
       if (!existingCompany) {
         if (type === 'consignor') {
           setAddConsignorCompany(true);
@@ -1033,10 +1044,10 @@ const LorryReceiptFormPage = () => {
   const generateCnNumber = async (location) => {
     try {
       const prefix = location === 'Tarapur' ? 'TPR' : 'BWD';
-      
+
       // Fetch the highest CN number from database for this prefix
       const response = await lorryReceiptService.getNextCnNumber(prefix);
-      
+
       if (response.success) {
         return `${prefix}-${response.data.nextNumber.toString().padStart(3, '0')}`;
       } else {
@@ -1053,8 +1064,8 @@ const LorryReceiptFormPage = () => {
 
   const selectFromLocation = async (location) => {
     const cnNumber = await generateCnNumber(location);
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       from: location,
       cnNumber: cnNumber
     }));
@@ -1073,17 +1084,18 @@ const LorryReceiptFormPage = () => {
       generateCnNumber(formData.from).then(cnNumber => {
         setFormData(prev => ({ ...prev, cnNumber }));
       });
-    }  }, [formData.from, formData.cnNumber]);
+    }
+  }, [formData.from, formData.cnNumber]);
   // Handle Truck field input and dropdown
   const handleTruckInputChange = (e) => {
     const { value } = e.target;
-    
+
     // Auto-capitalize truck number
     const capitalizedValue = value.toUpperCase();
-    
+
     // Validate truck number
     validateField('truckNumber', capitalizedValue);
-    
+
     setFormData(prev => ({ ...prev, truckNumber: capitalizedValue }));
     setShowTruckDropdown(true);
   };
@@ -1091,7 +1103,7 @@ const LorryReceiptFormPage = () => {
   const selectTruck = (truck) => {
     // Validate selected truck number
     validateField('truckNumber', truck.truck_number);
-    
+
     setFormData(prev => ({ ...prev, truckNumber: truck.truck_number }));
     setShowTruckDropdown(false);
   };
@@ -1099,7 +1111,8 @@ const LorryReceiptFormPage = () => {
     // Delay hiding dropdown to allow for selection
     setTimeout(() => {
       setShowTruckDropdown(false);
-    }, 200);  };
+    }, 200);
+  };
 
   // Calculate total automatically when charge fields change
   useEffect(() => {
@@ -1108,24 +1121,25 @@ const LorryReceiptFormPage = () => {
       const hamali = parseFloat(formData.hamali) || 0;
       const aoc = parseFloat(formData.aoc) || 0;
       const doorDelivery = parseFloat(formData.doorDelivery) || 0;
+      const detention = parseFloat(formData.detention) || 0;
       const collection = parseFloat(formData.collection) || 0;
       const stCharge = parseFloat(formData.stCharge) || 0;
       const extraLoading = parseFloat(formData.extraLoading) || 0;
-      
-      const total = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;
-      
+
+      const total = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
+
       // Update total field
       setFormData(prev => ({ ...prev, total: total.toString() }));
     };
 
     calculateTotal();
-  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
+  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.detention, formData.collection, formData.stCharge, formData.extraLoading]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-		<div className="max-w-7xl mx-auto">
-		<div className="flex justify-between items-center mb-4">
-			<button
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <button
             onClick={() => navigate(-1)}
             className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
           >
@@ -1160,30 +1174,47 @@ const LorryReceiptFormPage = () => {
             </button>
           </div>
         </div>
-		<div className='flex justify-center items-center relative'>
-    <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
-      <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
-        <div className='w-full flex flex-col items-center justify-center py-2'>
-          <div className='w-full flex flex-row items-start justify-between py-2'>
-            <div className='flex-shrink-0 flex items-center w-2/3'>
-              <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
-            </div>
-            <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
-              <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
-              <div className='mb-2 text-right text-xs'>
-                <div className='font-semibold'>Daily Part Load Service to -</div>
-                <div>Tarapur, Bhiwandi, Palghar,</div>
-                <div>Vashi, Taloja, Kolgoan Genises</div>
-              </div>
-              <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
-                DRIVERS COPY
+        <div className='flex justify-center items-center relative'>
+          <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
+            <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
+              <div className='w-full flex flex-col items-center justify-center py-2'>
+                <div className='w-full flex flex-row items-start justify-between py-2'>
+                  <div className='flex-shrink-0 flex items-center w-2/3'>
+                    <img src={truckHeader} alt="BillLogo" className="h-40 object-contain " />
+                    <img src={nameHeader} alt="BillLogo" className=" h-30 object-contain  ml-30" />
+                  </div>
+                  <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
+                    <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
+                    <div className='mb-2 text-right text-xs'>
+                      <div className='font-semibold'>Daily Part Load Service to -</div>
+                      <div>Tarapur, Bhiwandi, Palghar,</div>
+                      <div>Vashi, Taloja, Kolgoan Genises</div>
+                    </div>
+                    <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                      DRIVERS COPY
+                    </div>
+                  </div>
+                </div>
+                <div className="w-[90%] mx-auto -mt-8 mb-6 ml-65">
+                  <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
+                    <div>
+                      <span className="text-red-600 font-bold">TARAPUR:</span>
+                      Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+                      M.: 9823364283 / 7276272828
+                    </div>
+                    <div>
+                      <span className="text-red-600 font-bold">BHIWANDI:</span>
+                      Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+                      <div className="ml-20">
+                        Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-		</div>
         <form onSubmit={handleSubmit} className="lorry-receipt-form">
           <div className="container bg-white">
             {/* Consignor / Consignee */}            <div className="row-container">
@@ -1211,7 +1242,7 @@ const LorryReceiptFormPage = () => {
                             {addConsignorCompany && (
                               <span className="absolute right-2 top-1 text-xs text-green-600 font-semibold">NEW</span>
                             )}
-                              {showConsignorDropdown && (
+                            {showConsignorDropdown && (
                               <>
                                 {/* Create New Company Button above dropdown */}
                                 <div className="absolute bottom-full left-0 right-0 mb-1">
@@ -1224,31 +1255,30 @@ const LorryReceiptFormPage = () => {
                                     Create New Company
                                   </button>
                                 </div>
-                                
+
                                 {/* Dropdown with companies */}
                                 <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
                                   {/* Show filtered companies */}
                                   {filteredConsignorCompanies.map((company, index) => (
-                                  <div
-                                    key={company.id}
-                                    className={`px-3 py-2 cursor-pointer border-b border-gray-100 ${
-                                      focusedConsignorIndex === index 
-                                        ? 'bg-blue-100 text-blue-800' 
+                                    <div
+                                      key={company.id}
+                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 ${focusedConsignorIndex === index
+                                        ? 'bg-blue-100 text-blue-800'
                                         : 'hover:bg-gray-100'
-                                    }`}
-                                    onClick={() => selectCompany(company, 'consignor')}
-                                  >
-                                    <div className="font-medium text-sm">{company.name}</div>
-                                    {company.city && (
-                                      <div className="text-xs text-gray-500">{company.city}, {company.state}</div>
-                                    )}
-                                  </div>
-                                ))}                                
-                                {filteredConsignorCompanies.length === 0 && formData.consignorName && (
-                                  <div className="px-3 py-2 text-gray-500 text-sm">
-                                    No companies found
-                                  </div>
-                                )}
+                                        }`}
+                                      onClick={() => selectCompany(company, 'consignor')}
+                                    >
+                                      <div className="font-medium text-sm">{company.name}</div>
+                                      {company.city && (
+                                        <div className="text-xs text-gray-500">{company.city}, {company.state}</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {filteredConsignorCompanies.length === 0 && formData.consignorName && (
+                                    <div className="px-3 py-2 text-gray-500 text-sm">
+                                      No companies found
+                                    </div>
+                                  )}
                                 </div>
                               </>
                             )}
@@ -1259,27 +1289,27 @@ const LorryReceiptFormPage = () => {
                         <input
                           type="text"
                           name="consignorAddress1"
-                          value={formData.consignorAddress1}                          onChange={handleInputChange}
+                          value={formData.consignorAddress1} onChange={handleInputChange}
                           className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''}`}
                           placeholder="Address"
                           disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                         />
                       </div>
                       <div className="flex gap-2">                        <div className="input-container flex-1" onClick={handleDivClick}>
-                          <input
-                            type="text"
-                            name="consignorCity"
-                            value={formData.consignorCity}                            onChange={handleInputChange}
-                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''}`}
-                            placeholder="City"
-                            disabled={consignorSelectedFromDropdown && !addConsignorCompany}
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="consignorCity"
+                          value={formData.consignorCity} onChange={handleInputChange}
+                          className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''}`}
+                          placeholder="City"
+                          disabled={consignorSelectedFromDropdown && !addConsignorCompany}
+                        />
+                      </div>
                         <div className="input-container flex-1" onClick={handleDivClick}>
                           <input
                             type="text"
                             name="consignorState"
-                            value={formData.consignorState}                            onChange={handleInputChange}
+                            value={formData.consignorState} onChange={handleInputChange}
                             className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''}`}
                             placeholder="State"
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
@@ -1288,7 +1318,7 @@ const LorryReceiptFormPage = () => {
                           <input
                             type="text"
                             name="consignorPincode"
-                            value={formData.consignorPincode}                            onChange={handleInputChange}
+                            value={formData.consignorPincode} onChange={handleInputChange}
                             className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
@@ -1300,25 +1330,25 @@ const LorryReceiptFormPage = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">                        <div className="input-container flex-1" onClick={handleDivClick}>
-                          <input
-                            type="text"
-                            name="consignorGstin"
-                            value={formData.consignorGstin}
-                            onChange={handleInputChange}
-                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorGstin ? 'border-red-500' : ''}`}                            placeholder="GSTIN"
-                            disabled={consignorSelectedFromDropdown && !addConsignorCompany}
-                          />
-                          {validationErrors.consignorGstin && (
-                            <div className="text-red-500 text-xs mt-1">{validationErrors.consignorGstin}</div>
-                          )}
-                        </div>
+                        <input
+                          type="text"
+                          name="consignorGstin"
+                          value={formData.consignorGstin}
+                          onChange={handleInputChange}
+                          className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorGstin ? 'border-red-500' : ''}`} placeholder="GSTIN"
+                          disabled={consignorSelectedFromDropdown && !addConsignorCompany}
+                        />
+                        {validationErrors.consignorGstin && (
+                          <div className="text-red-500 text-xs mt-1">{validationErrors.consignorGstin}</div>
+                        )}
+                      </div>
                         <div className="input-container flex-1" onClick={handleDivClick}>
                           <input
                             type="text"
                             name="consignorPan"
                             value={formData.consignorPan}
                             onChange={handleInputChange}
-                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPan ? 'border-red-500' : ''}`}                            placeholder="PAN"
+                            className={`form-input ${consignorSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consignorPan ? 'border-red-500' : ''}`} placeholder="PAN"
                             disabled={consignorSelectedFromDropdown && !addConsignorCompany}
                           />
                           {validationErrors.consignorPan && (
@@ -1349,7 +1379,7 @@ const LorryReceiptFormPage = () => {
                             {addConsigneeCompany && (
                               <span className="absolute right-2 top-1 text-xs text-green-600 font-semibold">NEW</span>
                             )}
-                              {showConsigneeDropdown && (
+                            {showConsigneeDropdown && (
                               <>
                                 {/* Create New Company Button above dropdown */}
                                 <div className="absolute bottom-full left-0 right-0 mb-1">
@@ -1362,18 +1392,17 @@ const LorryReceiptFormPage = () => {
                                     Create New Company
                                   </button>
                                 </div>
-                                
+
                                 {/* Dropdown with companies */}
                                 <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
                                   {/* Show filtered companies */}
                                   {filteredConsigneeCompanies.map((company, index) => (
                                     <div
                                       key={company.id}
-                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 ${
-                                        focusedConsigneeIndex === index 
-                                          ? 'bg-blue-100 text-blue-800' 
-                                          : 'hover:bg-gray-100'
-                                      }`}
+                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 ${focusedConsigneeIndex === index
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'hover:bg-gray-100'
+                                        }`}
                                       onClick={() => selectCompany(company, 'consignee')}
                                     >
                                       <div className="font-medium text-sm">{company.name}</div>
@@ -1382,7 +1411,7 @@ const LorryReceiptFormPage = () => {
                                       )}
                                     </div>
                                   ))}
-                                  
+
                                   {filteredConsigneeCompanies.length === 0 && formData.consigneeName && (
                                     <div className="px-3 py-2 text-gray-500 text-sm">
                                       No companies found
@@ -1394,21 +1423,21 @@ const LorryReceiptFormPage = () => {
                           </div></div>
                       </div>
                       <div className="input-container" onClick={handleDivClick}><input
-                          type="text"
-                          name="consigneeAddress1"
-                          value={formData.consigneeAddress1}
-                          onChange={handleInputChange}
-                          className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''}`}
-                          placeholder="Address Line"
-                          disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
-                        />
+                        type="text"
+                        name="consigneeAddress1"
+                        value={formData.consigneeAddress1}
+                        onChange={handleInputChange}
+                        className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''}`}
+                        placeholder="Address Line"
+                        disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
+                      />
                       </div>
                       <div className="flex gap-2">
                         <div className="input-container flex-1" onClick={handleDivClick}>
                           <input
                             type="text"
                             name="consigneeCity"
-                            value={formData.consigneeCity}                            onChange={handleInputChange}
+                            value={formData.consigneeCity} onChange={handleInputChange}
                             className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''}`}
                             placeholder="City"
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
@@ -1424,11 +1453,11 @@ const LorryReceiptFormPage = () => {
                             placeholder="State"
                           />
                         </div>
-						<div className="input-container" onClick={handleDivClick}>
+                        <div className="input-container" onClick={handleDivClick}>
                           <input
                             type="text"
                             name="consigneePincode"
-                            value={formData.consigneePincode}                            onChange={handleInputChange}
+                            value={formData.consigneePincode} onChange={handleInputChange}
                             className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePincode ? 'border-red-500' : ''}`}
                             placeholder="Pin Code"
                             style={{ width: '80px' }}
@@ -1444,7 +1473,7 @@ const LorryReceiptFormPage = () => {
                             type="text"
                             name="consigneeGstin"
                             value={formData.consigneeGstin}
-                            onChange={handleInputChange}                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
+                            onChange={handleInputChange} className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneeGstin ? 'border-red-500' : ''}`}
                             placeholder="GSTIN"
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
@@ -1458,7 +1487,7 @@ const LorryReceiptFormPage = () => {
                             name="consigneePan"
                             value={formData.consigneePan}
                             onChange={handleInputChange}
-                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePan ? 'border-red-500' : ''}`}                            placeholder="PAN"
+                            className={`form-input ${consigneeSelectedFromDropdown ? 'bg-gray-100' : ''} ${validationErrors.consigneePan ? 'border-red-500' : ''}`} placeholder="PAN"
                             disabled={consigneeSelectedFromDropdown && !addConsigneeCompany}
                           />
                           {validationErrors.consigneePan && (
@@ -1468,8 +1497,8 @@ const LorryReceiptFormPage = () => {
                       </div>
                     </td>
                   </tr>
-                </tbody>              
-				</table>
+                </tbody>
+              </table>
               <table className="right-table">
                 <tbody>
                   <tr>
@@ -1482,13 +1511,15 @@ const LorryReceiptFormPage = () => {
                           value={formData.cnNumber}
                           className="form-input-small bg-gray-100"
                           readOnly
-                          placeholder="Select location first"                        />
+                          placeholder="Select location first" />
                       </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td>
-                      <strong>Truck No. - <span className="text-red-500">*</span></strong>
+                  <td className="text-center align-middle">
+                    <div className="mt-4 inline-block">
+                      <strong>
+                        Truck No. - <span className="text-red-500">*</span>
+                      </strong>
                       <div className="relative inline-block">
                         <div className="input-container inline-block" onClick={handleDivClick}>
                           <input
@@ -1498,40 +1529,22 @@ const LorryReceiptFormPage = () => {
                             onChange={handleTruckInputChange}
                             onFocus={() => setShowTruckDropdown(true)}
                             onBlur={handleTruckInputBlur}
-                            className={`form-input-small ${validationErrors.truckNumber ? 'border-red-500' : ''}`}
+                            className={`form-input-small ${validationErrors.truckNumber ? "border-red-500" : ""
+                              }`}
                             placeholder="Truck Number"
                             autoComplete="off"
                           />
                           {validationErrors.truckNumber && (
-                            <div className="text-red-500 text-xs mt-1">{validationErrors.truckNumber}</div>
+                            <div className="text-red-500 text-xs mt-1">
+                              {validationErrors.truckNumber}
+                            </div>
                           )}
                         </div>
-                        {showTruckDropdown && (
-                          <div 
-                            ref={truckDropdownRef}
-                            className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
-                            style={{ minWidth: '200px' }}
-                          >
-                            {trucks.map((truck) => (
-                              <div
-                                key={truck.id}
-                                className="px-3 py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-100"
-                                onClick={() => selectTruck(truck)}
-                              >
-                                <div className="font-medium text-sm">{truck.truck_number}</div>
-                                <div className="text-xs text-gray-500">{truck.truck_type} - {truck.capacity_ton}T</div>
-                              </div>
-                            ))}
-                            {trucks.length === 0 && (
-                              <div className="px-3 py-2 text-gray-500 text-sm">
-                                No trucks found
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {/* dropdown code */}
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </td>
+
                   <tr>
                     <td>
                       <strong>Date - <span className="text-red-500">*</span></strong>
@@ -1541,7 +1554,7 @@ const LorryReceiptFormPage = () => {
                           name="date"
                           value={formData.date}
                           onChange={handleInputChange}
-                          className="form-input-small"                        />
+                          className="form-input-small" />
                       </div>
                     </td>
                   </tr>
@@ -1562,7 +1575,7 @@ const LorryReceiptFormPage = () => {
                             autoComplete="off"
                           />
                         </div>                        {showFromDropdown && (
-                          <div 
+                          <div
                             ref={fromDropdownRef}
                             className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
                             style={{ minWidth: '150px' }}
@@ -1622,303 +1635,317 @@ const LorryReceiptFormPage = () => {
                     Purna Village, Bhiwandi.<br />
                     M.: 7507844317 /<br />
                     9168027868<br />
-					<hr />
-					<br />
+                    <hr />
+                    <br />
                     <b>PAN: AGTPV0112D<br />
-                    GSTIN: 27AGTPV0112D1ZG</b>
-					</td>
+                      GSTIN: 27AGTPV0112D1ZG</b>
+                  </td>
                   {/* Freight Table */}
                   <td colSpan="3">                    <table style={{ height: '330px', borderCollapse: 'collapse', width: '100%' }}>
-                      <tbody>
-                        <tr className="bold center">
-                          <td width="10%">Nos. <span className="text-red-500">*</span></td>
-                          <td width="60%">Particulars <span className="text-red-500">*</span></td>
-                          <td width="18%" colSpan="2">Rate Rs.</td>
-                          <td width="12%">Weight</td>
-                        </tr>
-                        <tr>{/* Nos. */}
-                          <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
-                            {formData.nos.map((nos, index) => (
-                              <div key={index} className="flex items-center mb-2">
-                                <div className="input-container flex-1" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    value={nos}
-                                    onChange={(e) => handleArrayInputChange(index, 'nos', e.target.value)}
-                                    className="form-input-nos"
-                                    placeholder={`Nos ${index + 1}`}
-                                  />
-                                </div>
-                                {formData.nos.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeArrayField(index, 'nos')}
-                                    className="ml-1 text-red-500 hover:text-red-700 text-xs"
-                                  >
-                                    ×
-                                  </button>
-                                )}
+                    <tbody>
+                      <tr className="bold center">
+                        <td width="10%">Nos. <span className="text-red-500">*</span></td>
+                        <td width="60%">Particulars <span className="text-red-500">*</span></td>
+                        <td width="18%" colSpan="2">Rate Rs.</td>
+                        <td width="12%">Weight</td>
+                      </tr>
+                      <tr>{/* Nos. */}
+                        <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
+                          {formData.nos.map((nos, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <div className="input-container flex-1" onClick={handleDivClick}>
+                                <input
+                                  type="text"
+                                  value={nos}
+                                  onChange={(e) => handleArrayInputChange(index, 'nos', e.target.value)}
+                                  className="form-input-nos"
+                                  placeholder={`Nos ${index + 1}`}
+                                />
                               </div>
-                            ))}
-                          </td>
+                              {formData.nos.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeArrayField(index, 'nos')}
+                                  className="ml-1 text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </td>
 
-                          {/* Particulars */}
-                          <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
-                            {formData.particulars.map((particular, index) => (
-                              <div key={index} className="flex items-center mb-2">
-                                <div className="input-container flex-1" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    value={particular}
-                                    onChange={(e) => handleArrayInputChange(index, 'particulars', e.target.value)}
-                                    className="form-input-particulars"
-                                    placeholder={`Particulars ${index + 1}`}
-                                  />
-                                </div>
-                                {formData.particulars.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeArrayField(index, 'particulars')}
-                                    className="ml-1 text-red-500 hover:text-red-700 text-xs"
-                                  >
-                                    ×
-                                  </button>
+                        {/* Particulars */}
+                        <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
+                          {formData.particulars.map((particular, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <div className="input-container flex-1" onClick={handleDivClick}>
+                                <input
+                                  type="text"
+                                  value={particular}
+                                  onChange={(e) => handleArrayInputChange(index, 'particulars', e.target.value)}
+                                  className="form-input-particulars"
+                                  placeholder={`Particulars ${index + 1}`}
+                                />
+                              </div>
+                              {formData.particulars.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeArrayField(index, 'particulars')}
+                                  className="ml-1 text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <div style={{ textAlign: 'left', marginTop: '8px' }}>
+                            <button
+                              type="button"
+                              className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  nos: [...prev.nos, ''],
+                                  particulars: [...prev.particulars, '']
+                                }));
+                              }}
+                            >
+                              + Add More
+                            </button>
+                          </div>
+                        </td>
+                        {/* Left Rate Rs. subcolumn */}
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Freight
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Hamali
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              A.O.C
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Door Dely
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Detention
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Collection
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              St.Charge
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Extra Loading <br /> paid by us
+                            </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Total
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Right Rate Rs. subcolumn */}
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '13%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="freight"
+                                  value={formData.freight}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="hamali"
+                                  value={formData.hamali}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="aoc"
+                                  value={formData.aoc}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="doorDelivery"
+                                  value={formData.doorDelivery}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="detention"
+                                  value={formData.detention}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="collection"
+                                  value={formData.collection}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="stCharge"
+                                  value={formData.stCharge}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="extraLoading"
+                                  value={formData.extraLoading}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                              <input
+                                type="text"
+                                name="total"
+                                value={formData.total}
+                                readOnly
+                                className="form-input-total"
+                                style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                              />
+                            </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
+                                <input
+                                  type="text"
+                                  name="actualWeight"
+                                  value={formData.actualWeight}
+                                  onChange={handleInputChange}
+                                  className={`form-input-weight ${validationErrors.actualWeight ? 'border-red-500' : ''}`}
+                                />
+                                {validationErrors.actualWeight && (
+                                  <div className="text-red-500 text-xs mt-1">{validationErrors.actualWeight}</div>
                                 )}
                               </div>
-                            ))}
-                            <div style={{textAlign: 'left', marginTop: '8px'}}>
-                              <button
-                                type="button"
-                                className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                                onClick={() => {
-                                  setFormData(prev => ({
+                              &nbsp;Kg.
+                            </div>
+                            <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>                                <div className="input-container inline-block" onClick={handleDivClick}>
+                              <input
+                                type="text"
+                                name="chargeableWeight"
+                                value={formData.chargeableWeight}
+                                onChange={handleInputChange}
+                                className={`form-input-weight ${validationErrors.chargeableWeight ? 'border-red-500' : ''}`}
+                              />
+                              {validationErrors.chargeableWeight && (
+                                <div className="text-red-500 text-xs mt-1">{validationErrors.chargeableWeight}</div>
+                              )}
+                            </div>
+                              &nbsp;Chargeable <span className="text-red-500">*</span>
+                            </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                              <input
+                                type="radio"
+                                id="payment-paid"
+                                name="paymentType"
+                                value="paid"
+                                checked={formData.paymentType === 'paid'}
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  paymentType: e.target.value,
+                                  paid: '20',
+                                  toBeBill: '0',
+                                  toPay: '0'
+                                }))}
+                                style={{ marginRight: '4px' }}
+                              />
+                              <label htmlFor="payment-paid">Paid</label>
+                            </div>
+                              <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                                <input
+                                  type="radio"
+                                  id="payment-toBeBill"
+                                  name="paymentType"
+                                  value="toBeBill"
+                                  checked={formData.paymentType === 'toBeBill'}
+                                  onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    nos: [...prev.nos, ''],
-                                    particulars: [...prev.particulars, '']
-                                  }));
-                                }}
-                              >
-                                + Add More
-                              </button>
-                            </div>
-                          </td>
-						  {/* Left Rate Rs. subcolumn */}
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Freight
+                                    paymentType: e.target.value,
+                                    paid: '0',
+                                    toBeBill: '20',
+                                    toPay: '0'
+                                  }))}
+                                  style={{ marginRight: '4px' }}
+                                />
+                                <label htmlFor="payment-toBeBill">To be Bill</label>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Hamali
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                A.O.C
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Door Dely
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Collection
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                St.Charge
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Extra Loading <br /> paid by us
-                              </div>
-                              <div style={{flex: '1',  padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Total
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <input
+                                  type="radio"
+                                  id="payment-toPay"
+                                  name="paymentType"
+                                  value="toPay"
+                                  checked={formData.paymentType === 'toPay'}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    paymentType: e.target.value,
+                                    paid: '0',
+                                    toBeBill: '0',
+                                    toPay: '20'
+                                  }))}
+                                  style={{ marginRight: '4px' }}
+                                />
+                                <label htmlFor="payment-toPay">To Pay</label>
                               </div>
                             </div>
-                          </td>
-
-                          {/* Right Rate Rs. subcolumn */}
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '15%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="freight"
-                                    value={formData.freight}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="hamali"
-                                    value={formData.hamali}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="aoc"
-                                    value={formData.aoc}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="doorDelivery"
-                                    value={formData.doorDelivery}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="collection"
-                                    value={formData.collection}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="stCharge"
-                                    value={formData.stCharge}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{  flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="extraLoading"
-                                    value={formData.extraLoading}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', padding: '2px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-									type="text"
-									name="total"
-									value={formData.total}
-									readOnly
-									className="form-input-total"
-									style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
-								  />
-                                </div>
-                              </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
+                              Goods entirely<br />booked at <br /><b>OWNER'S RISK</b>
                             </div>
-                          </td>
-
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    name="actualWeight"
-                                    value={formData.actualWeight}
-                                    onChange={handleInputChange}
-                                    className={`form-input-weight ${validationErrors.actualWeight ? 'border-red-500' : ''}`}
-                                  />
-                                  {validationErrors.actualWeight && (
-                                    <div className="text-red-500 text-xs mt-1">{validationErrors.actualWeight}</div>
-                                  )}
-                                </div>
-                                &nbsp;Kg.
-                              </div>
-                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>                                <div className="input-container inline-block" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    name="chargeableWeight"
-                                    value={formData.chargeableWeight}
-                                    onChange={handleInputChange}
-                                    className={`form-input-weight ${validationErrors.chargeableWeight ? 'border-red-500' : ''}`}
-                                  />
-                                  {validationErrors.chargeableWeight && (
-                                    <div className="text-red-500 text-xs mt-1">{validationErrors.chargeableWeight}</div>
-                                  )}
-                                </div>
-                                &nbsp;Chargeable <span className="text-red-500">*</span>
-                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-paid"
-                                    name="paymentType"
-                                    value="paid"
-                                    checked={formData.paymentType === 'paid'}
-                                    onChange={(e) => setFormData(prev => ({
-                                      ...prev,
-                                      paymentType: e.target.value,
-                                      paid: '20',
-                                      toBeBill: '0',
-                                      toPay: '0'
-                                    }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-paid">Paid</label>
-                                </div>
-                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-toBeBill"
-                                    name="paymentType"
-                                    value="toBeBill"
-                                    checked={formData.paymentType === 'toBeBill'}
-                                    onChange={(e) => setFormData(prev => ({
-                                      ...prev,
-                                      paymentType: e.target.value,
-                                      paid: '0',
-                                      toBeBill: '20',
-                                      toPay: '0'
-                                    }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-toBeBill">To be Bill</label>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-toPay"
-                                    name="paymentType"
-                                    value="toPay"
-                                    checked={formData.paymentType === 'toPay'}
-                                    onChange={(e) => setFormData(prev => ({
-                                      ...prev,
-                                      paymentType: e.target.value,
-                                      paid: '0',
-                                      toBeBill: '0',
-                                      toPay: '20'
-                                    }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-toPay">To Pay</label>
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
-                                Goods entirely<br />booked at <br/><b>OWNER'S RISK</b>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>                  </td>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>                  </td>
                 </tr>
               </tbody>
             </table>

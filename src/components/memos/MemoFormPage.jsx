@@ -39,17 +39,17 @@ const mockLRData = [
 const MemoFormPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
-  
+
   // State for dummy data cycling
   const [dummyDataIndex, setDummyDataIndex] = useState(0);
-  
+
   // Dummy data for development
   const dummyData = [
     {
       lorry_hire: '15000',
       lorry_no: 'MH 12 AB 1234',
       driver_name: 'Rajesh Kumar',
-      ac_no: 'AC001',
+      ac_no: '9288273654',
       address: 'Transport Nagar, Mumbai, Maharashtra',
       from_location: 'Mumbai',
       to_location: 'Pune',
@@ -67,7 +67,7 @@ const MemoFormPage = () => {
       lorry_hire: '12000',
       lorry_no: 'GJ 05 CD 5678',
       driver_name: 'Suresh Patel',
-      ac_no: 'AC002',
+      ac_no: '8737263829',
       address: 'Industrial Area, Surat, Gujarat',
       from_location: 'Surat',
       to_location: 'Ahmedabad',
@@ -85,7 +85,7 @@ const MemoFormPage = () => {
       lorry_hire: '18000',
       lorry_no: 'UP 32 EF 9101',
       driver_name: 'Ramesh Singh',
-      ac_no: 'AC003',
+      ac_no: '9494949393',
       address: 'Transport Hub, Kanpur, Uttar Pradesh',
       from_location: 'Kanpur',
       to_location: 'Delhi',
@@ -103,7 +103,7 @@ const MemoFormPage = () => {
       lorry_hire: '22000',
       lorry_no: 'KA 03 GH 2468',
       driver_name: 'Venkatesh Rao',
-      ac_no: 'AC004',
+      ac_no: '4564564564',
       address: 'Logistics Park, Bangalore, Karnataka',
       from_location: 'Bangalore',
       to_location: 'Chennai',
@@ -121,7 +121,7 @@ const MemoFormPage = () => {
       lorry_hire: '16500',
       lorry_no: 'RJ 14 IJ 3579',
       driver_name: 'Mohan Sharma',
-      ac_no: 'AC005',
+      ac_no: '8499294929',
       address: 'Commercial Complex, Jaipur, Rajasthan',
       from_location: 'Jaipur',
       to_location: 'Jodhpur',
@@ -139,7 +139,7 @@ const MemoFormPage = () => {
       lorry_hire: '14000',
       lorry_no: 'WB 22 KL 4680',
       driver_name: 'Subrata Das',
-      ac_no: 'AC006',
+      ac_no: '9779796979',
       address: 'Port Area, Kolkata, West Bengal',
       from_location: 'Kolkata',
       to_location: 'Bhubaneswar',
@@ -154,7 +154,7 @@ const MemoFormPage = () => {
       ]
     }
   ];
-  
+
   // State for form data
   const [formData, setFormData] = useState({
     memo_number: '',
@@ -199,17 +199,17 @@ const MemoFormPage = () => {
     try {
       console.log('🔄 Loading lorry receipts for memo form...');
       console.log('🔧 Using lorryReceiptService:', lorryReceiptService);
-      
+
       const response = await lorryReceiptService.getLorryReceipts({ limit: 1000 });
       console.log('📦 Raw LR Service Response:', response);
       console.log('📊 Response type:', typeof response);
       console.log('📋 Response keys:', Object.keys(response || {}));
-      
+
       if (response && response.success) {
         console.log('✅ API call successful');
         console.log('📦 Response.data:', response.data);
         console.log('📋 Data keys:', Object.keys(response.data || {}));
-        
+
         if (response.data && response.data.lorryReceipts) {
           console.log(`✅ Found ${response.data.lorryReceipts.length} lorry receipts`);
           console.log('📄 First 3 LR samples:', response.data.lorryReceipts.slice(0, 3));
@@ -254,12 +254,22 @@ const MemoFormPage = () => {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const { name, value } = e.target;
+
+  if (name === "ac_no") {
+    if (/^\d{0,10}$/.test(value)) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  } else if (name === "lorry_no") {
+    // Progressive typing regex: allows partial input but max 4 digits at the end
+    const regex = /^[A-Z]{0,2}\s?\d{0,2}\s?[A-Z]{0,2}\s?\d{0,4}$/i;
+    if (regex.test(value)) {
+      setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+    }
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
 
   // Add new table row
   const addTableRow = () => {
@@ -277,7 +287,7 @@ const MemoFormPage = () => {
 
   // Update table row
   const updateTableRow = (rowId, field, value) => {
-    setTableRows(prev => prev.map(row => 
+    setTableRows(prev => prev.map(row =>
       row.id === rowId ? { ...row, [field]: value } : row
     ));
   };
@@ -285,7 +295,7 @@ const MemoFormPage = () => {
   // Select LR for table row
   const selectLRForRow = (rowId, lr) => {
     console.log('🎯 selectLRForRow called with:', { rowId, lr });
-    setTableRows(prev => prev.map(row => 
+    setTableRows(prev => prev.map(row =>
       row.id === rowId ? {
         ...row,
         lr_no: lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A',
@@ -349,16 +359,16 @@ const MemoFormPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log('Form submitted, validating fields...');
     console.log('Form data:', formData);
-    
+
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
       return;
     }
-    
+
     try {
       const memoData = {
         memo_number: formData.memo_number,
@@ -382,9 +392,9 @@ const MemoFormPage = () => {
       const response = await memoService.createMemo(memoData);
 
       if (response.success) {
-  toast.success('Memo created successfully!');
-  // Navigate to /memos and pass new memo ID via location state
-  navigate('/memos', { state: { newMemoId: response.data.id } });
+        toast.success('Memo created successfully!');
+        // Navigate to /memos and pass new memo ID via location state
+        navigate('/memos', { state: { newMemoId: response.data.id } });
       } else {
         console.error('Memo creation failed:', response);
         alert(`Error creating memo: ${response.error || 'Unknown error'}`);
@@ -402,20 +412,20 @@ const MemoFormPage = () => {
   // Fill dummy data function
   const fillDummyData = () => {
     const currentDummy = dummyData[dummyDataIndex];
-    
+
     // Exclude memo_number and memo_date since they should be auto-generated
     const { tableData, ...dummyFormData } = currentDummy;
-    
+
     setFormData(prev => ({
       ...prev,
       ...dummyFormData
     }));
-    
+
     // Set table data
     setTableRows(tableData || [
       { id: 1, lr_no: '', articles: '', consignor: '', consignee: '', kgs: '', freight: '' }
     ]);
-    
+
     setDummyDataIndex((prev) => (prev + 1) % dummyData.length);
   };
 
@@ -480,11 +490,28 @@ const MemoFormPage = () => {
           </div>
         </div>
 
+        {/* 📌 Addresses */}
+        <div className="w-[90%] mx-auto -mt-2 mb-6 ml-60">
+          <div className="text-xs font-medium text-gray-700 leading-snug space-y-2">
+            <div>
+              <span className="text-red-600 font-bold">TARAPUR:</span>
+              Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+              M.: 9823364283 / 7276272828
+            </div>
+            <div>
+              <span className="text-red-600 font-bold">BHIWANDI:</span>
+              Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+              <div className="ml-20">
+                Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+              </div>
+            </div>
+          </div>
+        </div>
 
 
-      <form onSubmit={handleSubmit} className="memo-form">
-        <div className="container bg-white">
-            
+        <form onSubmit={handleSubmit} className="memo-form">
+          <div className="container bg-white">
+
             {/* Memo Details Section */}
             <div className="row-container">
               <table className="left-table">
@@ -540,7 +567,7 @@ const MemoFormPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center mb-2">
-                        <strong className="mr-2 whitespace-nowrap">Ac No.</strong>
+                        <strong className="mr-2 whitespace-nowrap">Contact No.</strong>
                         <div className="w-full">
                           <div className="input-container w-full">
                             <input
@@ -549,7 +576,9 @@ const MemoFormPage = () => {
                               value={formData.ac_no}
                               onChange={handleInputChange}
                               className="form-input"
-                              placeholder="Account number"
+                              placeholder="Contact number"
+                              maxLength={10}
+                              pattern='[0-9]{10}'
                             />
                           </div>
                         </div>
@@ -603,7 +632,7 @@ const MemoFormPage = () => {
                   </tr>
                 </tbody>
               </table>
-              
+
               <table className="right-table">
                 <tbody>
                   <tr>
@@ -732,7 +761,7 @@ const MemoFormPage = () => {
               </thead>
               <tbody>
                 {tableRows.map((row, index) => (
-                  <TableRow 
+                  <TableRow
                     key={row.id}
                     row={row}
                     index={index}
@@ -1026,7 +1055,7 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
   useEffect(() => {
     if (showLRDropdown) {
       let filtered = lorryReceipts;
-      
+
       if (searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase();
         filtered = lorryReceipts.filter(lr => {
@@ -1053,7 +1082,7 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
           );
         });
       }
-      
+
       // Limit to 25 results for better performance but show more data
       setFilteredLRs(filtered.slice(0, 25));
     }
@@ -1072,7 +1101,7 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
       console.log('📊 Available lorryReceipts count:', lorryReceipts.length);
       console.log('📋 Sample lorryReceipts data:', lorryReceipts.slice(0, 2));
       console.log('🔍 First LR structure:', lorryReceipts[0]);
-      
+
       setShowLRDropdown(true);
       setFilteredLRs(lorryReceipts.slice(0, 25)); // Show first 25 items initially
     } else {
@@ -1105,7 +1134,7 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
             onClick={openDropdown}
             disabled={isLoadingLRs}
             className="form-input-nos"
-            style={{ 
+            style={{
               width: '100%',
               textAlign: 'left',
               cursor: isLoadingLRs ? 'not-allowed' : 'pointer',
@@ -1120,26 +1149,26 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
             {isLoadingLRs ? 'Loading...' : (row.lr_no || 'Select LR...')}
             <span style={{ float: 'right' }}>{isLoadingLRs ? '⏳' : '▼'}</span>
           </button>
-          
+
           {showLRDropdown && (
-            <div style={{ 
-              position: 'absolute', 
-              top: '100%', 
-              left: '0', 
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: '0',
               right: '0',
               minWidth: '450px', // Make dropdown much wider
-              background: 'white', 
-              border: '2px solid #000', 
-              boxShadow: '0 8px 16px rgba(0,0,0,0.15)', 
-              zIndex: 1000, 
-              maxHeight: '400px', 
+              background: 'white',
+              border: '2px solid #000',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+              zIndex: 1000,
+              maxHeight: '400px',
               overflowY: 'auto',
               borderRadius: '4px'
             }}>
               {/* Search Input */}
-              <div style={{ 
-                padding: '12px', 
-                borderBottom: '2px solid #e5e7eb', 
+              <div style={{
+                padding: '12px',
+                borderBottom: '2px solid #e5e7eb',
                 background: '#f8fafc',
                 borderRadius: '4px 4px 0 0'
               }}>
@@ -1165,10 +1194,10 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
               {/* Clear Selection Option */}
               <div
-                style={{ 
-                  padding: '10px 12px', 
-                  cursor: 'pointer', 
-                  borderBottom: '1px solid #e5e7eb', 
+                style={{
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #e5e7eb',
                   fontSize: '11px',
                   background: '#fef3c7',
                   color: '#92400e',
@@ -1190,9 +1219,9 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
               {/* Loading State */}
               {isLoadingLRs && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#6b7280',
                   fontStyle: 'italic'
@@ -1204,9 +1233,9 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
               {/* No LRs Available */}
               {!isLoadingLRs && lorryReceipts.length === 0 && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#dc2626',
                   fontStyle: 'italic'
@@ -1219,9 +1248,9 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
               {/* No Results State */}
               {!isLoadingLRs && lorryReceipts.length > 0 && filteredLRs.length === 0 && searchTerm && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#6b7280',
                   fontStyle: 'italic'
@@ -1238,10 +1267,10 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
               {filteredLRs.map((lr) => (
                 <div
                   key={lr.id}
-                  style={{ 
-                    padding: '12px', 
-                    cursor: 'pointer', 
-                    borderBottom: '1px solid #f3f4f6', 
+                  style={{
+                    padding: '12px',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid #f3f4f6',
                     fontSize: '11px',
                     transition: 'background-color 0.2s'
                   }}
@@ -1250,8 +1279,8 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
                   onMouseLeave={(e) => e.target.style.background = 'white'}
                 >
                   {/* LR Number - Primary */}
-                  <div style={{ 
-                    fontWeight: 'bold', 
+                  <div style={{
+                    fontWeight: 'bold',
                     marginBottom: '6px',
                     color: '#1d4ed8',
                     fontSize: '12px'
@@ -1259,43 +1288,43 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
                     <span style={{ marginRight: '8px' }}>📋</span>
                     {lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A'}
                   </div>
-                  
+
                   {/* Consignor to Consignee */}
-                  <div style={{ 
-                    color: '#374151', 
+                  <div style={{
+                    color: '#374151',
                     fontSize: '10px',
                     marginBottom: '4px',
                     display: 'flex',
                     alignItems: 'center'
                   }}>
-                    <span style={{ 
-                      fontWeight: 'bold', 
+                    <span style={{
+                      fontWeight: 'bold',
                       minWidth: '45px',
-                      marginRight: '6px' 
+                      marginRight: '6px'
                     }}>From:</span>
-                    <span style={{ 
+                    <span style={{
                       flex: 1,
                       marginRight: '8px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
                     }}>{lr.consignor?.consignorName || lr.consignor_name || 'N/A'}</span>
-                    <span style={{ 
-                      margin: '0 6px', 
+                    <span style={{
+                      margin: '0 6px',
                       color: '#6b7280',
-                      fontWeight: 'bold' 
+                      fontWeight: 'bold'
                     }}>→</span>
-                    <span style={{ 
+                    <span style={{
                       flex: 1,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
                     }}>{lr.consignee?.consigneeName || lr.consignee_name || 'N/A'}</span>
                   </div>
-                  
+
                   {/* Additional Info */}
-                  <div style={{ 
-                    color: '#6b7280', 
+                  <div style={{
+                    color: '#6b7280',
                     fontSize: '9px',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -1317,9 +1346,9 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
               {/* Show more indicator */}
               {!searchTerm && lorryReceipts.length > 25 && filteredLRs.length === 25 && (
-                <div style={{ 
-                  padding: '8px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '8px 12px',
+                  textAlign: 'center',
                   fontSize: '10px',
                   color: '#6b7280',
                   fontStyle: 'italic',
@@ -1407,12 +1436,12 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
               type="button"
               onClick={() => removeTableRow(row.id)}
               className="print:hidden"
-              style={{ 
-                marginLeft: '4px', 
-                color: '#dc2626', 
-                fontSize: '12px', 
-                background: 'none', 
-                border: 'none', 
+              style={{
+                marginLeft: '4px',
+                color: '#dc2626',
+                fontSize: '12px',
+                background: 'none',
+                border: 'none',
                 cursor: 'pointer',
                 width: '16px',
                 height: '16px',

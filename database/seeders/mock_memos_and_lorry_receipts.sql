@@ -11,7 +11,7 @@ INSERT INTO memos (
 
 -- Mock lorry_receipts linked to memos
 INSERT INTO lorry_receipts (
-  cn_number, lr_date, from_location, to_location, consignor_id, consignee_id, truck_id, driver_id, truck_number, nos, particulars, freight, hamali, aoc, door_delivery, collection, st_charge, extra_loading, actual_weight, chargeable_weight, payment_type, delivery_at, total, remarks, memo_id
+  cn_number, lr_date, from_location, to_location, consignor_id, consignee_id, truck_id, driver_id, truck_number, nos, particulars, freight, hamali, aoc, door_delivery,detention, collection, st_charge, extra_loading, actual_weight, chargeable_weight, payment_type, delivery_at, total, remarks, memo_id
 ) VALUES
-('TPR-0101', '2025-08-10', 'Tarapur', 'Mumbai', 1, 2, 1, 1, 'MH 12 AB 1234', '["50"]', '["Electronics"]', 15000, 300, 200, 100, 100, 50, 0, 2.5, 2.5, 'paid', 'Mumbai Warehouse', 15750, 'Handle with care', 1),
-('BWD-0102', '2025-08-10', 'Bhiwandi', 'Delhi', 2, 3, 2, 2, 'GJ 01 AA 5678', '["100"]', '["Textiles"]', 12000, 250, 150, 80, 80, 40, 0, 1.8, 2.0, 'toPay', 'Delhi Warehouse', 12370, 'Fragile items', 2);
+('TPR-0101', '2025-08-10', 'Tarapur', 'Mumbai', 1, 2, 1, 1, 'MH 12 AB 1234', '["50"]', '["Electronics"]', 15000, 300, 200, 100,100, 100, 50, 0, 2.5, 2.5, 'paid', 'Mumbai Warehouse', 15750, 'Handle with care', 1),
+('BWD-0102', '2025-08-10', 'Bhiwandi', 'Delhi', 2, 3, 2, 2, 'GJ 01 AA 5678', '["100"]', '["Textiles"]', 12000, 250, 150, 80,80, 80, 40, 0, 1.8, 2.0, 'toPay', 'Delhi Warehouse', 12370, 'Fragile items', 2);

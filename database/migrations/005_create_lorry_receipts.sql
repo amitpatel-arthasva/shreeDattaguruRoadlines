@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS lorry_receipts (
     hamali REAL DEFAULT 0,
     aoc REAL DEFAULT 0,
     door_delivery REAL DEFAULT 0,
+    detention REAL DEFAULT 0,
     collection REAL DEFAULT 0,
     st_charge REAL DEFAULT 0,
     extra_loading REAL DEFAULT 0,

@@ -25,7 +25,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
   }
   const [form, setForm] = useState({ ...memo });
   const [tableRows, setTableRows] = useState(tableData);
-  
+
   // State for LR dropdown
   const [lorryReceipts, setLorryReceipts] = useState([]);
   const [isLoadingLRs, setIsLoadingLRs] = useState(true);
@@ -35,13 +35,13 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
     setIsLoadingLRs(true);
     try {
       console.log('🔄 Loading lorry receipts for memo edit modal...');
-      
+
       const response = await lorryReceiptService.getLorryReceipts({ limit: 1000 });
       console.log('📦 Raw LR Service Response:', response);
-      
+
       if (response && response.success) {
         console.log('✅ API call successful');
-        
+
         if (response.data && response.data.lorryReceipts) {
           console.log(`✅ Found ${response.data.lorryReceipts.length} lorry receipts`);
           setLorryReceipts(response.data.lorryReceipts);
@@ -79,7 +79,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
   // Select LR for table row
   const selectLRForRow = (rowIdx, lr) => {
     console.log('🎯 selectLRForRow called with:', { rowIdx, lr });
-    setTableRows(prev => prev.map((row, i) => 
+    setTableRows(prev => prev.map((row, i) =>
       i === rowIdx ? {
         ...row,
         lr_no: lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A',
@@ -122,7 +122,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
       payable_at: form.payable_at,
       broker: form.broker,
       remarks: form.remarks,
-  table_data: tableRows
+      table_data: tableRows
     });
   };
 
@@ -140,6 +140,23 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
                 <div className="border border-red-500 text-red-500 px-2 py-1 inline-block mt-1 text-xs">MEMO COPY</div>
               </div>
             </div>
+            <div className="w-[90%] mx-auto -mt-2 mb-6 ml-30">
+              <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
+                <div>
+                  <span className="text-red-600 font-bold">TARAPUR:</span>
+                  Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+                  M.: 9823364283 / 7276272828
+                </div>
+                <div>
+                  <span className="text-red-600 font-bold">BHIWANDI:</span>
+                  Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+                  <div className="ml-20">
+                    Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Main Memo Box */}
             <div className="border border-black mx-2 mb-2 bg-white">
               <div className="flex flex-row">
@@ -148,7 +165,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
                   <div className="flex mb-1"><span className="font-bold w-32">MEMO No. TPR</span><input type="text" name="memo_number" value={form.memo_number} onChange={e => setForm(prev => ({ ...prev, memo_number: e.target.value }))} className="border-b border-black flex-1 ml-1 bg-transparent" disabled /></div>
                   <div className="flex mb-1"><span className="font-bold w-32">Lorry No.</span><input type="text" name="lorry_no" value={form.lorry_no || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
                   <div className="flex mb-1"><span className="font-bold w-32">Driver's Name</span><input type="text" name="driver_name" value={form.driver_name || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
-                  <div className="flex mb-1"><span className="font-bold w-32">Ac No.</span><input type="text" name="ac_no" value={form.ac_no || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
+                  <div className="flex mb-1"><span className="font-bold w-32">Contact No.</span><input type="text" name="ac_no" value={form.ac_no || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
                   <div className="flex mb-1"><span className="font-bold w-32">Address</span><input type="text" name="address" value={form.address || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
                   <div className="flex mb-1"><span className="font-bold w-16">From</span><input type="text" name="from_location" value={form.from_location || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /><span className="font-bold w-8 ml-2">To</span><input type="text" name="to_location" value={form.to_location || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
                 </div>
@@ -159,7 +176,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
                   <div className="flex mb-1"><span className="font-bold w-32">Hamali</span><input type="text" name="hamali" value={form.hamali || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent text-right" /></div>
                   <div className="flex mb-1"><span className="font-bold w-32">Balance</span><input type="text" name="balance" value={form.balance || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent text-right" /><span className="font-bold w-16 ml-2">Payable at</span><input type="text" name="payable_at" value={form.payable_at || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
                   <div className="flex mb-1"><span className="font-bold w-32">Broker</span><input type="text" name="broker" value={form.broker || ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" /></div>
-                  <div className="flex mb-1"><span className="font-bold w-16">Date</span><input type="date" name="memo_date" value={form.memo_date ? form.memo_date.substring(0,10) : ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" required /></div>
+                  <div className="flex mb-1"><span className="font-bold w-16">Date</span><input type="date" name="memo_date" value={form.memo_date ? form.memo_date.substring(0, 10) : ''} onChange={handleChange} className="border-b border-black flex-1 ml-1 bg-transparent" required /></div>
                 </div>
               </div>
               {/* Remarks */}
@@ -184,7 +201,7 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
                 </thead>
                 <tbody>
                   {tableRows.map((row, idx) => (
-                    <TableRowEdit 
+                    <TableRowEdit
                       key={idx}
                       row={row}
                       index={idx}
@@ -231,7 +248,7 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
   useEffect(() => {
     if (showLRDropdown) {
       let filtered = lorryReceipts;
-      
+
       if (searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase();
         filtered = lorryReceipts.filter(lr => {
@@ -258,7 +275,7 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
           );
         });
       }
-      
+
       // Limit to 25 results for better performance
       setFilteredLRs(filtered.slice(0, 25));
     }
@@ -275,7 +292,7 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
     if (!isLoadingLRs) {
       console.log('🔽 Opening dropdown for edit row:', index);
       console.log('📊 Available lorryReceipts count:', lorryReceipts.length);
-      
+
       setShowLRDropdown(true);
       setFilteredLRs(lorryReceipts.slice(0, 25)); // Show first 25 items initially
     } else {
@@ -307,7 +324,7 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
             type="button"
             onClick={openDropdown}
             disabled={isLoadingLRs}
-            style={{ 
+            style={{
               width: '100%',
               textAlign: 'left',
               cursor: isLoadingLRs ? 'not-allowed' : 'pointer',
@@ -322,26 +339,26 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
             {isLoadingLRs ? 'Loading...' : (row.lr_no || 'Select LR...')}
             <span style={{ float: 'right' }}>{isLoadingLRs ? '⏳' : '▼'}</span>
           </button>
-          
+
           {showLRDropdown && (
-            <div style={{ 
-              position: 'absolute', 
-              top: '100%', 
-              left: '0', 
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: '0',
               right: '0',
               minWidth: '450px', // Make dropdown wider
-              background: 'white', 
-              border: '2px solid #000', 
-              boxShadow: '0 8px 16px rgba(0,0,0,0.15)', 
-              zIndex: 1000, 
-              maxHeight: '400px', 
+              background: 'white',
+              border: '2px solid #000',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+              zIndex: 1000,
+              maxHeight: '400px',
               overflowY: 'auto',
               borderRadius: '4px'
             }}>
               {/* Search Input */}
-              <div style={{ 
-                padding: '12px', 
-                borderBottom: '2px solid #e5e7eb', 
+              <div style={{
+                padding: '12px',
+                borderBottom: '2px solid #e5e7eb',
                 background: '#f8fafc',
                 borderRadius: '4px 4px 0 0'
               }}>
@@ -363,9 +380,9 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
               {/* Clear Selection Option */}
               <div
-                style={{ 
-                  padding: '10px 12px', 
-                  cursor: 'pointer', 
+                style={{
+                  padding: '10px 12px',
+                  cursor: 'pointer',
                   fontSize: '11px',
                   fontStyle: 'italic',
                   color: '#dc2626',
@@ -388,9 +405,9 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
               {/* Loading State */}
               {isLoadingLRs && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#6b7280',
                   fontStyle: 'italic'
@@ -402,9 +419,9 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
               {/* No LRs Available */}
               {!isLoadingLRs && lorryReceipts.length === 0 && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#dc2626',
                   fontStyle: 'italic'
@@ -416,9 +433,9 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
               {/* No Results State */}
               {!isLoadingLRs && lorryReceipts.length > 0 && filteredLRs.length === 0 && searchTerm && (
-                <div style={{ 
-                  padding: '20px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '20px 12px',
+                  textAlign: 'center',
                   fontSize: '12px',
                   color: '#6b7280',
                   fontStyle: 'italic'
@@ -444,8 +461,8 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
                   onMouseLeave={(e) => e.target.style.background = 'white'}
                 >
                   {/* LR Number - Primary */}
-                  <div style={{ 
-                    fontWeight: 'bold', 
+                  <div style={{
+                    fontWeight: 'bold',
                     marginBottom: '6px',
                     color: '#1d4ed8',
                     fontSize: '12px'
@@ -453,21 +470,21 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
                     <span style={{ marginRight: '8px' }}>📋</span>
                     {lr.lorryReceiptNumber || lr.cn_number || lr.lr_number || 'N/A'}
                   </div>
-                  
+
                   {/* Consignor to Consignee */}
-                  <div style={{ 
-                    color: '#374151', 
+                  <div style={{
+                    color: '#374151',
                     fontSize: '10px',
                     marginBottom: '4px',
                     display: 'flex',
                     alignItems: 'center'
                   }}>
-                    <span style={{ 
-                      fontWeight: 'bold', 
+                    <span style={{
+                      fontWeight: 'bold',
                       minWidth: '45px',
-                      marginRight: '6px' 
+                      marginRight: '6px'
                     }}>From:</span>
-                    <span style={{ 
+                    <span style={{
                       flex: 1,
                       marginRight: '8px',
                       overflow: 'hidden',
@@ -477,20 +494,20 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
                       {lr.consignor?.consignorName || lr.consignor_name || 'N/A'}
                     </span>
                   </div>
-                  
-                  <div style={{ 
-                    color: '#374151', 
+
+                  <div style={{
+                    color: '#374151',
                     fontSize: '10px',
                     marginBottom: '4px',
                     display: 'flex',
                     alignItems: 'center'
                   }}>
-                    <span style={{ 
-                      fontWeight: 'bold', 
+                    <span style={{
+                      fontWeight: 'bold',
                       minWidth: '45px',
-                      marginRight: '6px' 
+                      marginRight: '6px'
                     }}>To:</span>
-                    <span style={{ 
+                    <span style={{
                       flex: 1,
                       marginRight: '8px',
                       overflow: 'hidden',
@@ -502,10 +519,10 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
                   </div>
 
                   {/* Additional Info */}
-                  <div style={{ 
-                    fontSize: '9px', 
-                    color: '#6b7280', 
-                    display: 'flex', 
+                  <div style={{
+                    fontSize: '9px',
+                    color: '#6b7280',
+                    display: 'flex',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
                     gap: '8px'
@@ -526,9 +543,9 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
               {/* Show more indicator */}
               {!searchTerm && lorryReceipts.length > 25 && filteredLRs.length === 25 && (
-                <div style={{ 
-                  padding: '8px 12px', 
-                  textAlign: 'center', 
+                <div style={{
+                  padding: '8px 12px',
+                  textAlign: 'center',
                   fontSize: '10px',
                   color: '#6b7280',
                   fontStyle: 'italic',
@@ -542,52 +559,52 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
           )}
         </div>
       </td>
-      
+
       {/* Other table cells remain as inputs */}
       <td className="border border-black px-2 py-1">
-        <input 
-          type="text" 
-          value={row.articles || ''} 
-          onChange={e => handleTableRowChange(index, 'articles', e.target.value)} 
-          className="bg-transparent border-b border-black w-full" 
+        <input
+          type="text"
+          value={row.articles || ''}
+          onChange={e => handleTableRowChange(index, 'articles', e.target.value)}
+          className="bg-transparent border-b border-black w-full"
         />
       </td>
       <td className="border border-black px-2 py-1">
-        <input 
-          type="text" 
-          value={row.consignor || ''} 
-          onChange={e => handleTableRowChange(index, 'consignor', e.target.value)} 
-          className="bg-transparent border-b border-black w-full" 
+        <input
+          type="text"
+          value={row.consignor || ''}
+          onChange={e => handleTableRowChange(index, 'consignor', e.target.value)}
+          className="bg-transparent border-b border-black w-full"
         />
       </td>
       <td className="border border-black px-2 py-1">
-        <input 
-          type="text" 
-          value={row.consignee || ''} 
-          onChange={e => handleTableRowChange(index, 'consignee', e.target.value)} 
-          className="bg-transparent border-b border-black w-full" 
+        <input
+          type="text"
+          value={row.consignee || ''}
+          onChange={e => handleTableRowChange(index, 'consignee', e.target.value)}
+          className="bg-transparent border-b border-black w-full"
         />
       </td>
       <td className="border border-black px-2 py-1">
-        <input 
-          type="text" 
-          value={row.kgs || ''} 
-          onChange={e => handleTableRowChange(index, 'kgs', e.target.value)} 
-          className="bg-transparent border-b border-black w-full" 
+        <input
+          type="text"
+          value={row.kgs || ''}
+          onChange={e => handleTableRowChange(index, 'kgs', e.target.value)}
+          className="bg-transparent border-b border-black w-full"
         />
       </td>
       <td className="border border-black px-2 py-1">
-        <input 
-          type="text" 
-          value={row.freight || ''} 
-          onChange={e => handleTableRowChange(index, 'freight', e.target.value)} 
-          className="bg-transparent border-b border-black w-full" 
+        <input
+          type="text"
+          value={row.freight || ''}
+          onChange={e => handleTableRowChange(index, 'freight', e.target.value)}
+          className="bg-transparent border-b border-black w-full"
         />
       </td>
       <td className="border border-black px-2 py-1 text-center">
-        <button 
-          type="button" 
-          onClick={() => removeTableRow(index)} 
+        <button
+          type="button"
+          onClick={() => removeTableRow(index)}
           className="text-red-500 font-bold"
         >
           X

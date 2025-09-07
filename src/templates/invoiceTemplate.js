@@ -29,7 +29,7 @@
  * }
  */
 
-import { getBillHeaderAsBase64 } from '../services/imageUtils.js';
+import { getBillHeaderDattaGuruAsBase64 } from '../services/imageUtils.js';
 
 const invoiceTemplate = (data) => {
   // Helper function to format currency
@@ -90,7 +90,7 @@ const invoiceTemplate = (data) => {
   const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
 
   // Get the actual company header image as base64
-  const billHeaderBase64 = getBillHeaderAsBase64();
+  const billHeaderBase64 = getBillHeaderDattaGuruAsBase64();
   
   // Fallback SVG if billHeader.png is not found
   const fallbackLogoSvg = `

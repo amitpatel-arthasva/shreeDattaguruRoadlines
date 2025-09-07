@@ -71,7 +71,7 @@ WHERE NOT EXISTS (SELECT 1 FROM drivers WHERE phone = '9876543213');
 INSERT INTO lorry_receipts (
   cn_number, lr_date, from_location, to_location,
   consignor_id, consignee_id, truck_id, driver_id, truck_number,
-  nos, particulars, freight, hamali, aoc, door_delivery,
+  nos, particulars, freight, hamali, aoc, door_delivery, detention,
   collection, st_charge, extra_loading, actual_weight, chargeable_weight,
   payment_type, delivery_at, total, remarks
 )
@@ -79,7 +79,7 @@ SELECT
   'TPR-001', '2024-12-01', 'Tarapur', 'Mumbai',
   1, 2, 1, 1, 'MH 12 AB 1234',
   '["50", "25"]', '["Cotton Bales", "Textile Materials"]', 
-  15000.00, 500.00, 200.00, 300.00,
+  15000.00, 500.00, 200.00, 300.00,100.0,
   100.00, 750.00, 0.00, 2.5, 2.5,
   'paid', 'Mumbai Warehouse', 16850.00, 'Handle with care'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-001')
@@ -92,7 +92,7 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-001')
 INSERT INTO lorry_receipts (
   cn_number, lr_date, from_location, to_location,
   consignor_id, consignee_id, truck_id, driver_id, truck_number,
-  nos, particulars, freight, hamali, aoc, door_delivery,
+  nos, particulars, freight, hamali, aoc, door_delivery, detention,
   collection, st_charge, extra_loading, actual_weight, chargeable_weight,
   payment_type, delivery_at, total, remarks
 )
@@ -100,7 +100,7 @@ SELECT
   'BWD-001', '2024-12-02', 'Bhiwandi', 'Bangalore',
   3, 5, 2, 2, 'GJ 01 AA 5678',
   '["100"]', '["Electronic Components"]', 
-  12000.00, 400.00, 150.00, 250.00,
+  12000.00, 400.00, 150.00, 250.00,100.0,
   0.00, 600.00, 200.00, 1.8, 2.0,
   'toBeBill', 'RST Warehouse', 13600.00, 'Fragile items'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-001')
@@ -113,7 +113,7 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-001')
 INSERT INTO lorry_receipts (
   cn_number, lr_date, from_location, to_location,
   consignor_id, consignee_id, truck_id, driver_id, truck_number,
-  nos, particulars, freight, hamali, aoc, door_delivery,
+  nos, particulars, freight, hamali, aoc, door_delivery, detention,
   collection, st_charge, extra_loading, actual_weight, chargeable_weight,
   payment_type, delivery_at, total, remarks
 )
@@ -121,7 +121,7 @@ SELECT
   'TPR-002', '2024-12-03', 'Tarapur', 'Surat',
   4, 6, 3, 3, 'DL 8C AA 9012',
   '["75", "25", "10"]', '["Raw Materials", "Chemicals", "Dyes"]', 
-  18000.00, 600.00, 300.00, 400.00,
+  18000.00, 600.00, 300.00, 400.00,100.0,
   150.00, 900.00, 500.00, 3.2, 3.5,
   'toPay', 'Global Textiles Factory', 20950.00, 'Chemical items - handle carefully'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-002')
@@ -134,7 +134,7 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-002')
 INSERT INTO lorry_receipts (
   cn_number, lr_date, from_location, to_location,
   consignor_id, consignee_id, truck_id, driver_id, truck_number,
-  nos, particulars, freight, hamali, aoc, door_delivery,
+  nos, particulars, freight, hamali, aoc, door_delivery,detention,
   collection, st_charge, extra_loading, actual_weight, chargeable_weight,
   payment_type, delivery_at, total, remarks
 )
@@ -142,7 +142,7 @@ SELECT
   'BWD-002', '2024-12-04', 'Bhiwandi', 'Delhi',
   1, 2, 4, 4, 'KA 05 BC 3456',
   '["20", "15"]', '["Servers", "Networking Equipment"]', 
-  25000.00, 800.00, 400.00, 500.00,
+  25000.00, 800.00, 400.00, 500.00,100.0,
   200.00, 1250.00, 300.00, 1.5, 1.5,
   'paid', 'Tech Hub Data Center', 28450.00, 'High-value electronic equipment'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-002')
@@ -155,7 +155,7 @@ WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'BWD-002')
 INSERT INTO lorry_receipts (
   cn_number, lr_date, from_location, to_location,
   consignor_id, consignee_id, truck_id, driver_id, truck_number,
-  nos, particulars, freight, hamali, aoc, door_delivery,
+  nos, particulars, freight, hamali, aoc, door_delivery, detention,
   collection, st_charge, extra_loading, actual_weight, chargeable_weight,
   payment_type, delivery_at, total, remarks
 )
@@ -163,7 +163,7 @@ SELECT
   'TPR-003', '2024-12-05', 'Tarapur', 'Ahmedabad',
   1, 3, 1, 1, 'MH 12 AB 1234',
   '["25"]', '["Pharmaceutical Products"]', 
-  22000.00, 400.00, 250.00, 500.00,
+  22000.00, 400.00, 250.00, 500.00, 100.0,
   100.00, 1100.00, 0.00, 0.52, 0.6,
   'paid', 'Cold Storage Facility', 24350.00, 'Temperature controlled - Keep refrigerated'
 WHERE NOT EXISTS (SELECT 1 FROM lorry_receipts WHERE cn_number = 'TPR-003')

@@ -5,7 +5,7 @@ class LorryReceipt {
     const {
       lr_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_number, freight,
-      hamali, aoc, door_delivery, collection, service_charge,
+      hamali, aoc, door_delivery,detention, collection, service_charge,
       extra_loading, actual_weight, charged_weight, payment_type,
       goods_risk, truck_id, driver_id, delivery_at, remarks
     } = receiptData;
@@ -14,7 +14,7 @@ class LorryReceipt {
       INSERT INTO lorry_receipts (
         lr_number, lr_date, from_location, to_location,
         consignor_id, consignee_id, truck_number, freight,
-        hamali, aoc, door_delivery, collection, service_charge,
+        hamali, aoc, door_delivery,detention, collection, service_charge,
         extra_loading, actual_weight, charged_weight, payment_type,
         goods_risk, truck_id, driver_id, delivery_at, remarks
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -23,7 +23,7 @@ class LorryReceipt {
     return db.query(sql, [
       lr_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_number, freight,
-      hamali, aoc, door_delivery, collection, service_charge,
+      hamali, aoc, door_delivery,detention, collection, service_charge,
       extra_loading, actual_weight, charged_weight, payment_type,
       goods_risk, truck_id, driver_id, delivery_at, remarks
     ]);

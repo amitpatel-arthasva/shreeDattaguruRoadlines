@@ -5,7 +5,7 @@ class LorryReceipt {
     const {
       lr_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_id, driver_id, truck_number,
-      particulars, quantity, unit, freight, hamali, aoc, door_delivery,
+      particulars, quantity, unit, freight, hamali, aoc, door_delivery,detention,
       collection, service_charge, extra_loading, actual_weight, charged_weight,
       payment_type, service_tax_payable_by, goods_risk, invoice_number,
       challan_number, delivery_at, remarks
@@ -15,17 +15,17 @@ class LorryReceipt {
       INSERT INTO lorry_receipts (
         lr_number, lr_date, from_location, to_location,
         consignor_id, consignee_id, truck_id, driver_id, truck_number,
-        particulars, quantity, unit, freight, hamali, aoc, door_delivery,
+        particulars, quantity, unit, freight, hamali, aoc, door_delivery, detention,
         collection, service_charge, extra_loading, actual_weight, charged_weight,
         payment_type, service_tax_payable_by, goods_risk, invoice_number,
         challan_number, delivery_at, remarks
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     return db.query(sql, [
       lr_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_id, driver_id, truck_number,
-      particulars, quantity, unit || 'Bags', freight, hamali || 0, aoc || 0, door_delivery || 0,
+      particulars, quantity, unit || 'Bags', freight, hamali || 0, aoc || 0, door_delivery || 0, detention || 0,
       collection || 0, service_charge || 20, extra_loading || 0, actual_weight, charged_weight,
       payment_type, service_tax_payable_by, goods_risk || 'Owner', invoice_number,
       challan_number, delivery_at, remarks
@@ -180,6 +180,7 @@ class LorryReceipt {
         SUM(hamali) as total_hamali,
         SUM(aoc) as total_aoc,
         SUM(door_delivery) as total_door_delivery,
+        SUM(detention) as total_detention,
         SUM(collection) as total_collection,
         SUM(service_charge) as total_service_charge,
         SUM(extra_loading) as total_extra_loading,
@@ -197,7 +198,7 @@ class LorryReceipt {
       SELECT 
         payment_type,
         COUNT(*) as count,
-        SUM(freight + hamali + aoc + door_delivery + collection + service_charge + extra_loading) as total_amount
+        SUM(freight + hamali + aoc + door_delivery + detention + collection + service_charge + extra_loading) as total_amount
       FROM lorry_receipts 
       GROUP BY payment_type
     `;

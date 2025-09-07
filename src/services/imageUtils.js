@@ -90,14 +90,14 @@ const getBillHeaderAsBase64 = () => {
 const getLogosAsBase64 = () => {
   if (logosCache === null) {
     logosCache = {
-      invoiceHeader: getImageAsBase64('invoice_header.jpg'),
+      invoiceHeader: getImageAsBase64('billHeader3.png'),
       lorryReceiptHeader: getImageAsBase64('LR_header.jpg'),
       footer: getImageAsBase64('footer.jpg'),
       billHeader: getImageAsBase64('billHeader.png'),
     };
   }
   return logosCache;
-};
+}; 
 
 /**
  * Clear the image cache (useful for development or when images change)

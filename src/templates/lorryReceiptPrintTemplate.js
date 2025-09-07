@@ -102,11 +102,12 @@ const lorryReceiptPrintTemplate = (data) => {
   const hamali = parseFloat(data.freightDetails?.hamali || data.hamali || 0);
   const aoc = parseFloat(data.freightDetails?.aoc || data.aoc || 0);
   const doorDelivery = parseFloat(data.freightDetails?.doorDelivery || data.door_delivery || 0);
+  const detention = parseFloat(data.freightDetails?.detention || data.detention || 0);
   const collection = parseFloat(data.freightDetails?.collection || data.collection || 0);
   const stCharge = parseFloat(data.freightDetails?.stCharge || data.st_charge || data.service_charge || 20);
   const extraLoading = parseFloat(data.freightDetails?.extraLoading || data.extra_loading || 0);
   
-  const totalAmount = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;  // Get the actual company header image as base64
+  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;  // Get the actual company header image as base64
   const billHeaderBase64 = getBillHeaderAsBase64();
   
   // Fallback SVG if billHeader.png is not found
@@ -635,6 +636,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                                     <div class="rate-item">Hamali</div>
                                                     <div class="rate-item">A.O.C</div>
                                                     <div class="rate-item">Door Dely</div>
+                                                    <div class="rate-item">Detention</div>
                                                     <div class="rate-item">Collection</div>
                                                     <div class="rate-item">St.Charge</div>
                                                     <div class="rate-item">Extra Loading<br />paid by us</div>
@@ -649,6 +651,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                                     <div class="rate-value">${formatCurrency(hamali)}</div>
                                                     <div class="rate-value">${formatCurrency(aoc)}</div>
                                                     <div class="rate-value">${formatCurrency(doorDelivery)}</div>
+                                                    <div class="rate-value">${formatCurrency(detention)}</div>
                                                     <div class="rate-value">${formatCurrency(collection)}</div>
                                                     <div class="rate-value">${formatCurrency(stCharge)}</div>
                                                     <div class="rate-value">${formatCurrency(extraLoading)}</div>

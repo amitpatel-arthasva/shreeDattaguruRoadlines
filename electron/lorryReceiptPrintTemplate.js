@@ -48,7 +48,7 @@
  * }
  */
 
-import { getBillHeaderAsBase64 } from './imageUtils.js';
+import { getBillHeaderAsBase64, getBillHeaderNameAsBase64, getBillHeaderTruckAsBase64 } from './imageUtils.js';
 
 const lorryReceiptPrintTemplate = (data) => {
   // Helper function to format currency
@@ -104,7 +104,8 @@ const lorryReceiptPrintTemplate = (data) => {
   const extraLoading = parseFloat(data.freightDetails?.extraLoading || data.extra_loading || 0);
   
   const totalAmount = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;  // Get the actual company header image as base64
-  const billHeaderBase64 = getBillHeaderAsBase64();
+  const truckHeaderBase64 = getBillHeaderTruckAsBase64();
+  const nameHeaderBase64 = getBillHeaderNameAsBase64();
   
   // Fallback SVG if billHeader.png is not found
   const fallbackLogoSvg = `
@@ -509,7 +510,9 @@ const lorryReceiptPrintTemplate = (data) => {
                 <div class="header-section">
                     <div class="header-inner">                    
                         <div class="logo-container">
-                            <img src="${headerImage}" 
+                            <img src="${truckHeaderBase64}" 
+                                 alt="BillLogo" class="logo-image" />
+                                 <img src="${nameHeaderBase64}" 
                                  alt="BillLogo" class="logo-image" />
                         </div>
                         <div class="jurisdiction-section">

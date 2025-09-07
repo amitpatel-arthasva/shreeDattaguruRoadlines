@@ -129,6 +129,17 @@ const getBillHeaderAsBase64 = () => {
   return getImageAsBase64('billHeader4.png');
 };
 
+const getBillHeaderDattaGuruAsBase64 = () => {
+  return getImageAsBase64('billHeader3.png');
+}
+
+const getBillHeaderTruckAsBase64 = () => {
+  return getImageAsBase64('truck_image.png');
+}
+const getBillHeaderNameAsBase64 = () => {
+  return getImageAsBase64('shree_datta_guru.png');
+}
+
 /**
  * Get all logo images as base64 data URLs
  * @returns {Object} - Object with logo names as keys and base64 data URLs as values
@@ -136,7 +147,7 @@ const getBillHeaderAsBase64 = () => {
 const getLogosAsBase64 = () => {
   if (logosCache === null) {
     logosCache = {
-      invoiceHeader: getImageAsBase64('invoice_header.jpg'),
+      invoiceHeader: getImageAsBase64('billHeader3.png'),
       lorryReceiptHeader: getImageAsBase64('LR_header.jpg'),
       footer: getImageAsBase64('footer.jpg'),
       billHeader: getImageAsBase64('billHeader.png'),
@@ -157,5 +168,8 @@ export {
   getImageAsBase64,
   getBillHeaderAsBase64,
   getLogosAsBase64,
-  clearImageCache
+  clearImageCache,
+  getBillHeaderDattaGuruAsBase64,
+  getBillHeaderTruckAsBase64,
+  getBillHeaderNameAsBase64
 };

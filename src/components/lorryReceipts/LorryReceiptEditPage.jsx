@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import BillHeader from '../../../assets/billHeader5.png';
+import truckHeader from '../../../assets/truck_image.png';
+import nameHeader from '../../../assets/shree_datta_guru.png';
 import companyService from '../../services/companyService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 import truckService from '../../services/truckService';
@@ -64,6 +65,7 @@ const LorryReceiptEditPage = () => {
     hamali: '',
     aoc: '',
     doorDelivery: '',
+    detention: '',
     collection: '',
     stCharge: '20',
     extraLoading: '',
@@ -148,6 +150,7 @@ const LorryReceiptEditPage = () => {
           hamali: lr.freightDetails?.hamali?.toString() || '',
           aoc: lr.freightDetails?.aoc?.toString() || '',
           doorDelivery: lr.freightDetails?.doorDelivery?.toString() || '',
+          detention: lr.freightDetails?.detention?.toString() || '',
           collection: lr.freightDetails?.collection?.toString() || '',
           ewayBill: lr.ewayBill || '',
           stCharge: lr.freightDetails?.stCharge?.toString() || '20',
@@ -267,11 +270,12 @@ const LorryReceiptEditPage = () => {
     const hamali = parseFloat(formData.hamali) || 0;
     const aoc = parseFloat(formData.aoc) || 0;
     const doorDelivery = parseFloat(formData.doorDelivery) || 0;
+    const detention = parseFloat(formData.detention) || 0;
     const collection = parseFloat(formData.collection) || 0;
     const stCharge = parseFloat(formData.stCharge) || 0;
     const extraLoading = parseFloat(formData.extraLoading) || 0;
     
-    const total = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;
+    const total = freight + hamali + aoc + doorDelivery +  detention + collection + stCharge + extraLoading;
     const totalValue = total.toFixed(2);
     
     // Update the total in form data
@@ -313,6 +317,7 @@ const LorryReceiptEditPage = () => {
         hamali: parseFloat(formData.hamali) || 0,
         aoc: parseFloat(formData.aoc) || 0,
         door_delivery: parseFloat(formData.doorDelivery) || 0,
+        detention: parseFloat(formData.detention) || 0,
         collection: parseFloat(formData.collection) || 0,
         st_charge: parseFloat(formData.stCharge) || 0,
         extra_loading: parseFloat(formData.extraLoading) || 0,
@@ -748,7 +753,7 @@ const LorryReceiptEditPage = () => {
   // Calculate total automatically when charge fields change
   useEffect(() => {
     calculateTotal();
-  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.collection, formData.stCharge, formData.extraLoading]);
+  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery,formData.detention, formData.collection, formData.stCharge, formData.extraLoading]);
 
   if (loading) {
     return (
@@ -765,9 +770,10 @@ const LorryReceiptEditPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className='w-full flex flex-row items-start justify-between py-2'>
             <div className='flex-shrink-0 flex items-center w-2/3'>
-              <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+              <img src={truckHeader} alt="BillLogo" className="h-40 object-contain " />
+              <img src={nameHeader} alt="BillLogo" className=" h-30 object-contain  ml-30" />
             </div>
-            <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
+            <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3 mt-2'>
               <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
               <div className='mb-2 text-right text-xs'>
                 <div className='font-semibold'>Daily Part Load Service to -</div>
@@ -779,6 +785,22 @@ const LorryReceiptEditPage = () => {
               </div>
             </div>
           </div>
+          <div className="w-[90%] mx-auto -mt-8 mb-6 ml-65">
+              <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
+                <div>
+                  <span className="text-red-600 font-bold">TARAPUR:</span>
+                  Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+                  M.: 9823364283 / 7276272828
+                </div>
+                <div>
+                  <span className="text-red-600 font-bold">BHIWANDI:</span>
+                  Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+                  <div className="ml-20">
+                    Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+                  </div>
+                </div>
+              </div>
+            </div>
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Edit Lorry Receipt</h1>
@@ -1324,6 +1346,9 @@ const LorryReceiptEditPage = () => {
                                 Door Dely
                               </div>
                               <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                                Detention
+                              </div>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 Collection
                               </div>
                               <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
@@ -1341,7 +1366,7 @@ const LorryReceiptEditPage = () => {
                           {/* Right Rate Rs. subcolumn */}
                           <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '15%' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1352,7 +1377,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1363,7 +1388,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1374,7 +1399,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1385,7 +1410,18 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                  <input
+                                    type="text"
+                                    name="detention"
+                                    value={formData.detention}
+                                    onChange={handleInputChange}
+                                    className="form-input-rate"
+                                  />
+                                </div>
+                              </div>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1396,7 +1432,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1407,7 +1443,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{  flex: '1', borderBottom: '1px solid #000', padding: '2px', display: 'flex', alignItems: 'center' }}>
+                              <div style={{  flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                                 <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
                                     type="text"
@@ -1418,7 +1454,7 @@ const LorryReceiptEditPage = () => {
                                   />
                                 </div>
                               </div>
-                              <div style={{ flex: '1', padding: '2px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                              <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                   <input
 									type="text"
 									name="total"

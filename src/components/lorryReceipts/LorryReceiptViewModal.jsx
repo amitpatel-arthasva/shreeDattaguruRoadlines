@@ -1,5 +1,6 @@
 import React from 'react';
-import BillHeader from '../../../assets/billHeader5.png';
+import truckHeader from '../../../assets/truck_image.png';
+import nameHeader from '../../../assets/shree_datta_guru.png';
 import Modal from '../common/Modal';
 
 const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
@@ -11,7 +12,7 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
       console.log('LorryReceiptViewModal received data:', lorryReceipt);
     }
   }, [isOpen, lorryReceipt]);
-  
+
   if (!lorryReceipt) return null;
 
   const formatDate = (dateString) => {
@@ -31,26 +32,26 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   // Parse material details
   let nosArray = [];
   let particularsArray = [];
-  
+
   if (lorryReceipt.materialDetails && Array.isArray(lorryReceipt.materialDetails)) {
     nosArray = lorryReceipt.materialDetails.map(item => item.nos);
     particularsArray = lorryReceipt.materialDetails.map(item => item.particulars);
   } else if (lorryReceipt.nos && lorryReceipt.particulars) {
-    nosArray = Array.isArray(lorryReceipt.nos) ? lorryReceipt.nos : 
-               (typeof lorryReceipt.nos === 'string' ? JSON.parse(lorryReceipt.nos) : ['']);
-    particularsArray = Array.isArray(lorryReceipt.particulars) ? lorryReceipt.particulars : 
-                      (typeof lorryReceipt.particulars === 'string' ? JSON.parse(lorryReceipt.particulars) : ['']);
+    nosArray = Array.isArray(lorryReceipt.nos) ? lorryReceipt.nos :
+      (typeof lorryReceipt.nos === 'string' ? JSON.parse(lorryReceipt.nos) : ['']);
+    particularsArray = Array.isArray(lorryReceipt.particulars) ? lorryReceipt.particulars :
+      (typeof lorryReceipt.particulars === 'string' ? JSON.parse(lorryReceipt.particulars) : ['']);
   } else {
     try {
-      nosArray = typeof lorryReceipt.nos === 'string' ? JSON.parse(lorryReceipt.nos) : 
-                 (Array.isArray(lorryReceipt.nos) ? lorryReceipt.nos : ['']);
+      nosArray = typeof lorryReceipt.nos === 'string' ? JSON.parse(lorryReceipt.nos) :
+        (Array.isArray(lorryReceipt.nos) ? lorryReceipt.nos : ['']);
     } catch {
       nosArray = [''];
     }
-    
+
     try {
-      particularsArray = typeof lorryReceipt.particulars === 'string' ? JSON.parse(lorryReceipt.particulars) : 
-                        (Array.isArray(lorryReceipt.particulars) ? lorryReceipt.particulars : ['']);
+      particularsArray = typeof lorryReceipt.particulars === 'string' ? JSON.parse(lorryReceipt.particulars) :
+        (Array.isArray(lorryReceipt.particulars) ? lorryReceipt.particulars : ['']);
     } catch {
       particularsArray = [''];
     }
@@ -61,10 +62,11 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   const hamali = parseFloat(lorryReceipt.freightDetails?.hamali || lorryReceipt.hamali || 0);
   const aoc = parseFloat(lorryReceipt.freightDetails?.aoc || lorryReceipt.aoc || 0);
   const doorDelivery = parseFloat(lorryReceipt.freightDetails?.doorDelivery || lorryReceipt.door_delivery || 0);
+  const detention = parseFloat(lorryReceipt.freightDetails?.detention || lorryReceipt.detention || 0);
   const collection = parseFloat(lorryReceipt.freightDetails?.collection || lorryReceipt.collection || 0);
   const stCharge = parseFloat(lorryReceipt.freightDetails?.stCharge || lorryReceipt.st_charge || lorryReceipt.service_charge || 20);
   const extraLoading = parseFloat(lorryReceipt.freightDetails?.extraLoading || lorryReceipt.extra_loading || 0);
-  const totalAmount = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;
+  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
 
   const handlePrint = () => {
     window.print();
@@ -132,9 +134,9 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
 
         {/* Scrollable Bill Content */}
         <div className="flex-1 overflow-auto p-6">
-          <div 
+          <div
             className="bill-content max-w-none"
-            style={{ 
+            style={{
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'top left',
               width: `${100 / zoomLevel}%`
@@ -144,7 +146,8 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
             <div className="header-section">
               <div className='w-full flex flex-row items-start justify-between py-2'>
                 <div className='flex-shrink-0 flex items-center w-2/3'>
-                  <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+                  <img src={truckHeader} alt="BillLogo" className="h-40 object-contain " />
+                  <img src={nameHeader} alt="BillLogo" className=" h-40 object-contain  ml-30" />
                 </div>
                 <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
                   <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
@@ -159,224 +162,241 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
                 </div>
               </div>
             </div>
+<div className="w-[90%] mx-auto -mt-8 mb-6 ml-75">
+                  <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
+                    <div>
+                      <span className="text-red-600 font-bold">TARAPUR:</span>
+                      Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+                      M.: 9823364283 / 7276272828
+                    </div>
+                    <div>
+                      <span className="text-red-600 font-bold">BHIWANDI:</span>
+                      Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+                      <div className="ml-20">
+                        Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            {/* Main Container */}
+            <div className="container">
+              {/* Consignor / Consignee Section */}
+              <div className="row-container">
+                <table className="left-table">
+                  <tbody>
+                    <tr>
+                      <td className="left-cell">
+                        <div style={{ marginBottom: '8px' }}>
+                          <strong>Consignor - M/s {getValue(lorryReceipt.consignor?.consignorName || lorryReceipt.consignor_name)}</strong>
+                        </div>
+                        <div className="form-value">{getValue(lorryReceipt.consignor?.address || lorryReceipt.consignor_address)}</div>
+                        <div className="form-value">{getValue(lorryReceipt.consignor?.city || lorryReceipt.consignor_city)}, {getValue(lorryReceipt.consignor?.state || lorryReceipt.consignor_state)} - {getValue(lorryReceipt.consignor?.pinCode || lorryReceipt.consignor_pin_code || lorryReceipt.consignor_pincode)}</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="left-cell">
+                        <div style={{ marginBottom: '8px' }}>
+                          <strong>Consignee - M/s {getValue(lorryReceipt.consignee?.consigneeName || lorryReceipt.consignee_name)}</strong>
+                        </div>
+                        <div className="form-value">{getValue(lorryReceipt.consignee?.address || lorryReceipt.consignee_address)}</div>
+                        <div className="form-value">{getValue(lorryReceipt.consignee?.city || lorryReceipt.consignee_city)}, {getValue(lorryReceipt.consignee?.state || lorryReceipt.consignee_state)} - {getValue(lorryReceipt.consignee?.pinCode || lorryReceipt.consignee_pin_code || lorryReceipt.consignee_pincode)}</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
 
-          {/* Main Container */}
-          <div className="container">
-            {/* Consignor / Consignee Section */}
-            <div className="row-container">
-              <table className="left-table">
+                <table className="right-table">
+                  <tbody>
+                    <tr>
+                      <td colSpan="2">
+                        <strong>CN't No. - </strong>
+                        <span className="form-value-small">{getValue(lorryReceipt.lorryReceiptNumber || lorryReceipt.cn_number || lorryReceipt.lr_number)}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ width: '50%' }}>
+                        <strong>Date - </strong>
+                        <span className="form-value-small">{formatDate(lorryReceipt.date || lorryReceipt.lr_date)}</span>
+                      </td>
+                      <td style={{ width: '50%', textAlign: 'center' }} rowSpan="2">
+                        <strong>Truck No. - </strong>
+                        <span className="form-value-small">{getValue(lorryReceipt.truckDetails?.truckNumber || lorryReceipt.truck_number || lorryReceipt.truckNumber)}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>From - </strong>
+                        <span className="form-value-small">{getValue(lorryReceipt.fromLocation || lorryReceipt.from_location)}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan="2">
+                        <strong>To - </strong>
+                        <span className="form-value-small">{getValue(lorryReceipt.toLocation || lorryReceipt.to_location)}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Main Freight Table */}
+              <table>
                 <tbody>
                   <tr>
-                    <td className="left-cell">
-                      <div style={{ marginBottom: '8px' }}>
-                        <strong>Consignor - M/s {getValue(lorryReceipt.consignor?.consignorName || lorryReceipt.consignor_name)}</strong>
-                      </div>
-                      <div className="form-value">{getValue(lorryReceipt.consignor?.address || lorryReceipt.consignor_address)}</div>
-                      <div className="form-value">{getValue(lorryReceipt.consignor?.city || lorryReceipt.consignor_city)}, {getValue(lorryReceipt.consignor?.state || lorryReceipt.consignor_state)} - {getValue(lorryReceipt.consignor?.pinCode || lorryReceipt.consignor_pin_code || lorryReceipt.consignor_pincode)}</div>
+                    <td rowSpan="2" className="address-section">
+                      <strong>TARAPUR</strong><br />
+                      Plot No. W-4,<br />
+                      Camlin Naka,<br />
+                      MIDC, Tarapur<br />
+                      M: 9823364283 /<br />
+                      9168027869 /<br />
+                      7276272828<br />
+                      <hr />
+                      <strong>BHIWANDI</strong><br />
+                      Godown No. A-2,<br />
+                      Gali No. 2,<br />
+                      Opp. Capital Roadlines,<br />
+                      Khandagale Estate,<br />
+                      Purna Village, Bhiwandi.<br />
+                      M.: 7507844317 /<br />
+                      9168027868<br />
+                      <hr />
+                      <strong>VASHI</strong><br />
+                      Godown No. C-15,<br />
+                      Sector - 19A,<br />
+                      Vashi, Navi Mumbai.<br />
+                      M.: 9168027867
                     </td>
-                  </tr>
-                  <tr>
-                    <td className="left-cell">
-                      <div style={{ marginBottom: '8px' }}>
-                        <strong>Consignee - M/s {getValue(lorryReceipt.consignee?.consigneeName || lorryReceipt.consignee_name)}</strong>
-                      </div>
-                      <div className="form-value">{getValue(lorryReceipt.consignee?.address || lorryReceipt.consignee_address)}</div>
-                      <div className="form-value">{getValue(lorryReceipt.consignee?.city || lorryReceipt.consignee_city)}, {getValue(lorryReceipt.consignee?.state || lorryReceipt.consignee_state)} - {getValue(lorryReceipt.consignee?.pinCode || lorryReceipt.consignee_pin_code || lorryReceipt.consignee_pincode)}</div>
+                    <td>
+                      <table className="freight-table-container">
+                        <tbody>
+                          <tr>
+                            {/* Nos Column */}
+                            <td className="nos-column">
+                              {nosArray.map((nos, index) =>
+                                <div key={index} className="nos-item">{getValue(nos)}</div>
+                              )}
+                            </td>
+
+                            {/* Particulars Column */}
+                            <td className="particulars-column">
+                              {particularsArray.map((particular, index) =>
+                                <div key={index} className="particulars-item">{getValue(particular)}</div>
+                              )}
+                            </td>
+
+                            {/* Rate Left Column */}
+                            <td className="rate-left-column">
+                              <div className="rate-container">
+                                <div className="rate-item">Freight</div>
+                                <div className="rate-item">Hamali</div>
+                                <div className="rate-item">A.O.C</div>
+                                <div className="rate-item">Door Dely</div>
+                                <div className="rate-item">Detention</div>
+                                <div className="rate-item">Collection</div>
+                                <div className="rate-item">St.Charge</div>
+                                <div className="rate-item">Extra Loading<br />paid by us</div>
+                                <div className="rate-item">Total</div>
+                              </div>
+                            </td>
+
+                            {/* Rate Right Column */}
+                            <td className="rate-right-column">
+                              <div className="rate-container">
+                                <div className="rate-value">{formatCurrency(freight)}</div>
+                                <div className="rate-value">{formatCurrency(hamali)}</div>
+                                <div className="rate-value">{formatCurrency(aoc)}</div>
+                                <div className="rate-value">{formatCurrency(doorDelivery)}</div>
+                                <div className="rate-value">{formatCurrency(detention)}</div>
+                                <div className="rate-value">{formatCurrency(collection)}</div>
+                                <div className="rate-value">{formatCurrency(stCharge)}</div>
+                                <div className="rate-value">{formatCurrency(extraLoading)}</div>
+                                <div className="rate-value"><strong>{formatCurrency(totalAmount)}</strong></div>
+                              </div>
+                            </td>
+
+                            {/* Weight Column */}
+                            <td className="weight-column">
+                              <div className="weight-container">
+                                <div className="weight-item">
+                                  <p>Actual<br />
+                                    <strong>{getValue(lorryReceipt.actualWeight || lorryReceipt.actual_weight)}</strong> <br /> Kg.</p>
+                                </div>
+                                <div className="weight-item">
+                                  <p>Chargeable <br /><strong>{getValue(lorryReceipt.chargeableWeight || lorryReceipt.chargeable_weight || lorryReceipt.charged_weight)}</strong></p>
+                                </div>
+                                <div className="payment-section">
+                                  <div className="payment-option">
+                                    <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'paid'} disabled className="payment-radio" />
+                                    <label>Paid</label>
+                                  </div>
+                                  <div className="payment-option">
+                                    <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'toBeBill'} disabled className="payment-radio" />
+                                    <label>To be Bill</label>
+                                  </div>
+                                  <div className="payment-option">
+                                    <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'toPay'} disabled className="payment-radio" />
+                                    <label>To Pay</label>
+                                  </div>
+                                </div>
+                                <div className="risk-section">
+                                  Goods entirely<br />booked at<br /><b>OWNER'S RISK</b>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              
-              <table className="right-table">
+
+              {/* Footer Sections */}
+              <table>
                 <tbody>
-                  <tr>
-                    <td colSpan="2">
-                      <strong>CN't No. - </strong>
-                      <span className="form-value-small">{getValue(lorryReceipt.lorryReceiptNumber || lorryReceipt.cn_number || lorryReceipt.lr_number)}</span>
+                  <tr className="delivery-section">
+                    <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ width: '80px' }}>Delivery At:</span>
+                        <span style={{ color: 'red', marginRight: '4px' }}>*</span>
+                        <div className="input-container flex-grow">
+                          <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
+                            {getValue(lorryReceipt.deliveryAt || lorryReceipt.delivery_at)}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ width: '80px' }}>E-way Bill:</span>
+                        <div className="input-container flex-grow">
+                          <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
+                            {getValue(lorryReceipt.ewayBill || lorryReceipt.eway_bill)}
+                          </div>
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                  <tr>
-                    <td style={{ width: '50%' }}>
-                      <strong>Date - </strong>
-                      <span className="form-value-small">{formatDate(lorryReceipt.date || lorryReceipt.lr_date)}</span>
-                    </td>
-                    <td style={{ width: '50%', textAlign: 'center' }} rowSpan="2">
-                      <strong>Truck No. - </strong>
-                      <span className="form-value-small">{getValue(lorryReceipt.truckDetails?.truckNumber || lorryReceipt.truck_number || lorryReceipt.truckNumber)}</span>
+                  <tr className="remarks-section">
+                    <td colSpan="3">
+                      Remarks:
+                      <span className="form-value" style={{ display: 'inline-block', width: '450px' }}>{getValue(lorryReceipt.remarks || lorryReceipt.notes)}</span>
                     </td>
                   </tr>
-                  <tr>
-                    <td>
-                      <strong>From - </strong>
-                      <span className="form-value-small">{getValue(lorryReceipt.fromLocation || lorryReceipt.from_location)}</span>
+                  <tr className="footer-section">
+                    <td style={{ width: '70%' }}>
+                      We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee
                     </td>
-                  </tr>
-                  <tr>
-                    <td colSpan="2">
-                      <strong>To - </strong>
-                      <span className="form-value-small">{getValue(lorryReceipt.toLocation || lorryReceipt.to_location)}</span>
+                    <td style={{ width: '30%', verticalAlign: 'bottom', textAlign: 'center' }}>
+                      For <b>Shree Dattaguru Road Lines</b>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-
-            {/* Main Freight Table */}
-            <table>
-              <tbody>
-                <tr>
-                  <td rowSpan="2" className="address-section">
-                    <strong>TARAPUR</strong><br />
-                    Plot No. W-4,<br />
-                    Camlin Naka,<br />
-                    MIDC, Tarapur<br />
-                    M: 9823364283 /<br />
-                    9168027869 /<br />
-                    7276272828<br />
-                    <hr />
-                    <strong>BHIWANDI</strong><br />
-                    Godown No. A-2,<br />
-                    Gali No. 2,<br />
-                    Opp. Capital Roadlines,<br />
-                    Khandagale Estate,<br />
-                    Purna Village, Bhiwandi.<br />
-                    M.: 7507844317 /<br />
-                    9168027868<br />
-                    <hr />
-                    <strong>VASHI</strong><br />
-                    Godown No. C-15,<br />
-                    Sector - 19A,<br />
-                    Vashi, Navi Mumbai.<br />
-                    M.: 9168027867
-                  </td>
-                  <td>
-                    <table className="freight-table-container">
-                      <tbody>
-                        <tr>
-                          {/* Nos Column */}
-                          <td className="nos-column">
-                            {nosArray.map((nos, index) => 
-                              <div key={index} className="nos-item">{getValue(nos)}</div>
-                            )}
-                          </td>
-
-                          {/* Particulars Column */}
-                          <td className="particulars-column">
-                            {particularsArray.map((particular, index) => 
-                              <div key={index} className="particulars-item">{getValue(particular)}</div>
-                            )}
-                          </td>
-
-                          {/* Rate Left Column */}
-                          <td className="rate-left-column">
-                            <div className="rate-container">
-                              <div className="rate-item">Freight</div>
-                              <div className="rate-item">Hamali</div>
-                              <div className="rate-item">A.O.C</div>
-                              <div className="rate-item">Door Dely</div>
-                              <div className="rate-item">Collection</div>
-                              <div className="rate-item">St.Charge</div>
-                              <div className="rate-item">Extra Loading<br />paid by us</div>
-                              <div className="rate-item">Total</div>
-                            </div>
-                          </td>
-
-                          {/* Rate Right Column */}
-                          <td className="rate-right-column">
-                            <div className="rate-container">
-                              <div className="rate-value">{formatCurrency(freight)}</div>
-                              <div className="rate-value">{formatCurrency(hamali)}</div>
-                              <div className="rate-value">{formatCurrency(aoc)}</div>
-                              <div className="rate-value">{formatCurrency(doorDelivery)}</div>
-                              <div className="rate-value">{formatCurrency(collection)}</div>
-                              <div className="rate-value">{formatCurrency(stCharge)}</div>
-                              <div className="rate-value">{formatCurrency(extraLoading)}</div>
-                              <div className="rate-value"><strong>{formatCurrency(totalAmount)}</strong></div>
-                            </div>
-                          </td>
-
-                          {/* Weight Column */}
-                          <td className="weight-column">
-                            <div className="weight-container">
-                              <div className="weight-item">
-                                <p>Actual<br />
-                                <strong>{getValue(lorryReceipt.actualWeight || lorryReceipt.actual_weight)}</strong> <br /> Kg.</p>
-                              </div>
-                              <div className="weight-item">
-                                <p>Chargeable <br /><strong>{getValue(lorryReceipt.chargeableWeight || lorryReceipt.chargeable_weight || lorryReceipt.charged_weight)}</strong></p>
-                              </div>
-                              <div className="payment-section">
-                                <div className="payment-option">
-                                  <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'paid'} disabled className="payment-radio" />
-                                  <label>Paid</label>
-                                </div>
-                                <div className="payment-option">
-                                  <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'toBeBill'} disabled className="payment-radio" />
-                                  <label>To be Bill</label>
-                                </div>
-                                <div className="payment-option">
-                                  <input type="radio" checked={(lorryReceipt.freightDetails?.paymentType || lorryReceipt.paymentType || lorryReceipt.payment_type) === 'toPay'} disabled className="payment-radio" />
-                                  <label>To Pay</label>
-                                </div>
-                              </div>
-                              <div className="risk-section">
-                                Goods entirely<br />booked at<br /><b>OWNER'S RISK</b>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Footer Sections */}
-            <table>
-              <tbody>
-                <tr className="delivery-section">
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ width: '80px' }}>Delivery At:</span>
-                      <span style={{ color: 'red', marginRight: '4px' }}>*</span>
-                      <div className="input-container flex-grow">
-                        <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
-                          {getValue(lorryReceipt.deliveryAt || lorryReceipt.delivery_at)}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ width: '80px' }}>E-way Bill:</span>
-                      <div className="input-container flex-grow">
-                        <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
-                          {getValue(lorryReceipt.ewayBill || lorryReceipt.eway_bill)}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="remarks-section">
-                  <td colSpan="3">
-                    Remarks: 
-                    <span className="form-value" style={{ display: 'inline-block', width: '450px' }}>{getValue(lorryReceipt.remarks || lorryReceipt.notes)}</span>
-                  </td>
-                </tr>
-                <tr className="footer-section">
-                  <td style={{ width: '70%' }}>
-                    We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee
-                  </td>
-                  <td style={{ width: '30%', verticalAlign: 'bottom', textAlign: 'center' }}>
-                    For <b>Shree Dattaguru Road Lines</b>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
-      </div>
 
         {/* CSS Styles */}
         <style jsx>{`

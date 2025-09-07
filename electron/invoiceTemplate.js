@@ -29,7 +29,7 @@
  * }
  */
 
-import { getBillHeaderAsBase64 } from './imageUtils.js';
+import { getBillHeaderDattaGuruAsBase64 } from './imageUtils.js';
 
 const invoiceTemplate = (data) => {
   // Helper function to format currency
@@ -53,7 +53,7 @@ const invoiceTemplate = (data) => {
   // Parse JSON arrays for nos and particulars
   let nosArray = [];
   let particularsArray = [];
-  
+
   if (Array.isArray(data.nos)) {
     nosArray = data.nos;
   } else if (typeof data.nos === 'string') {
@@ -65,7 +65,7 @@ const invoiceTemplate = (data) => {
   } else {
     nosArray = [''];
   }
-  
+
   if (Array.isArray(data.particulars)) {
     particularsArray = data.particulars;
   } else if (typeof data.particulars === 'string') {
@@ -86,12 +86,12 @@ const invoiceTemplate = (data) => {
   const collection = parseFloat(data.collection || 0);
   const serviceCharge = parseFloat(data.serviceCharge || 0);
   const extraLoading = parseFloat(data.extraLoading || 0);
-  
+
   const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
 
   // Get the actual company header image as base64
-  const billHeaderBase64 = getBillHeaderAsBase64();
-  
+  const billHeaderBase64 = getBillHeaderDattaGuruAsBase64();
+
   // Fallback SVG if billHeader.png is not found
   const fallbackLogoSvg = `
     <svg width="600" height="80" xmlns="http://www.w3.org/2000/svg">
@@ -107,7 +107,7 @@ const invoiceTemplate = (data) => {
       </text>
     </svg>
   `;
-  
+
   // Use the actual bill header image or fallback to SVG
   let headerImage;
   if (billHeaderBase64) {
@@ -132,11 +132,11 @@ const invoiceTemplate = (data) => {
   const generateGoodsRows = () => {
     let rows = '';
     const maxRows = Math.max(nosArray.length, particularsArray.length, 1);
-    
+
     for (let i = 0; i < maxRows; i++) {
       const nos = nosArray[i] || '';
       const particulars = particularsArray[i] || '';
-      
+
       rows += `
         <tr style="height: 50px;">
           <td style='width:40px;min-width:40px;'>${i + 1}</td>
@@ -150,7 +150,7 @@ const invoiceTemplate = (data) => {
         </tr>
       `;
     }
-    
+
     // Add empty rows to fill the space (with borders to extend columns)
     const remainingRows = Math.max(0, 10 - maxRows);
     for (let i = 0; i < remainingRows; i++) {
@@ -167,7 +167,7 @@ const invoiceTemplate = (data) => {
         </tr>
       `;
     }
-    
+
     return rows;
   };
 
@@ -242,13 +242,31 @@ const invoiceTemplate = (data) => {
 <body>
   <div class="invoice">
     <!-- Header Section -->
-    <div class="header-section">
-      <img src="${headerImage}" alt="Shree Dattaguru Road Lines" class="header-image">
-      <div class="company-info">
-        <strong>Transport Contractors & Fleet Owners</strong><br>
-        <strong>GPlot No. W - 4, Camlin Naka, MIDC, Tarapur.</strong>
-      </div>
-    </div>
+    <div class="header-section" style="text-align:center; margin-bottom:16px;">
+
+  <!-- Header Image -->
+<img src="${headerImage}" 
+     alt="Shree Dattaguru Road Lines" 
+     style="height:150px; max-width:80%; object-fit:contain; display:block; margin:0 auto;" />
+
+<!-- Branch Addresses -->
+<div class="branch-addresses" 
+     style="margin-top:12px; font-size:12px; color:#4B5563; line-height:1.4; text-align:center; display:block;">
+
+  <!-- Tarapur Branch --> 
+  <div style="margin-bottom:4px; white-space:nowrap;">
+    <span style="color:#DC2626; font-weight:bold;">TARAPUR:</span>Plot No. W - 4, Camlin Naka, MIDC, Tarapur. M.: 9823364283 / 7276272828
+  </div>
+
+  <!-- Bhiwandi Branch -->
+  <div style="white-space:nowrap;">
+    <span style="color:#DC2626; font-weight:bold;">BHIWANDI:</span> Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate, Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
+  </div>
+
+</div>
+
+</div>
+
 
     <!-- Top Section -->
     <table style="border-collapse: collapse; width: 100%;">
