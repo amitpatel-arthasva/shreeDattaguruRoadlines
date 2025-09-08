@@ -15,6 +15,36 @@ chrome-bundle
 build
 *.local
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Cache directories
+puppeteer-cache/
+.npm/
+.yarn/
+.electron-gyp/
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Thumbs.db
+
+# Build output
+/build/
+/dist/
+*.exe
+*.msi
+*.dmg
+*.pkg
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +55,11 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# Node bundle (if used for offline installer)
+node-bundle/
+node_modules_old/
+
+# Electron debug files
+builder-debug.yml
+builder-effective-config.yaml

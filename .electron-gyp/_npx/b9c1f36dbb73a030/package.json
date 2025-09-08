@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@electron/rebuild": "^4.0.1"
-  }
-}
