@@ -24,7 +24,7 @@
     "preview": "vite preview",
     "electron": "electron .",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron-build": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder --config electron-builder-simple.json",
+    "electron-build": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder",
     "electron-build-skip-rebuild": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder --config.npmRebuild=false",
     "dist": "electron-builder --publish=never",
     "postinstall": "install-app-deps && node scripts/postinstall.js && node scripts/setup-puppeteer.js",
@@ -146,12 +146,16 @@
         {
           "from": "node-bundle",
           "to": "resources/app.asar.unpacked/node-bundle",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         },
         {
           "from": "installer",
           "to": "resources/app.asar.unpacked/installer",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
