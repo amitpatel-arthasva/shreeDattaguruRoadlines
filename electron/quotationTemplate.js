@@ -17,14 +17,14 @@ const quotationTemplate = (data, imageBase64 = null) => {
     const getValue = (value, defaultValue = 'N/A') => value || defaultValue;
     const materialDetails = data.materialDetails || [];
 
-            const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
             <title>Quotation - ${getValue(data.quotationNumber)}</title>
             <style>
                 body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
-                .main-container { max-width: 700px; margin: 16px auto; border: 2px solid #0d47a1; background: #fff; padding: 0; }
+                .main-container { max-width: 700px; margin: 16px auto;  background: #fff; padding: 0; }
                 .header-red { background: #fff; color: #b71c1c; text-align: center; padding: 4px 0 0 0; border-bottom: none; }
                 .header-hindi { font-size: 22px; font-weight: bold; color: #b71c1c; font-family: 'Mangal', Arial, sans-serif; margin-bottom: 0px; }
                 .header-eng { font-size: 22px; font-weight: bold; color: #0d47a1; letter-spacing: 1px; margin-top: 0px; margin-bottom: 0px; }
@@ -66,20 +66,31 @@ const quotationTemplate = (data, imageBase64 = null) => {
                     <!-- Address and contact line moved below header image as per request -->
                     <!-- Email removed as per request -->
                     <!-- GST number and PAN removed as per request -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 2px 30px 0 30px; font-size: 12px;">
-                        <div style="color: #0d47a1; font-weight: bold;">Ref.: ${getValue(data.referenceNo, data.quotationNumber || '')}</div>
-                        <div style="color: #0d47a1; font-weight: bold; text-align: right;">Date: ${formatDate(data.quotationDate)}</div>
-                    </div>
-                    <div class="to-block">
-                        <span class="to-label"><b>To,</b></span><br>
-                        ${getValue(data.companyName, 'N/A')}<br>
-                        ${getValue(data.location, '')}<br>
-                        <span class="sub-label">Sub:</span> Quotation <br>
-                        <span class="attn-label">Kind Attn:</span> ${getValue(data.kindAtten, 'N/A')}<br>
-                        <br>
-                        Respected sir,<br>
-                        With ref. to the above subject we are giving our most competitive rates as below -
-                    </div>
+                    <div style="display: flex; width: 100%; justify-content: space-between; align-items: flex-start;">
+  <!-- Left column (Ref + To block stacked vertically) -->
+  <div style="flex: 1;">
+    <div style="color: #0d47a1; font-weight: bold; margin-bottom: 6px; margin-left: 15px;">
+      Ref.: ${getValue(data.referenceNo, data.quotationNumber || '')}
+    </div>
+
+    <div class="to-block">
+      <span class="to-label"><b>To,</b></span><br>
+      ${getValue(data.companyName, 'N/A')}<br>
+      ${getValue(data.location, '')}<br>
+      <span class="sub-label">Subject:</span> Quotation <br>
+      <span class="attn-label">Kind Attention:</span> ${getValue(data.kindAtten, 'N/A')}<br>
+      <br>
+      Respected sir,<br>
+      With ref. to the above subject we are giving our most competitive rates as below -
+    </div>
+  </div>
+
+  <!-- Right column (Date) -->
+  <div style="color: #0d47a1; font-weight: bold; text-align: right; white-space: nowrap; margin-left: 20px;">
+    Date: ${formatDate(data.quotationDate)}
+  </div>
+</div>
+
                     <div class="table-section">
                         <table>
                             <thead>
@@ -91,11 +102,11 @@ const quotationTemplate = (data, imageBase64 = null) => {
                             </thead>
                             <tbody>
                                 ${Array.isArray(data.destinations) && data.destinations.length > 0 ?
-                                    data.destinations.map((dest, idx) =>
-                                        `<tr><td>${idx + 1}</td><td>${getValue(dest.destination || dest.name, 'N/A')}</td><td>${formatCurrency(dest.freight || dest.rate)}</td></tr>`
-                                    ).join('') :
-                                    '<tr><td>1</td><td>N/A</td><td>0.00</td></tr><tr><td>2</td><td>N/A</td><td>0.00</td></tr>'
-                                }
+            data.destinations.map((dest, idx) =>
+                `<tr><td>${idx + 1}</td><td>${getValue(dest.destination || dest.name, 'N/A')}</td><td>${formatCurrency(dest.freight || dest.rate)}</td></tr>`
+            ).join('') :
+            '<tr><td>1</td><td>N/A</td><td>0.00</td></tr><tr><td>2</td><td>N/A</td><td>0.00</td></tr>'
+        }
                             </tbody>
                         </table>
                     </div>
@@ -118,6 +129,6 @@ const quotationTemplate = (data, imageBase64 = null) => {
     return html;
 };
 export default quotationTemplate;
-                            
+
 
 

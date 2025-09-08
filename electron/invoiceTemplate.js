@@ -185,7 +185,6 @@ const invoiceTemplate = (data) => {
     }
     .invoice {
       width: 800px;
-      border: 1px solid black;
       padding: 20px;
       margin: 0 auto;
     }
