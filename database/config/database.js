@@ -30,6 +30,8 @@ class DatabaseManager {
       this.db = new Database(this.dbPath);
       this.db.pragma('journal_mode = WAL');
       this.db.pragma('foreign_keys = ON'); // Enable foreign key constraints
+      this.db.pragma('busy_timeout = 30000'); // Set 30 second timeout for database locks
+      this.db.pragma('synchronous = NORMAL'); // Balance between safety and performance
       
       // Run migrations
       await this.runMigrations();
@@ -130,8 +132,13 @@ class DatabaseManager {
         this.db.exec(migration);
         console.log(`Migration ${file} executed successfully`);
       } catch (error) {
-        console.error(`Migration ${file} failed:`, error);
-        throw error;
+        // For ADD COLUMN operations, ignore "duplicate column name" errors
+        if (error.message && error.message.includes('duplicate column name')) {
+          console.log(`Migration ${file} skipped - column already exists`);
+        } else {
+          console.error(`Migration ${file} failed:`, error);
+          throw error;
+        }
       }
     }
   }
@@ -207,7 +214,7 @@ class DatabaseManager {
     }
   }
 
-  query(sql, params = []) {
+  async query(sql, params = []) {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -232,6 +239,33 @@ class DatabaseManager {
       }
     } catch (error) {
       console.error('Database query error:', error);
+      
+      // Handle database lock with retry logic
+      if (error.code === 'SQLITE_BUSY') {
+        console.log('Database is busy, retrying in 100ms...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Retry once after a short delay
+        try {
+          if (sql.trim().toUpperCase().startsWith('SELECT')) {
+            const stmt = this.db.prepare(sql);
+            return stmt.all(params);
+          } else {
+            const stmt = this.db.prepare(sql);
+            const result = stmt.run(params);
+            console.log('Non-SELECT DB result (retry):', JSON.stringify(result, null, 2));
+            return {
+              success: typeof result.changes === 'number' ? result.changes > 0 : true,
+              changes: result.changes,
+              lastInsertRowid: result.lastInsertRowid
+            };
+          }
+        } catch (retryError) {
+          console.error('Database retry failed:', retryError);
+          return { success: false, error: retryError.message };
+        }
+      }
+      
       return { success: false, error: error.message };
     }
   }
@@ -244,4 +278,4 @@ class DatabaseManager {
   }
 }
 
-export default new DatabaseManager();
+export default DatabaseManager;

@@ -3,29 +3,29 @@ import db from '../config/database.js';
 class LorryReceipt {
   static create(receiptData) {
     const {
-      lr_number, lr_date, from_location, to_location,
-      consignor_id, consignee_id, truck_number, freight,
-      hamali, aoc, door_delivery,detention, collection, service_charge,
-      extra_loading, actual_weight, charged_weight, payment_type,
-      goods_risk, truck_id, driver_id, delivery_at, remarks
+      cn_number, lr_date, from_location, to_location,
+      consignor_id, consignee_id, truck_number, nos, particulars, freight,
+      hamali, aoc, door_delivery, detention, collection, st_charge,
+      extra_loading, actual_weight, chargeable_weight, payment_type,
+      truck_id, driver_id, delivery_at, eway_bill, total, remarks
     } = receiptData;
     
     const sql = `
       INSERT INTO lorry_receipts (
-        lr_number, lr_date, from_location, to_location,
-        consignor_id, consignee_id, truck_number, freight,
-        hamali, aoc, door_delivery,detention, collection, service_charge,
-        extra_loading, actual_weight, charged_weight, payment_type,
-        goods_risk, truck_id, driver_id, delivery_at, remarks
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        cn_number, lr_date, from_location, to_location,
+        consignor_id, consignee_id, truck_number, nos, particulars, freight,
+        hamali, aoc, door_delivery, detention, collection, st_charge,
+        extra_loading, actual_weight, chargeable_weight, payment_type,
+        truck_id, driver_id, delivery_at, eway_bill, total, remarks
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     return db.query(sql, [
-      lr_number, lr_date, from_location, to_location,
-      consignor_id, consignee_id, truck_number, freight,
-      hamali, aoc, door_delivery,detention, collection, service_charge,
-      extra_loading, actual_weight, charged_weight, payment_type,
-      goods_risk, truck_id, driver_id, delivery_at, remarks
+      cn_number, lr_date, from_location, to_location,
+      consignor_id, consignee_id, truck_number, nos, particulars, freight || 0,
+      hamali || 0, aoc || 0, door_delivery || 0, detention || 0, collection || 0, st_charge || 0,
+      extra_loading || 0, actual_weight, chargeable_weight, payment_type,
+      truck_id, driver_id, delivery_at, eway_bill, total || 0, remarks
     ]);
   }
 
@@ -52,7 +52,7 @@ class LorryReceipt {
     return receipts[0] || null;
   }
 
-  static findByLRNumber(lr_number) {
+  static findByLRNumber(cn_number) {
     const sql = `
       SELECT 
         lr.*,
@@ -65,9 +65,9 @@ class LorryReceipt {
       LEFT JOIN companies c2 ON lr.consignee_id = c2.id
       LEFT JOIN trucks t ON lr.truck_id = t.id
       LEFT JOIN drivers d ON lr.driver_id = d.id
-      WHERE lr.lr_number = ?
+      WHERE lr.cn_number = ?
     `;
-    const receipts = db.query(sql, [lr_number]);
+    const receipts = db.query(sql, [cn_number]);
     return receipts[0] || null;
   }
 

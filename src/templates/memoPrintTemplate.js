@@ -2,13 +2,13 @@
 // Returns HTML string for the memo in the same format as MemoPrintTemplate.jsx
 
 
-import { getBillHeaderAsBase64 } from '../services/imageUtils.js';
+import { getImageAsBase64 } from '../services/imageUtils.js';
 
 function memoPrintTemplate(memo) {
   if (!memo) return '';
 
-  // Use the same dynamic image loading as lorryReceiptPrintTemplate
-    const billHeaderBase64 = getBillHeaderAsBase64(); // Use the same image loading as quotation, lorry receipt, and invoice templates
+  // Use original billHeader.png directly (not getBillHeaderAsBase64 which returns billHeader4.png)
+  const billHeaderBase64 = getImageAsBase64('billHeader.png');
 
   return `
     <div style="background:#f3f4f6;padding:32px 8px;min-height:900px;display:flex;flex-direction:column;align-items:center;">
@@ -21,6 +21,21 @@ function memoPrintTemplate(memo) {
             <div style="border:1px solid #ef4444;color:#ef4444;padding:2px 8px;display:inline-block;margin-top:4px;font-size:12px;">MEMO COPY</div>
           </div>
         </div>
+        
+        <!-- Address Section matching frontend layout -->
+        <div style="width:90%;margin:0 auto -8px 160px;font-size:12px;font-weight:500;color:#374151;line-height:1.4;margin-bottom:8px;">
+          <div style="margin-bottom:8px;">
+            <span style="color:#dc2626;font-weight:bold;">TARAPUR:</span>
+            Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+            M.: 9823364283 / 7276272828
+          </div>
+          <div>
+            <span style="color:#dc2626;font-weight:bold;">BHIWANDI:</span>
+            Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+            <span style="margin-left:80px;">Puma Village, Bhiwandi. M.: 9222161259 / 9168027868</span>
+          </div>
+        </div>
+        
         <div style="border:1px solid #000;margin:0 8px 8px 8px;background:#fff;">
           <div style="display:flex;flex-direction:row;">
             <div style="width:50%;padding:12px 4px 12px 12px;font-size:14px;">

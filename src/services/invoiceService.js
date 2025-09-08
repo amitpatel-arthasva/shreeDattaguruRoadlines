@@ -133,11 +133,12 @@ class InvoiceService {
         const hamali = parseFloat(lr.hamali || 0);
         const aoc = parseFloat(lr.aoc || 0);
         const doorDelivery = parseFloat(lr.door_delivery || 0);
+        const detention = parseFloat(lr.detention || 0);
         const collection = parseFloat(lr.collection || 0);
         const serviceCharge = parseFloat(lr.service_charge || 0);
         const extraLoading = parseFloat(lr.extra_loading || 0);
         
-        const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
+        const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading;
 
         return {
           id: lr.id,
@@ -272,11 +273,12 @@ class InvoiceService {
       const hamali = parseFloat(lr.hamali || 0);
       const aoc = parseFloat(lr.aoc || 0);
       const doorDelivery = parseFloat(lr.door_delivery || 0);
+      const detention = parseFloat(lr.detention || 0);
       const collection = parseFloat(lr.collection || 0);
       const serviceCharge = parseFloat(lr.st_charge || 0);
       const extraLoading = parseFloat(lr.extra_loading || 0);
       
-      const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
+      const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading;
 
       const invoice = {
         id: lr.id,

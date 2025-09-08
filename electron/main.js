@@ -74,8 +74,14 @@ let dbManager;
 // Initialize database
 async function initializeDatabase() {
   try {
+    // Only initialize if not already initialized
+    if (dbManager) {
+      console.log('Database already initialized, skipping...');
+      return;
+    }
+    
     const DatabaseManager = await import('../database/config/database.js');
-    dbManager = DatabaseManager.default;
+    dbManager = new DatabaseManager.default();
     
     // Set up default database path in user documents
     const documentsPath = app.getPath('documents');
@@ -232,7 +238,7 @@ ipcMain.handle('db-query', async (event, sql, params) => {
 
     let result;
     try {
-      result = dbManager.query(sql, params);
+      result = await dbManager.query(sql, params);
       console.log('Query result:', result);
       if (!sql.trim().toUpperCase().startsWith('SELECT')) {
         console.log('Non-SELECT query executed. Result object:', JSON.stringify(result, null, 2));

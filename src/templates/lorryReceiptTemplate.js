@@ -26,11 +26,12 @@ const lorryReceiptTemplate = (data) => {
   const hamali = parseFloat(data.hamali || 0);
   const aoc = parseFloat(data.aoc || 0);
   const doorDelivery = parseFloat(data.door_delivery || 0);
+  const detention = parseFloat(data.detention || 0);
   const collection = parseFloat(data.collection || 0);
   const serviceCharge = parseFloat(data.service_charge || data.st_charge || 20); // Default 20
   const extraLoading = parseFloat(data.extra_loading || 0);
   
-  const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
+  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading;
 
   // Handle arrays for nos and particulars
   const nosArray = data.nos || [data.quantity || ''];

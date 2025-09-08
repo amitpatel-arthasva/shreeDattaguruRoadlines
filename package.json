@@ -139,7 +139,6 @@
         }
       ],
       "icon": "build/desktoplogo.ico",
-
       "requestedExecutionLevel": "requireAdministrator",
       "publisherName": "Shree Dattagu Roadlines",
       "extraFiles": [
@@ -153,10 +152,8 @@
           "to": "resources/app.asar.unpacked/installer",
           "filter": ["**/*"]
         }
-      ],
-      "verifyUpdateCodeSignature": false
+      ]
     },
-    
     "linux": {
       "category": "Office",
       "icon": "build/desktoplogo.ico"

@@ -48,7 +48,7 @@
  * }
  */
 
-import { getBillHeaderAsBase64, getBillHeaderNameAsBase64, getBillHeaderTruckAsBase64 } from './imageUtils.js';
+import { getBillHeaderAsBase64, getImageAsBase64 } from './imageUtils.js';
 
 const lorryReceiptPrintTemplate = (data) => {
   // Helper function to format currency
@@ -99,13 +99,16 @@ const lorryReceiptPrintTemplate = (data) => {
   const hamali = parseFloat(data.freightDetails?.hamali || data.hamali || 0);
   const aoc = parseFloat(data.freightDetails?.aoc || data.aoc || 0);
   const doorDelivery = parseFloat(data.freightDetails?.doorDelivery || data.door_delivery || 0);
+  const detention = parseFloat(data.freightDetails?.detention || data.detention || 0);
   const collection = parseFloat(data.freightDetails?.collection || data.collection || 0);
   const stCharge = parseFloat(data.freightDetails?.stCharge || data.st_charge || data.service_charge || 20);
   const extraLoading = parseFloat(data.freightDetails?.extraLoading || data.extra_loading || 0);
   
-  const totalAmount = freight + hamali + aoc + doorDelivery + collection + stCharge + extraLoading;  // Get the actual company header image as base64
-  const truckHeaderBase64 = getBillHeaderTruckAsBase64();
-  const nameHeaderBase64 = getBillHeaderNameAsBase64();
+  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
+
+  // Get the actual company header image as base64
+  const billHeaderBase64 = getBillHeaderAsBase64();
+  const billheader5Base64 = getImageAsBase64('billheader5.png');
   
   // Fallback SVG if billHeader.png is not found
   const fallbackLogoSvg = `
@@ -205,7 +208,7 @@ const lorryReceiptPrintTemplate = (data) => {
         }
         
         .logo-image {
-            max-width: 300px; /* Much smaller logo */
+            max-width: 450px; /* Larger logo */
             height: auto;
         }
         
@@ -330,8 +333,8 @@ const lorryReceiptPrintTemplate = (data) => {
         .address-section {
             width: 18%;
             padding: 4px; /* Reduced padding */
-            font-size: 7px; /* Smaller font */
-            line-height: 1.1;
+            font-size: 10px; /* Increased from 7px to 10px */
+            line-height: 1.3; /* Slightly increased line height for better readability */
             vertical-align: top;
         }
         
@@ -510,10 +513,8 @@ const lorryReceiptPrintTemplate = (data) => {
                 <div class="header-section">
                     <div class="header-inner">                    
                         <div class="logo-container">
-                            <img src="${truckHeaderBase64}" 
-                                 alt="BillLogo" class="logo-image" />
-                                 <img src="${nameHeaderBase64}" 
-                                 alt="BillLogo" class="logo-image" />
+                            <img src="${billheader5Base64}" 
+                                 alt="Shree Dattaguru Road Lines Header" class="logo-image" />
                         </div>
                         <div class="jurisdiction-section">
                             <div class="jurisdiction-title">SUBJECT TO PALGHAR JURISDICTION</div>
@@ -584,7 +585,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong>TARAPUR</strong><br />
+                                <strong style="font-size: 11px;">TARAPUR</strong><br />
                                 Plot No. W-4,<br />
                                 Camlin Naka,<br />
                                 MIDC, Tarapur<br />
@@ -592,7 +593,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027869 /<br />
                                 7276272828<br />
                                 <hr />
-                                <strong>BHIWANDI</strong><br />
+                                <strong style="font-size: 11px;">BHIWANDI</strong><br />
                                 Godown No. A-2,<br />
                                 Gali No. 2,<br />
                                 Opp. Capital Roadlines,<br />
@@ -602,7 +603,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027868<br />
                                 <hr />
                                 <br />
-                                <b>PAN: AGTPV0112D<br />
+                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
                                 GSTIN: 27AGTPV0112D1ZG</b>
                             </td>
                             <td colspan="3">
@@ -636,6 +637,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                                     <div class="rate-item">Hamali</div>
                                                     <div class="rate-item">A.O.C</div>
                                                     <div class="rate-item">Door Dely</div>
+                                                    <div class="rate-item">Detention</div>
                                                     <div class="rate-item">Collection</div>
                                                     <div class="rate-item">St.Charge</div>
                                                     <div class="rate-item">Extra Loading<br />paid by us</div>
@@ -650,6 +652,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                                     <div class="rate-value">${formatCurrency(hamali)}</div>
                                                     <div class="rate-value">${formatCurrency(aoc)}</div>
                                                     <div class="rate-value">${formatCurrency(doorDelivery)}</div>
+                                                    <div class="rate-value">${formatCurrency(detention)}</div>
                                                     <div class="rate-value">${formatCurrency(collection)}</div>
                                                     <div class="rate-value">${formatCurrency(stCharge)}</div>
                                                     <div class="rate-value">${formatCurrency(extraLoading)}</div>
@@ -693,27 +696,32 @@ const lorryReceiptPrintTemplate = (data) => {
                     </tbody>
                 </table>
 
-                <!-- Footer Sections -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
+                <!-- E-way Bill Section -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px;">
                     <tbody>
                         <tr>
-                            <td style="width: 70%; padding: 4px 8px;">
+                            <td style="padding: 6px 8px; border: 1px solid #000; text-align: left; background-color: #f9f9f9;">
+                                <span style="font-family: Arial; font-size: 11px; font-weight: bold;">E-way Bill: </span>
+                                <span style="font-family: Arial; font-size: 11px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Footer Sections -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 0; table-layout: fixed;">
+                    <tbody>
+                        <tr>
+                            <td colspan="2" style="padding: 4px 8px; border: 1px solid #000; vertical-align: top;">
                                 <div>
                                     <span style="font-family: Arial; font-size: 11px;">Delivery At:</span>
                                     <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
                                 </div>
                                 <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
-                            <td style="width: 30%; padding: 4px 8px;">
-                                <div>
-                                    <span style="font-family: Arial; font-size: 11px;">E-way Bill:</span>
-                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.ewayBill || data.eway_bill)}</span>
-                                </div>
-                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
-                            </td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 4px 8px;">
+                            <td colspan="2" style="padding: 4px 8px; border: 1px solid #000;">
                                 <div>
                                     <span style="font-family: Arial; font-size: 11px;">Remarks:</span>
                                     <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
@@ -722,12 +730,12 @@ const lorryReceiptPrintTemplate = (data) => {
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 8px;">
+                            <td style="padding: 4px 8px; border: 1px solid #000;">
                                 <div>
                                     <span style="font-family: Arial; font-size: 11px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
                                 </div>
                             </td>
-                            <td style="padding: 4px 8px;">
+                            <td style="padding: 4px 8px; border: 1px solid #000;">
                                 <div style="text-align: right;">
                                     <span style="font-family: Arial; font-size: 11px;">For Shree Dattaguru Road Lines</span>
                                 </div>

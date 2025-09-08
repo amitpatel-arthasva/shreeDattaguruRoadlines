@@ -1,4 +1,4 @@
-import LorryReceipt from '../database/models/LorryReceipt.js';
+import LorryReceipt from '../../database/models/LorryReceiptNew.js';
 
 class LorryReceiptController {
   // Create a new lorry receipt
@@ -7,7 +7,7 @@ class LorryReceiptController {
       const lrData = req.body;
       
       // Validate required fields
-      const requiredFields = ['lr_number', 'lr_date', 'from_location', 'to_location', 'consignor_id', 'consignee_id'];
+      const requiredFields = ['cn_number', 'lr_date', 'from_location', 'to_location', 'consignor_id', 'consignee_id'];
       const missingFields = requiredFields.filter(field => !lrData[field]);
       
       if (missingFields.length > 0) {
@@ -85,8 +85,8 @@ class LorryReceiptController {
   // Get a specific lorry receipt by LR number
   static async getByNumber(req, res) {
     try {
-      const { lr_number } = req.params;
-      const receipt = LorryReceipt.findByNumber(lr_number);
+      const { cn_number } = req.params;
+      const receipt = LorryReceipt.findByLRNumber(cn_number);
       
       if (!receipt) {
         return res.status(404).json({

@@ -3,7 +3,7 @@ import db from '../config/database.js';
 class LorryReceipt {
   static create(lrData) {
     const {
-      lr_number, lr_date, from_location, to_location,
+      cn_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_id, driver_id, truck_number,
       particulars, quantity, unit, freight, hamali, aoc, door_delivery,detention,
       collection, service_charge, extra_loading, actual_weight, charged_weight,
@@ -13,7 +13,7 @@ class LorryReceipt {
     
     const sql = `
       INSERT INTO lorry_receipts (
-        lr_number, lr_date, from_location, to_location,
+        cn_number, lr_date, from_location, to_location,
         consignor_id, consignee_id, truck_id, driver_id, truck_number,
         particulars, quantity, unit, freight, hamali, aoc, door_delivery, detention,
         collection, service_charge, extra_loading, actual_weight, charged_weight,
@@ -23,11 +23,32 @@ class LorryReceipt {
     `;
     
     return db.query(sql, [
-      lr_number, lr_date, from_location, to_location,
+  static create(lrData) {
+    const {
+      cn_number, lr_date, from_location, to_location,
       consignor_id, consignee_id, truck_id, driver_id, truck_number,
-      particulars, quantity, unit || 'Bags', freight, hamali || 0, aoc || 0, door_delivery || 0, detention || 0,
-      collection || 0, service_charge || 20, extra_loading || 0, actual_weight, charged_weight,
-      payment_type, service_tax_payable_by, goods_risk || 'Owner', invoice_number,
+      nos, particulars, freight, hamali, aoc, door_delivery, detention,
+      collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+      payment_type, delivery_at, eway_bill, total, remarks
+    } = lrData;
+    
+    const sql = `
+      INSERT INTO lorry_receipts (
+        cn_number, lr_date, from_location, to_location,
+        consignor_id, consignee_id, truck_id, driver_id, truck_number,
+        nos, particulars, freight, hamali, aoc, door_delivery, detention,
+        collection, st_charge, extra_loading, actual_weight, chargeable_weight,
+        payment_type, delivery_at, eway_bill, total, remarks
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    return db.query(sql, [
+      cn_number, lr_date, from_location, to_location,
+      consignor_id, consignee_id, truck_id, driver_id, truck_number,
+      nos, particulars, freight || 0, hamali || 0, aoc || 0, door_delivery || 0, detention || 0,
+      collection || 0, st_charge || 0, extra_loading || 0, actual_weight, chargeable_weight,
+      payment_type, delivery_at, eway_bill, total || 0, remarks
+    ]);
       challan_number, delivery_at, remarks
     ]);
   }

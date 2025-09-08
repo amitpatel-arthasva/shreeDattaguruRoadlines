@@ -333,8 +333,8 @@ const lorryReceiptPrintTemplate = (data) => {
         .address-section {
             width: 18%;
             padding: 4px; /* Reduced padding */
-            font-size: 7px; /* Smaller font */
-            line-height: 1.1;
+            font-size: 10px; /* Increased from 7px to 10px */
+            line-height: 1.3; /* Slightly increased line height for better readability */
             vertical-align: top;
         }
         
@@ -584,7 +584,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong>TARAPUR</strong><br />
+                                <strong style="font-size: 11px;">TARAPUR</strong><br />
                                 Plot No. W-4,<br />
                                 Camlin Naka,<br />
                                 MIDC, Tarapur<br />
@@ -592,7 +592,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027869 /<br />
                                 7276272828<br />
                                 <hr />
-                                <strong>BHIWANDI</strong><br />
+                                <strong style="font-size: 11px;">BHIWANDI</strong><br />
                                 Godown No. A-2,<br />
                                 Gali No. 2,<br />
                                 Opp. Capital Roadlines,<br />
@@ -602,7 +602,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027868<br />
                                 <hr />
                                 <br />
-                                <b>PAN: AGTPV0112D<br />
+                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
                                 GSTIN: 27AGTPV0112D1ZG</b>
                             </td>
                             <td colspan="3">
@@ -695,26 +695,33 @@ const lorryReceiptPrintTemplate = (data) => {
                     </tbody>
                 </table>
 
-                <!-- Footer Sections -->
-                <table>
+                <!-- E-way Bill Section -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px;">
                     <tbody>
                         <tr>
-                            <td style="width: 65%; border-right: none;">
-                                <div style="display: flex; align-items: center; padding: 4px;">
+                            <td style="padding: 6px 8px; border: 1px solid #000; text-align: left; background-color: #f9f9f9;">
+                                <span style="font-family: Arial; font-size: 12px; font-weight: bold;">E-way Bill: </span>
+                                <span style="font-family: Arial; font-size: 12px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Footer Sections -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 0; table-layout: fixed;">
+                    <tbody>
+                        <tr>
+                            <td colspan="2" style="padding: 4px 8px; border: 1px solid #000; vertical-align: top;">
+                                <div style="display: flex; align-items: center;">
                                     <span style="font-size: 12px; font-weight: normal;">Delivery At:</span>
                                     <span style="color: red; margin: 0 4px;">*</span>
                                     <span style="font-size: 12px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
                                 </div>
-                            </td>
-                            <td style="width: 35%; border-left: none;">
-                                <div style="display: flex; justify-content: space-between; padding: 4px;">
-                                    <span style="font-size: 12px;">E-way Bill:</span>
-                                    <span style="font-size: 12px;">${getValue(data.ewayBill || data.eway_bill)}</span>
-                                </div>
+                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 12px;">
+                            <td colspan="2" style="padding: 12px; border: 1px solid #000;">
                                 <div style="display: flex; align-items: top;">
                                     <span style="width: 80px; font-size: 14px; font-family: Arial;">Remarks:</span>
                                     <div style="flex-grow: 1;">
@@ -726,10 +733,10 @@ const lorryReceiptPrintTemplate = (data) => {
                             </td>
                         </tr>
                         <tr class="footer-section">
-                            <td style="width: 70%;">
+                            <td style="width: 50%; padding: 4px 8px; border: 1px solid #000;">
                                 We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee
                             </td>
-                            <td style="width: 30%; vertical-align: bottom; text-align: center;">
+                            <td style="width: 50%; padding: 4px 8px; border: 1px solid #000; vertical-align: bottom; text-align: center;">
                                 For <b>Shree Dattaguru Road Lines</b>
                             </td>
                         </tr>

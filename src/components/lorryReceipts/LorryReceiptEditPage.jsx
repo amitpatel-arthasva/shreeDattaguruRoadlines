@@ -1612,7 +1612,7 @@ const LorryReceiptEditPage = () => {
                   <td width="70%">
                     We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee
                   </td>
-                  <td width="20%" colSpan="3" style={{ verticalAlign: 'bottom' }}>
+                  <td width="30%" colSpan="3" style={{ verticalAlign: 'bottom', textAlign: 'center' }}>
                     For <b>Shree Dattaguru Road Lines</b>
                   </td>                </tr>
               </tbody>            </table>

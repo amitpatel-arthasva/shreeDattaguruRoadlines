@@ -83,11 +83,12 @@ const invoiceTemplate = (data) => {
   const hamali = parseFloat(data.hamali || 0);
   const aoc = parseFloat(data.aoc || 0);
   const doorDelivery = parseFloat(data.doorDelivery || 0);
+  const detention = parseFloat(data.detention || 0);
   const collection = parseFloat(data.collection || 0);
   const serviceCharge = parseFloat(data.serviceCharge || 0);
   const extraLoading = parseFloat(data.extraLoading || 0);
   
-  const totalAmount = freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
+  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading;
 
   // Get the actual company header image as base64
   const billHeaderBase64 = getBillHeaderDattaGuruAsBase64();
@@ -145,7 +146,7 @@ const invoiceTemplate = (data) => {
           <td>${getValue(data.toLocation)}</td>
           <td>${getValue(data.invoiceNumber)}</td>
           <td>${formatCurrency(freight)}</td>
-          <td>${formatCurrency(hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading)}</td>
+          <td>${formatCurrency(hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading)}</td>
           <td>${formatCurrency(totalAmount)}</td>
         </tr>
       `;

@@ -338,18 +338,21 @@ class LorryReceiptService {
         const sql = `
         INSERT INTO lorry_receipts (
           cn_number, truck_number, lr_date, to_location, from_location,
-          consignor_id, consignee_id, truck_id, driver_id,
+          company_id, consignor_id, consignee_id, truck_id, driver_id,
           nos, particulars,
-          freight, hamali, aoc, door_delivery,detention, collection, st_charge, extra_loading,
+          freight, hamali, aoc, door_delivery, detention, collection, st_charge, extra_loading,
           actual_weight, chargeable_weight,
           payment_type, delivery_at, eway_bill, total, remarks
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;      const params = [
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const params = [
         cnNumber, // Auto-generated CN number
         lrData.truck_number,
         lrData.lr_date,
         lrData.to_location,
         lrData.from_location,
+        lrData.company_id || null, // Add company_id parameter
         lrData.consignor_id,
         lrData.consignee_id,
         lrData.truck_id || null,
