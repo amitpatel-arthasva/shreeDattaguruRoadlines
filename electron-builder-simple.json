@@ -1,0 +1,53 @@
+{
+  "appId": "com.shreeDattaguruRoadlines.app",
+  "productName": "Shree Dattagu Roadlines",
+  "icon": "build/desktoplogo.ico",
+  "directories": {
+    "output": "dist"
+  },
+  "npmRebuild": false,
+  "buildDependenciesFromSource": false,
+  "files": [
+    "build/**/*",
+    "electron/**/*", 
+    "database/**/*",
+    "api/**/*",
+    "assets/**/*",
+    "puppeteer-cache/**/*",
+    "node_modules/**/*",
+    "!node_modules/.cache/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "chrome-bundle",
+      "to": "chrome-bundle",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "puppeteer-cache", 
+      "to": "puppeteer-cache",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Shree Dattagu Roadlines",
+    "deleteAppDataOnUninstall": true,
+    "runAfterFinish": true,
+    "allowElevation": true,
+    "perMachine": true,
+    "include": "installer.nsh",
+    "warningsAsErrors": false
+  }
+}

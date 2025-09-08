@@ -19,17 +19,14 @@ function memoPrintTemplate(memo) {
           </div>
         </div>
         
-        <!-- Address Section matching frontend layout -->
-        <div style="width:90%;margin:0 auto -8px 160px;font-size:12px;font-weight:500;color:#374151;line-height:1.4;margin-bottom:8px;">
-          <div style="margin-bottom:8px;">
-            <span style="color:#dc2626;font-weight:bold;">TARAPUR:</span>
-            Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
-            M.: 9823364283 / 7276272828
+        <!-- Address Section positioned below company name -->
+        <div style="margin: 4px 0 8px 60px; font-size:11px; font-weight:500; color:#000; line-height:1.2;">
+          <div style="margin-bottom:2px;">
+            <span style="font-weight:bold; color:#dc2626;">TARAPUR:</span>Plot No. W - 4, Camlin Naka, MIDC, Tarapur. M.: 9823364283 / 7276272828
           </div>
           <div>
-            <span style="color:#dc2626;font-weight:bold;">BHIWANDI:</span>
-            Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
-            <span style="margin-left:80px;">Puma Village, Bhiwandi. M.: 9222161259 / 9168027868</span>
+            <span style="font-weight:bold; color:#dc2626;">BHIWANDI:</span>Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
           </div>
         </div>
         

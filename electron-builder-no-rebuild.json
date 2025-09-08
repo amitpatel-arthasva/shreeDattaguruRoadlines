@@ -1,0 +1,84 @@
+{
+  "extends": "./package.json",
+  "build": {
+    "appId": "com.shreeDattaguruRoadlines.app",
+    "productName": "Shree Dattagu Roadlines",
+    "icon": "build/desktoplogo.ico",
+    "directories": {
+      "output": "dist"
+    },
+    "npmRebuild": false,
+    "buildDependenciesFromSource": false,
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "database/**/*",
+      "api/**/*",
+      "assets/**/*",
+      "puppeteer-cache/**/*",
+      "node_modules/**/*",
+      "!node_modules/.cache/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "chrome-bundle",
+        "to": "chrome-bundle",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "puppeteer-cache",
+        "to": "puppeteer-cache",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Shree Dattagu Roadlines",
+      "deleteAppDataOnUninstall": true,
+      "runAfterFinish": true,
+      "allowElevation": true,
+      "perMachine": true,
+      "include": "installer.nsh",
+      "warningsAsErrors": false,
+      "installerIcon": "build/desktoplogo.ico",
+      "uninstallerIcon": "build/desktoplogo.ico",
+      "installerHeaderIcon": "build/desktoplogo.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "language": "1033",
+      "multiLanguageInstaller": true,
+      "packElevateHelper": true
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/desktoplogo.ico",
+      "requestedExecutionLevel": "requireAdministrator",
+      "publisherName": "Shree Dattagu Roadlines",
+      "extraFiles": [
+        {
+          "from": "node-bundle",
+          "to": "resources/app.asar.unpacked/node-bundle",
+          "filter": ["**/*"]
+        },
+        {
+          "from": "installer",
+          "to": "resources/app.asar.unpacked/installer",
+          "filter": ["**/*"]
+        }
+      ]
+    }
+  }
+}

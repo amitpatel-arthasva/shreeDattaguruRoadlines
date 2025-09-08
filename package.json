@@ -1,7 +1,7 @@
 {
   "name": "shree-dattagu-roadlines",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop application for roadlines management",
   "author": {
     "name": "Shree Dattagu Roadlines",
@@ -24,7 +24,8 @@
     "preview": "vite preview",
     "electron": "electron .",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron-build": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder",
+    "electron-build": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder --config electron-builder-simple.json",
+    "electron-build-skip-rebuild": "npm run setup-puppeteer && npm run prepare-installer && npm run prebuild && npm run build && electron-builder --config.npmRebuild=false",
     "dist": "electron-builder --publish=never",
     "postinstall": "install-app-deps && node scripts/postinstall.js && node scripts/setup-puppeteer.js",
     "setup-chrome": "npx puppeteer browsers install chrome",

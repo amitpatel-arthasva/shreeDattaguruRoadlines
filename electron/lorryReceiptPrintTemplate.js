@@ -345,7 +345,7 @@ const lorryReceiptPrintTemplate = (data) => {
         }
         
         .freight-table-container {
-            height: 150px; /* Reduced height */
+            height: 300px; /* Increased height to stretch and fill empty space */
             border-collapse: collapse;
             width: 100%;
         }
@@ -353,14 +353,14 @@ const lorryReceiptPrintTemplate = (data) => {
         .nos-column {
             width: 10%;
             border-right: 1px solid #000;
-            padding: 4px;
+            padding: 8px; /* Increased padding to stretch column vertically */
             vertical-align: top;
         }
         
         .particulars-column {
             width: 70%;
             border-right: 1px solid #000;
-            padding: 4px;
+            padding: 8px; /* Increased padding to stretch column vertically */
             vertical-align: top;
         }
         
@@ -389,13 +389,13 @@ const lorryReceiptPrintTemplate = (data) => {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 200px;
+            min-height: 300px; /* Increased minimum height to stretch and fill space */
         }
         
         .rate-item {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 4px;
+            padding: 8px; /* Increased padding to stretch items vertically */
             display: flex;
             align-items: center;
         }
@@ -407,7 +407,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .rate-value {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 2px;
+            padding: 6px; /* Increased padding to stretch items vertically */
             display: flex;
             align-items: center;
             text-align: center;
@@ -421,7 +421,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .weight-item {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 1px;
+            padding: 8px; /* Increased padding to stretch items vertically */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -431,7 +431,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .payment-section {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 4px;
+            padding: 10px; /* Increased padding to stretch section vertically */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -440,7 +440,7 @@ const lorryReceiptPrintTemplate = (data) => {
         
         .risk-section {
             flex: 1;
-            padding: 4px;
+            padding: 10px; /* Increased padding to stretch section vertically */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -460,10 +460,10 @@ const lorryReceiptPrintTemplate = (data) => {
         }
         
         .nos-item, .particulars-item {
-            margin-bottom: 8px;
-            padding: 2px;
+            margin-bottom: 12px; /* Increased margin to stretch items vertically */
+            padding: 6px; /* Increased padding to make items taller */
             border-bottom: 1px solid #ccc;
-            min-height: 18px;
+            min-height: 25px; /* Increased minimum height to stretch items */
         }
         
         .delivery-section, .remarks-section {
@@ -534,15 +534,13 @@ const lorryReceiptPrintTemplate = (data) => {
                             <tr>                                <td class="left-cell">                                    <div style="margin-bottom: 8px;">
                                         <strong>Consignor - M/s ${getValue(data.consignor?.consignorName || data.consignor_name)}</strong>
                                     </div>
-                                    <div class="form-value">${getValue(data.consignor?.address || data.consignor_address)}</div>
-                                    <div class="form-value">${getValue(data.consignor?.city || data.consignor_city)}, ${getValue(data.consignor?.state || data.consignor_state)} - ${getValue(data.consignor?.pinCode || data.consignor_pin_code || data.consignor_pincode)}</div>
+                                    <div class="form-value">${getValue(data.consignor?.address || data.consignor_address)}, ${getValue(data.consignor?.city || data.consignor_city)}, ${getValue(data.consignor?.state || data.consignor_state)} - ${getValue(data.consignor?.pinCode || data.consignor_pin_code || data.consignor_pincode)}</div>
                                 </td>
                             </tr>
                             <tr>                                <td class="left-cell">                                    <div style="margin-bottom: 8px;">
                                         <strong>Consignee - M/s ${getValue(data.consignee?.consigneeName || data.consignee_name)}</strong>
                                     </div>
-                                    <div class="form-value">${getValue(data.consignee?.address || data.consignee_address)}</div>
-                                    <div class="form-value">${getValue(data.consignee?.city || data.consignee_city)}, ${getValue(data.consignee?.state || data.consignee_state)} - ${getValue(data.consignee?.pinCode || data.consignee_pin_code || data.consignee_pincode)}</div>
+                                    <div class="form-value">${getValue(data.consignee?.address || data.consignee_address)}, ${getValue(data.consignee?.city || data.consignee_city)}, ${getValue(data.consignee?.state || data.consignee_state)} - ${getValue(data.consignee?.pinCode || data.consignee_pin_code || data.consignee_pincode)}</div>
                                 </td>
                             </tr>
                         </tbody>
@@ -559,19 +557,17 @@ const lorryReceiptPrintTemplate = (data) => {
                                     <strong>Date - </strong>
                                     <span class="form-value-small">${formatDate(data.date || data.lr_date)}</span>
                                 </td>
-                                <td style="width: 50%; text-align: center;" rowspan="2">
+                                <td style="width: 50%; text-align: center;">
                                     <strong>Truck No. - </strong>
                                     <span class="form-value-small">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td>
+                                <td style="width: 50%;">
                                     <strong>From - </strong>
                                     <span class="form-value-small">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
+                                <td style="width: 50%;">
                                     <strong>To - </strong>
                                     <span class="form-value-small">${getValue(data.toLocation || data.to_location)}</span>
                                 </td>
