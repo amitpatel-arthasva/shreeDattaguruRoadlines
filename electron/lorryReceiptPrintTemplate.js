@@ -57,12 +57,6 @@ const lorryReceiptPrintTemplate = (data) => {
     return parseFloat(amount).toFixed(2);
   };
 
-  // Helper function to format date
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-  };
 
   // Helper function to safely get values
   const getValue = (value, defaultValue = '') => {
@@ -110,6 +104,20 @@ const lorryReceiptPrintTemplate = (data) => {
   const billHeaderBase64 = getBillHeaderAsBase64();
   const billheader5Base64 = getImageAsBase64('billheader5.png');
   
+  function formatDate(dateStr) {
+  if (!dateStr) return "";
+
+  const date = new Date(dateStr);
+  if (isNaN(date)) return dateStr; // fallback if invalid
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`; // ddmmyyyy format
+}
+
+
   // Fallback SVG if billHeader.png is not found
   const fallbackLogoSvg = `
     <svg width="600" height="80" xmlns="http://www.w3.org/2000/svg">
@@ -157,41 +165,48 @@ const lorryReceiptPrintTemplate = (data) => {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            outline: none !important; /* Remove outlines */
         }
-          body {
+
+        body {
             font-family: Arial, sans-serif;
-            font-size: 8px; /* Much smaller for compact layout */
+            font-size: 8px;
             line-height: 1.2;
             color: #000;
             background: white;
-            padding: 0; /* Remove body padding */
+            padding: 0;
             max-width: 100%;
             overflow-x: hidden;
         }
-        
-        .min-h-screen {
-            min-height: auto; /* Remove full height requirement */
-            background-color: #f9fafb;
-            padding: 6px; /* Reduced padding for compact layout */
+
+        body, .container, table {
+            outline: none !important;
+            border-color: #000 !important; /* only black borders */
         }
-        
+
+        .min-h-screen {
+            min-height: auto;
+            background-color: #f9fafb;
+            padding: 6px;
+        }
+
         .max-w-7xl {
-            max-width: 100%; /* Use full width */
+            max-width: 100%;
             margin: 0 auto;
         }
-        
+
         .header-controls {
-            display: none; /* Hide controls in print */
+            display: none;
         }
-        
+
         .header-section {
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            margin-bottom: 10px; /* Reduced margin */
+            margin-bottom: 10px;
         }
-        
+
         .header-inner {
             width: 100%;
             display: flex;
@@ -199,57 +214,55 @@ const lorryReceiptPrintTemplate = (data) => {
             align-items: center;
             position: relative;
         }
-        
+
         .logo-container {
             flex: 1;
             display: flex;
             justify-content: flex-start;
-            margin-left: 10px; /* Reduced margin */
+            margin-left: 10px;
         }
-        
+
         .logo-image {
-            max-width: 450px; /* Larger logo */
+            max-width: 450px;
             height: auto;
         }
-        
+
         .jurisdiction-section {
             position: absolute;
             right: 0;
             text-align: right;
-            font-size: 8px; /* Smaller font */
+            font-size: 8px;
             font-weight: 500;
             color: #374151;
             line-height: 1.1;
         }
-        
+
         .jurisdiction-title {
-            margin-bottom: 4px; /* Reduced margin */
+            margin-bottom: 4px;
             font-weight: bold;
         }
-        
+
         .service-details {
-            margin-bottom: 4px; /* Reduced margin */
+            margin-bottom: 4px;
         }
-        
+
         .service-title {
             font-weight: 600;
         }
-        
+
         .drivers-copy {
             font-weight: bold;
             color: #000000;
-            border: 1px solid #000000;
-            padding: 2px 4px; /* Reduced padding */
+            padding: 2px 4px;
             display: inline-block;
-            font-size: 7px; /* Smaller font */
+            font-size: 7px;
         }
-        
+
         .container {
             width: 100%;
-            border: 1px solid #000;
-            padding: 5px; /* Further reduced padding */
+            padding: 5px;
             font-family: Arial, sans-serif;
-            font-size: 8px; /* Smaller font */
+            font-size: 8px;
             margin: 0 auto;
             background: white;
         }
@@ -257,12 +270,12 @@ const lorryReceiptPrintTemplate = (data) => {
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3px; /* Reduced margin */
+            margin-bottom: 3px;
         }
 
         td, th {
             border: 1px solid #000;
-            padding: 2px 3px; /* Reduced padding */
+            padding: 2px 3px;
             vertical-align: top;
         }
 
@@ -291,156 +304,160 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .left-table td, .right-table td {
             border: 1px solid #000;
-            padding: 2px 3px; /* Reduced padding */
+            padding: 2px 3px;
             vertical-align: top;
         }
-        
+
         .left-cell {
-            height: 60px; /* Reduced height */
+            height: auto;
             vertical-align: top;
-            padding: 3px; /* Reduced padding */
+            padding: 2px 3px; /* reduced */
         }
-        
+
+        .left-cell > div {
+            margin-bottom: 2px !important; /* reduced spacing */
+        }
+
         .form-value {
             border-bottom: 1px solid #000;
-            min-height: 12px; /* Reduced height */
-            padding: 1px; /* Reduced padding */
+            min-height: 12px;
+            padding: 1px;
             margin: 1px 0;
             display: block;
             background: transparent;
         }
-        
+
         .form-value-small {
             border-bottom: 1px solid #000;
-            min-height: 10px; /* Reduced height */
-            padding: 1px 2px; /* Reduced padding */
+            min-height: 10px;
+            padding: 1px 2px;
             margin: 1px 0;
             display: inline-block;
-            width: 80px; /* Reduced width */
+            width: 80px;
             background: transparent;
         }
-        
+
         .flex-row {
             display: flex;
-            gap: 4px; /* Reduced gap */
-            margin: 1px 0; /* Reduced margin */
+            gap: 4px;
+            margin: 1px 0;
         }
-        
+
         .flex-1 {
             flex: 1;
         }
-        
+
         .address-section {
             width: 18%;
-            padding: 4px; /* Reduced padding */
-            font-size: 10px; /* Increased from 7px to 10px */
-            line-height: 1.3; /* Slightly increased line height for better readability */
+            padding: 4px;
+            font-size: 8px;
+            line-height: 1.3;
             vertical-align: top;
         }
-        
+
         .address-section hr {
-            margin: 4px 0; /* Reduced margin */
+            margin: 4px 0;
             border: 0;
             border-top: 1px solid #000;
         }
-        
+
         .freight-table-container {
-            height: 300px; /* Increased height to stretch and fill empty space */
+            height: 300px;
             border-collapse: collapse;
             width: 100%;
         }
-        
+
         .nos-column {
             width: 10%;
             border-right: 1px solid #000;
-            padding: 8px; /* Increased padding to stretch column vertically */
+            padding: 8px;
             vertical-align: top;
         }
-        
+
         .particulars-column {
             width: 70%;
             border-right: 1px solid #000;
-            padding: 8px; /* Increased padding to stretch column vertically */
+            padding: 8px;
             vertical-align: top;
         }
-        
+
         .rate-left-column {
             padding: 0;
             vertical-align: top;
             border-bottom: 1px solid #000;
             width: 17%;
         }
-        
+
         .rate-right-column {
             padding: 0;
             vertical-align: top;
             border-bottom: 1px solid #000;
             width: 15%;
         }
-        
+
         .weight-column {
             padding: 0;
             vertical-align: top;
             border-bottom: 1px solid #000;
             width: 17%;
         }
-        
+
         .rate-container, .weight-container {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 300px; /* Increased minimum height to stretch and fill space */
+            min-height: 300px;
         }
-        
+
         .rate-item {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 8px; /* Increased padding to stretch items vertically */
+            padding: 4px;
             display: flex;
             align-items: center;
         }
-        
+
         .rate-item:last-child {
             border-bottom: none;
         }
-        
+
         .rate-value {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 6px; /* Increased padding to stretch items vertically */
+            padding: 6px;
             display: flex;
             align-items: center;
             text-align: center;
             justify-content: center;
         }
-        
+
         .rate-value:last-child {
             border-bottom: none;
         }
-        
+
         .weight-item {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 8px; /* Increased padding to stretch items vertically */
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
         }
-        
+
         .payment-section {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 10px; /* Increased padding to stretch section vertically */
+            padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             font-size: 10px;
         }
-        
+
         .risk-section {
             flex: 1;
-            padding: 10px; /* Increased padding to stretch section vertically */
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -448,51 +465,44 @@ const lorryReceiptPrintTemplate = (data) => {
             text-align: center;
             font-size: 11px;
         }
-        
+
         .payment-option {
             margin-bottom: 4px;
             display: flex;
             align-items: center;
         }
-        
+
         .payment-radio {
             margin-right: 4px;
         }
-        
+
         .nos-item, .particulars-item {
-            margin-bottom: 12px; /* Increased margin to stretch items vertically */
-            padding: 6px; /* Increased padding to make items taller */
+            margin-bottom: 12px;
+            padding: 6px;
             border-bottom: 1px solid #ccc;
-            min-height: 25px; /* Increased minimum height to stretch items */
+            min-height: 25px;
         }
-        
+
         .delivery-section, .remarks-section {
             height: 20px;
         }
-        
+
         .remarks-section {
             height: 20px;
         }
-        
+
         .footer-section {
             height: auto;
         }
-        
-        @media print {
-            .min-h-screen {
-                min-height: auto;
-            }
-            
-            .header-controls {
-                display: none !important;
-            }
-            
-            .container {
-                border: 1px solid #000;
-                width: 100%;
-                max-width: 100%;
-            }
-            
+
+        @ @media print {
+      .container {
+        width: 80%;              /* smaller width */
+        margin: 0 auto;          /* center */
+        transform: scale(0.8);   /* shrink to ~60% of A4 */
+        transform-origin: top center;
+        height: auto;
+      }
             body {
                 padding: 5px;
                 font-size: 8px;
@@ -500,16 +510,15 @@ const lorryReceiptPrintTemplate = (data) => {
         }
     </style>
 </head>
-<body>    <div class="min-h-screen">
+<body>
+    <div class="min-h-screen">
         <div class="max-w-7xl">
-            <!-- Header Controls (hidden in print) -->
-            <div class="header-controls">
-                <!-- This would contain the buttons but they're hidden in print -->
-            </div>
+            <!-- Header Controls -->
+            <div class="header-controls"></div>
             
             <!-- Form Content -->
             <div class="container">
-                <!-- Header Section with Logo and Jurisdiction -->
+                <!-- Header Section -->
                 <div class="header-section">
                     <div class="header-inner">                    
                         <div class="logo-container">
@@ -527,24 +536,32 @@ const lorryReceiptPrintTemplate = (data) => {
                         </div>
                     </div>
                 </div>
+                
                 <!-- Consignor / Consignee Section -->
                 <div class="row-container">
                     <table class="left-table">
                         <tbody>
-                            <tr>                                <td class="left-cell">                                    <div style="margin-bottom: 8px;">
+                            <tr>
+                                <td class="left-cell">
+                                    <div>
                                         <strong>Consignor - M/s ${getValue(data.consignor?.consignorName || data.consignor_name)}</strong>
                                     </div>
                                     <div class="form-value">${getValue(data.consignor?.address || data.consignor_address)}, ${getValue(data.consignor?.city || data.consignor_city)}, ${getValue(data.consignor?.state || data.consignor_state)} - ${getValue(data.consignor?.pinCode || data.consignor_pin_code || data.consignor_pincode)}</div>
                                 </td>
                             </tr>
-                            <tr>                                <td class="left-cell">                                    <div style="margin-bottom: 8px;">
+                            <tr>
+                                <td class="left-cell">
+                                    <div>
                                         <strong>Consignee - M/s ${getValue(data.consignee?.consigneeName || data.consignee_name)}</strong>
                                     </div>
                                     <div class="form-value">${getValue(data.consignee?.address || data.consignee_address)}, ${getValue(data.consignee?.city || data.consignee_city)}, ${getValue(data.consignee?.state || data.consignee_state)} - ${getValue(data.consignee?.pinCode || data.consignee_pin_code || data.consignee_pincode)}</div>
                                 </td>
                             </tr>
                         </tbody>
-                    </table>                    <table class="right-table">
+                    </table>
+                    
+                    <!-- Right Table -->
+                    <table class="right-table">
                         <tbody>
                             <tr>
                                 <td colspan="2">
@@ -563,11 +580,11 @@ const lorryReceiptPrintTemplate = (data) => {
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width: 50%;">
+                                <td style="width: 40%;">
                                     <strong>From - </strong>
                                     <span class="form-value-small">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
-                                <td style="width: 50%;">
+                                <td style="width: 40%;">
                                     <strong>To - </strong>
                                     <span class="form-value-small">${getValue(data.toLocation || data.to_location)}</span>
                                 </td>
@@ -581,7 +598,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong style="font-size: 11px;">TARAPUR</strong><br />
+                                <strong style="font-size: 8px;">TARAPUR</strong><br />
                                 Plot No. W-4,<br />
                                 Camlin Naka,<br />
                                 MIDC, Tarapur<br />
@@ -589,7 +606,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027869 /<br />
                                 7276272828<br />
                                 <hr />
-                                <strong style="font-size: 11px;">BHIWANDI</strong><br />
+                                <strong style="font-size: 8px;">BHIWANDI</strong><br />
                                 Godown No. A-2,<br />
                                 Gali No. 2,<br />
                                 Opp. Capital Roadlines,<br />
@@ -607,9 +624,9 @@ const lorryReceiptPrintTemplate = (data) => {
                                     <tbody>
                                         <tr class="bold center">
                                             <td style="width: 10%;">Nos.</td>
-                                            <td style="width: 60%;">Particulars</td>
+                                            <td style="width: 50%;">Particulars</td>
                                             <td style="width: 18%;" colspan="2">Rate Rs.</td>
-                                            <td style="width: 12%;">Weight</td>
+                                            <td style="width: 22%;">Weight</td>
                                         </tr>
                                         <tr>
                                             <!-- Nos Column -->
@@ -743,7 +760,8 @@ const lorryReceiptPrintTemplate = (data) => {
         </div>
     </div>
 </body>
-</html>`;
+</html>
+`;
 
   return html;
 };

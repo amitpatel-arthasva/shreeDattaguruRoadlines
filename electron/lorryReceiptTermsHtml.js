@@ -9,7 +9,7 @@ const lorryReceiptTermsHtml = () => `
   <title>Terms & Conditions - Owner's Risk</title>
   <style>
     body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 0; }
-    .container { max-width: 700px; margin: 40px auto 0 auto; padding: 32px 32px 24px 32px; border: 2px solid #0d47a1; background: #fff; }
+    .container { max-width: 700px; margin: 40px auto 0 auto; padding: 32px 32px 24px 32px;  background: #fff; }
     h2 { text-align: center; font-size: 18px; margin-bottom: 18px; color: #0d47a1; }
     ol { margin-left: 18px; margin-bottom: 18px; }
     li { margin-bottom: 7px; line-height: 1.5; }

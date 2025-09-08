@@ -6,9 +6,21 @@ function memoPrintTemplate(memo) {
   if (!memo) return '';
   // Use original billHeader.png directly (not getBillHeaderAsBase64 which returns billHeader4.png)
   const billHeaderBase64 = getImageAsBase64('billHeader.png');
-  
+   function formatDate(dateStr) {
+  if (!dateStr) return "";
+
+  const date = new Date(dateStr);
+  if (isNaN(date)) return dateStr; // fallback if invalid
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`; // ddmmyyyy format
+}
+
   return `
-    <div style="background:#f3f4f6;padding:32px 8px;min-height:900px;display:flex;flex-direction:column;align-items:center;">
+    <div style="padding:32px 8px;min-height:900px;display:flex;flex-direction:column;align-items:center;">
       <div style="width:90%;max-width:900px;background:#fff;padding:0;">
         <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:8px;">
             <img src="${billHeaderBase64}" alt="Header" style="height:120px;object-fit:contain;margin-left:8px;margin-top:8px;max-width:70%;" />
@@ -40,13 +52,13 @@ function memoPrintTemplate(memo) {
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Address</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.address || ''}</span></div>
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:64px;">From</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.from_location || ''}</span><span style="font-weight:bold;width:32px;margin-left:8px;">To</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.to_location || ''}</span></div>
             </div>
-            <div style="width:50%;padding:12px 12px 12px 4px;font-size:14px;">
+            <div style="width:50%;padding:12px 12px 12px 12px;font-size:14px;">
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Lorry Hire Rs.</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.lorry_hire || ''}</span></div>
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Advance Rs.</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.advance || ''}</span></div>
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Hamali</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.hamali || ''}</span></div>
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Balance</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.balance || ''}</span><span style="font-weight:bold;width:64px;margin-left:8px;">Payable at</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.payable_at || ''}</span></div>
               <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Broker</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.broker || ''}</span></div>
-              <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:64px;">Date</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${memo.memo_date || ''}</span></div>
+              <div style="display:flex;margin-bottom:4px;"><span style="font-weight:bold;width:128px;">Date</span><span style="border-bottom:1px solid #000;flex:1;margin-left:4px;">${formatDate(memo.memo_date) || ''}</span></div>
             </div>
           </div>
           <div style="display:flex;flex-direction:row;padding:0 12px 4px 12px;">
