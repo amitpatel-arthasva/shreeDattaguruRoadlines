@@ -69,7 +69,28 @@ const getImageAsBase64 = (imagePath) => {
       if (fs.existsSync(buildAssetsDir)) {
         const files = fs.readdirSync(buildAssetsDir);
         const baseName = path.parse(imagePath).name; // Get filename without extension
-        const hashedFile = files.find(file => file.startsWith(baseName + '-') && file.includes('.'));
+        const extension = path.parse(imagePath).ext;
+        
+        // Create a mapping for common image files that get hashed
+        const hashMappings = {
+          'billHeader5.png': 'billHeader-',
+          'billHeader4.png': 'billHeader-',
+          'billHeader3.png': 'billHeader-', 
+          'billHeader.png': 'billHeader-',
+          'truck_image.png': 'truck_image-',
+          'shree_datta_guru.png': 'shree_datta_guru-'
+        };
+        
+        let hashedFile = null;
+        
+        // First try exact basename match
+        hashedFile = files.find(file => file.startsWith(baseName + '-') && file.endsWith(extension));
+        
+        // If not found, try the mapping
+        if (!hashedFile && hashMappings[imagePath]) {
+          hashedFile = files.find(file => file.startsWith(hashMappings[imagePath]) && file.endsWith(extension));
+        }
+        
         if (hashedFile) {
           fullPath = path.join(buildAssetsDir, hashedFile);
         }
@@ -126,7 +147,7 @@ let logosCache = null;
  * @returns {string} - Base64 data URL for billHeader.png
  */
 const getBillHeaderAsBase64 = () => {
-  return getImageAsBase64('billHeader4.png');
+  return getImageAsBase64('billHeader5.png');
 };
 
 const getBillHeaderDattaGuruAsBase64 = () => {

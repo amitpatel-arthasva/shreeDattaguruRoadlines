@@ -304,37 +304,40 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .left-table td, .right-table td {
             border: 1px solid #000;
-            padding: 2px 3px;
+            padding: 1px 3px; /* reduced from 2px 3px to 1px 3px */
             vertical-align: top;
+            height: auto; /* ensure minimal height */
         }
 
         .left-cell {
             height: auto;
             vertical-align: top;
-            padding: 2px 3px; /* reduced */
+            padding: 1px 3px; /* reduced from 2px to 1px */
         }
 
         .left-cell > div {
-            margin-bottom: 2px !important; /* reduced spacing */
+            margin-bottom: 0 !important; /* removed all margin */
         }
 
         .form-value {
             border-bottom: 1px solid #000;
-            min-height: 12px;
-            padding: 1px;
-            margin: 1px 0;
+            min-height: 6px; /* reduced from 8px to 6px */
+            padding: 0px; /* removed all padding */
+            margin: 0; /* removed margin */
             display: block;
             background: transparent;
+            line-height: 1.1; /* tighter line height */
         }
 
         .form-value-small {
             border-bottom: 1px solid #000;
-            min-height: 10px;
-            padding: 1px 2px;
-            margin: 1px 0;
+            min-height: 8px; /* reduced from 10px to 8px */
+            padding: 0px 2px; /* reduced padding */
+            margin: 0; /* removed margin */
             display: inline-block;
             width: 80px;
             background: transparent;
+            line-height: 1.1; /* tighter line height */
         }
 
         .flex-row {
@@ -362,7 +365,7 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .freight-table-container {
-            height: 300px;
+            height: 180px; /* Reduced from 300px to 180px */
             border-collapse: collapse;
             width: 100%;
         }
@@ -370,14 +373,14 @@ const lorryReceiptPrintTemplate = (data) => {
         .nos-column {
             width: 10%;
             border-right: 1px solid #000;
-            padding: 8px;
+            padding: 3px; /* Reduced from 8px to 3px */
             vertical-align: top;
         }
 
         .particulars-column {
             width: 70%;
             border-right: 1px solid #000;
-            padding: 8px;
+            padding: 3px; /* Reduced from 8px to 3px */
             vertical-align: top;
         }
 
@@ -406,13 +409,13 @@ const lorryReceiptPrintTemplate = (data) => {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 300px;
+            min-height: 180px; /* Reduced from 300px to 180px */
         }
 
         .rate-item {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 4px;
+            padding: 2px; /* Reduced from 4px to 2px */
             display: flex;
             align-items: center;
         }
@@ -424,7 +427,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .rate-value {
             flex: 1;
             border-bottom: 1px solid #000;
-            padding: 6px;
+            padding: 2px; /* Reduced from 6px to 2px */
             display: flex;
             align-items: center;
             text-align: center;
@@ -438,7 +441,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .weight-item {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 8px;
+            padding: 3px; /* Reduced from 8px to 3px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -448,39 +451,39 @@ const lorryReceiptPrintTemplate = (data) => {
         .payment-section {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 10px;
+            padding: 4px; /* Reduced from 10px to 4px */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px; /* Reduced from 10px to 9px */
         }
 
         .risk-section {
             flex: 1;
-            padding: 10px;
+            padding: 4px; /* Reduced from 10px to 4px */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 11px;
+            font-size: 9px; /* Reduced from 11px to 9px */
         }
 
         .payment-option {
-            margin-bottom: 4px;
+            margin-bottom: 2px; /* Reduced from 4px to 2px */
             display: flex;
             align-items: center;
         }
 
         .payment-radio {
-            margin-right: 4px;
+            margin-right: 2px; /* Reduced from 4px to 2px */
         }
 
         .nos-item, .particulars-item {
-            margin-bottom: 12px;
-            padding: 6px;
+            margin-bottom: 4px; /* Reduced from 12px to 4px */
+            padding: 2px; /* Reduced from 6px to 2px */
             border-bottom: 1px solid #ccc;
-            min-height: 25px;
+            min-height: 15px; /* Reduced from 25px to 15px */
         }
 
         .delivery-section, .remarks-section {
@@ -541,16 +544,16 @@ const lorryReceiptPrintTemplate = (data) => {
                 <div class="row-container">
                     <table class="left-table">
                         <tbody>
-                            <tr>
-                                <td class="left-cell">
+                            <tr style="height: auto;">
+                                <td class="left-cell" style="height: auto;">
                                     <div>
                                         <strong>Consignor - M/s ${getValue(data.consignor?.consignorName || data.consignor_name)}</strong>
                                     </div>
                                     <div class="form-value">${getValue(data.consignor?.address || data.consignor_address)}, ${getValue(data.consignor?.city || data.consignor_city)}, ${getValue(data.consignor?.state || data.consignor_state)} - ${getValue(data.consignor?.pinCode || data.consignor_pin_code || data.consignor_pincode)}</div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="left-cell">
+                            <tr style="height: auto;">
+                                <td class="left-cell" style="height: auto;">
                                     <div>
                                         <strong>Consignee - M/s ${getValue(data.consignee?.consigneeName || data.consignee_name)}</strong>
                                     </div>
@@ -563,28 +566,28 @@ const lorryReceiptPrintTemplate = (data) => {
                     <!-- Right Table -->
                     <table class="right-table">
                         <tbody>
-                            <tr>
-                                <td colspan="2">
+                            <tr style="height: auto;">
+                                <td colspan="2" style="padding: 1px 3px; height: auto;">
                                     <strong>CN't No. - </strong>
                                     <span class="form-value-small">${getValue(data.lorryReceiptNumber || data.cn_number || data.lr_number)}</span>
                                 </td>
                             </tr>
-                            <tr>
-                                <td style="width: 50%;">
+                            <tr style="height: auto;">
+                                <td style="width: 50%; padding: 1px 3px; height: auto;">
                                     <strong>Date - </strong>
                                     <span class="form-value-small">${formatDate(data.date || data.lr_date)}</span>
                                 </td>
-                                <td style="width: 50%; text-align: center;">
+                                <td style="width: 50%; text-align: center; padding: 1px 3px; height: auto;">
                                     <strong>Truck No. - </strong>
                                     <span class="form-value-small">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
                                 </td>
                             </tr>
-                            <tr>
-                                <td style="width: 40%;">
+                            <tr style="height: auto;">
+                                <td style="width: 40%; padding: 1px 3px; height: auto;">
                                     <strong>From - </strong>
                                     <span class="form-value-small">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
-                                <td style="width: 40%;">
+                                <td style="width: 40%; padding: 1px 3px; height: auto;">
                                     <strong>To - </strong>
                                     <span class="form-value-small">${getValue(data.toLocation || data.to_location)}</span>
                                 </td>
@@ -616,7 +619,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027868<br />
                                 <hr />
                                 <br />
-                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
+                                <b style="font-size: 8px;">PAN: AGTPV0112D<br />
                                 GSTIN: 27AGTPV0112D1ZG</b>
                             </td>
                             <td colspan="3">
@@ -714,8 +717,8 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td style="padding: 6px 8px; border: 1px solid #000; text-align: left; background-color: #f9f9f9;">
-                                <span style="font-family: Arial; font-size: 11px; font-weight: bold;">E-way Bill: </span>
-                                <span style="font-family: Arial; font-size: 11px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                                <span style="font-family: Arial; font-size: 9px; font-weight: bold;">E-way Bill: </span>
+                                <span style="font-family: Arial; font-size: 9px;">${getValue(data.ewayBill || data.eway_bill)}</span>
                             </td>
                         </tr>
                     </tbody>
@@ -727,8 +730,8 @@ const lorryReceiptPrintTemplate = (data) => {
                         <tr>
                             <td colspan="2" style="padding: 4px 8px; border: 1px solid #000; vertical-align: top;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 11px;">Delivery At:</span>
-                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                                    <span style="font-family: Arial; font-size: 9px;">Delivery At:</span>
+                                    <span style="font-family: Arial; font-size: 9px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
                                 </div>
                                 <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
@@ -736,8 +739,8 @@ const lorryReceiptPrintTemplate = (data) => {
                         <tr>
                             <td colspan="2" style="padding: 4px 8px; border: 1px solid #000;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 11px;">Remarks:</span>
-                                    <span style="font-family: Arial; font-size: 11px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
+                                    <span style="font-family: Arial; font-size: 9px;">Remarks:</span>
+                                    <span style="font-family: Arial; font-size: 9px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
                                 </div>
                                 <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
@@ -745,12 +748,12 @@ const lorryReceiptPrintTemplate = (data) => {
                         <tr>
                             <td style="padding: 4px 8px; border: 1px solid #000;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 11px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
+                                    <span style="font-family: Arial; font-size: 9px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
                                 </div>
                             </td>
                             <td style="padding: 4px 8px; border: 1px solid #000;">
                                 <div style="text-align: right;">
-                                    <span style="font-family: Arial; font-size: 11px;">For Shree Dattaguru Road Lines</span>
+                                    <span style="font-family: Arial; font-size: 9px;">For Shree Dattaguru Road Lines</span>
                                 </div>
                             </td>
                         </tr>
