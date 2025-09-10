@@ -118,10 +118,10 @@ const lorryReceiptPrintTemplate = (data) => {
 }
 
 
-  // Fallback SVG if billHeader.png is not found
+  // Fallback SVG if billHeader.png is not found - stretched to full width
   const fallbackLogoSvg = `
-    <svg width="600" height="80" xmlns="http://www.w3.org/2000/svg">
-      <rect width="600" height="80" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+    <svg width="100%" height="80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80" preserveAspectRatio="none">
+      <rect width="100%" height="80" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
       <text x="20" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#c5677b">
         SHREE DATTAGURU ROAD LINES
       </text>
@@ -163,19 +163,19 @@ const lorryReceiptPrintTemplate = (data) => {
     <style>
         * {
             margin: 0;
-            padding: 0;
             box-sizing: border-box;
             outline: none !important; /* Remove outlines */
         }
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 8px;
+            font-size: 12px; /* Increased from 8px to 12px */
             line-height: 1.2;
             color: #000;
             background: white;
-            padding: 0;
-            max-width: 100%;
+            padding: 10px !important;
+            margin: 0 auto !important;
+            max-width: 800px; /* Set reasonable max width */
             overflow-x: hidden;
         }
 
@@ -186,13 +186,19 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .min-h-screen {
             min-height: auto;
-            background-color: #f9fafb;
-            padding: 6px;
+            background-color: white;
+            padding: 0 !important;
+            margin: 0 auto !important;
+            position: relative;
+            top: 0;
+            width: 100%;
         }
 
         .max-w-7xl {
-            max-width: 100%;
-            margin: 0 auto;
+            max-width: 800px; /* Set reasonable max width */
+            margin: 0 auto !important;
+            padding: 0 !important;
+            width: 100%;
         }
 
         .header-controls {
@@ -203,7 +209,7 @@ const lorryReceiptPrintTemplate = (data) => {
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            position: center;
             margin-bottom: 10px;
         }
 
@@ -223,15 +229,16 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .logo-image {
-            max-width: 450px;
+            max-width: 600px;
             height: auto;
+        
         }
 
         .jurisdiction-section {
             position: absolute;
             right: 0;
             text-align: right;
-            font-size: 8px;
+            font-size: 11px; /* Increased from 8px to 12px */
             font-weight: 500;
             color: #374151;
             line-height: 1.1;
@@ -255,16 +262,18 @@ const lorryReceiptPrintTemplate = (data) => {
             color: #000000;
             padding: 2px 4px;
             display: inline-block;
-            font-size: 7px;
+            font-size: 12px; /* Increased from 7px to 12px */
         }
 
         .container {
             width: 100%;
-            padding: 5px;
+            padding: 0 !important;
             font-family: Arial, sans-serif;
-            font-size: 8px;
-            margin: 0 auto;
+            font-size: 12px; /* Increased from 8px to 12px */
+            margin: 0 auto !important;
             background: white;
+            position: relative;
+            top: 0;
         }
 
         table {
@@ -274,8 +283,8 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         td, th {
-            border: 1px solid #000;
-            padding: 2px 3px;
+            border: 1px solid #000; /* Keep inner borders for separation */
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
         }
 
@@ -295,16 +304,18 @@ const lorryReceiptPrintTemplate = (data) => {
         .left-table {
             flex: 2;
             border-collapse: collapse;
+            border: 0px; /* Remove outer border to avoid overlap */
         }
 
         .right-table {
             flex: 1;
             border-collapse: collapse;
+            border: 0px; /* Remove outer border to avoid overlap */
         }
 
         .left-table td, .right-table td {
-            border: 1px solid #000;
-            padding: 1px 3px; /* reduced from 2px 3px to 1px 3px */
+            border: 1px solid #000; /* Keep inner borders for separation */
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
             height: auto; /* ensure minimal height */
         }
@@ -312,7 +323,7 @@ const lorryReceiptPrintTemplate = (data) => {
         .left-cell {
             height: auto;
             vertical-align: top;
-            padding: 1px 3px; /* reduced from 2px to 1px */
+            padding: 3px; /* Consistent 3px padding throughout */
         }
 
         .left-cell > div {
@@ -320,27 +331,17 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .form-value {
-            border-bottom: 1px solid #000;
-            min-height: 6px; /* reduced from 8px to 6px */
-            padding: 0px; /* removed all padding */
-            margin: 0; /* removed margin */
-            display: block;
-            background: transparent;
-            line-height: 1.1; /* tighter line height */
+            border-bottom: none; /* Remove underline */
+            padding: 3px; /* Consistent 3px padding throughout */
+            margin: 2px 0; /* Added margin */
         }
 
         .form-value-small {
-            border-bottom: 1px solid #000;
-            min-height: 8px; /* reduced from 10px to 8px */
-            padding: 0px 2px; /* reduced padding */
+            border-bottom: none; /* Remove underline */
+            padding: 3px; /* Consistent 3px padding throughout */
             margin: 0; /* removed margin */
-            display: inline-block;
-            width: 80px;
-            background: transparent;
-            line-height: 1.1; /* tighter line height */
-        }
-
-        .flex-row {
+            display: inline;
+        }        .flex-row {
             display: flex;
             gap: 4px;
             margin: 1px 0;
@@ -352,9 +353,9 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .address-section {
             width: 18%;
-            padding: 4px;
-            font-size: 8px;
-            line-height: 1.3;
+            padding: 3px; /* Consistent 3px padding throughout */
+            font-size: 12px; /* Increased from 8px to 12px */
+            line-height: 1.2; /* Tighter line height */
             vertical-align: top;
         }
 
@@ -368,105 +369,140 @@ const lorryReceiptPrintTemplate = (data) => {
             height: 180px; /* Reduced from 300px to 180px */
             border-collapse: collapse;
             width: 100%;
+            border: 0px; /* Remove outer border to avoid overlap */
+        }
+
+        /* Remove outer borders from freight table header cells but keep separators */
+        .freight-table-container tr:first-child td {
+            border-top: 0px !important;
+            border-left: 0px !important;
+            border-bottom: 1px solid #000 !important; /* Keep bottom border */
+        }
+
+        .freight-table-container tr:first-child td:not(:last-child) {
+            border-right: 1px solid #000 !important; /* Keep separators between header columns */
+        }
+
+        .freight-table-container tr:first-child td:last-child {
+            border-right: 0px !important; /* Remove right border on last column */
         }
 
         .nos-column {
             width: 10%;
-            border-right: 1px solid #000;
-            padding: 3px; /* Reduced from 8px to 3px */
+            border-right: 1px solid #000; /* Keep separating border */
+            border-left: 1px solid #000; /* Restore left border for proper separation */
+            border-top: 1px solid #000; /* Restore top border */
+            border-bottom: 1px solid #000; /* Keep bottom border */
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
         }
 
         .particulars-column {
-            width: 70%;
-            border-right: 1px solid #000;
-            padding: 3px; /* Reduced from 8px to 3px */
+            width: 52%; /* Adjusted width to account for rate columns being equal */
+            border-right: 1px solid #000; /* Keep separating border */
+            border-left: 0px; /* No left border as nos-column already has right border */
+            border-top: 1px solid #000; /* Restore top border */
+            border-bottom: 1px solid #000; /* Keep bottom border */
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
         }
 
         .rate-left-column {
-            padding: 0;
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
             border-bottom: 1px solid #000;
-            width: 17%;
+            border-left: 1px solid #000; /* Restore left border for proper separation */
+            border-top: 1px solid #000; /* Restore top border */
+            border-right: 1px solid #000; /* Separator between Rate Rs. columns */
+            width: 16%; /* Match width to rate-right-column */
         }
 
         .rate-right-column {
-            padding: 0;
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
             border-bottom: 1px solid #000;
-            width: 15%;
+            border-left: 0px; /* No left border as rate-left already has right border */
+            border-top: 1px solid #000; /* Restore top border */
+            border-right: 1px solid #000; /* Right border for proper separation */
+            width: 16%; /* Match width to rate-left-column */
         }
 
         .weight-column {
-            padding: 0;
+            padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
             border-bottom: 1px solid #000;
-            width: 17%;
-        }
-
-        .rate-container, .weight-container {
+            border-left: 0px; /* No left border as rate-right already has right border */
+            border-top: 1px solid #000; /* Restore top border */
+            border-right: 1px solid #000; /* Right border for proper separation */
+            width: 16%; /* Match other columns */
+        }        .rate-container, .weight-container {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 180px; /* Reduced from 300px to 180px */
+            min-height: 150px; /* Reduced from previous height for more compact layout */
         }
 
         .rate-item {
-            flex: 1;
-            border-bottom: 1px solid #000;
-            padding: 2px; /* Reduced from 4px to 2px */
+            flex: 1; /* Equal distribution to eliminate empty space */
+            border-bottom: 1px solid #000; /* Row separator for proper alignment */
+            padding: 3px; /* Consistent 3px padding throughout */
             display: flex;
             align-items: center;
+            min-height: 24px; /* Increased to prevent text cutting */
+            line-height: 1.3; /* Better line height for text alignment */
         }
 
         .rate-item:last-child {
-            border-bottom: none;
+            border-bottom: none; /* Remove border from last item */
         }
 
         .rate-value {
-            flex: 1;
-            border-bottom: 1px solid #000;
-            padding: 2px; /* Reduced from 6px to 2px */
+            flex: 1; /* Equal distribution to match rate-item */
+            border-bottom: 1px solid #000; /* Row separator aligned with rate-item */
+            padding: 3px; /* Consistent 3px padding throughout */
             display: flex;
             align-items: center;
             text-align: center;
             justify-content: center;
+            min-height: 24px; /* Same height as rate-item to prevent text cutting */
+            line-height: 1.3; /* Better line height for text alignment */
         }
 
         .rate-value:last-child {
-            border-bottom: none;
+            border-bottom: none; /* Remove border from last item to match rate-item */
         }
 
         .weight-item {
-            flex: 2;
-            border-bottom: 1px solid #000;
-            padding: 3px; /* Reduced from 8px to 3px */
+            flex: 1; /* Equal distribution to match other columns */
+            border-bottom: 1px solid #000; /* Row separator */
+            padding: 3px; /* Consistent 3px padding throughout */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
+            min-height: 24px; /* Same height as rate items to prevent text cutting */
+            line-height: 1.3; /* Better line height for text alignment */
         }
 
         .payment-section {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 4px; /* Reduced from 10px to 4px */
+            padding: 8px; /* Increased padding for better spacing */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            font-size: 9px; /* Reduced from 10px to 9px */
+            font-size: 12px; /* Increased from 9px to 12px */
         }
 
         .risk-section {
             flex: 1;
-            padding: 4px; /* Reduced from 10px to 4px */
+            padding: 8px; /* Increased padding for better spacing */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 9px; /* Reduced from 11px to 9px */
+            font-size: 12px; /* Increased from 9px to 12px */
         }
 
         .payment-option {
@@ -480,10 +516,10 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .nos-item, .particulars-item {
-            margin-bottom: 4px; /* Reduced from 12px to 4px */
-            padding: 2px; /* Reduced from 6px to 2px */
+            margin-bottom: 2px; /* Reduced from 4px for more compact layout */
+            padding: 3px; /* Consistent 3px padding throughout */
             border-bottom: 1px solid #ccc;
-            min-height: 15px; /* Reduced from 25px to 15px */
+            min-height: 12px; /* Reduced from 15px for more compact layout */
         }
 
         .delivery-section, .remarks-section {
@@ -499,17 +535,30 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         @ @media print {
+      * {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      html, body {
+        margin: 0 auto !important;
+        padding: 10px !important;
+        height: auto !important;
+        width: 100% !important;
+        max-width: 800px !important;
+      }
       .container {
-        width: 80%;              /* smaller width */
-        margin: 0 auto;          /* center */
-        transform: scale(0.8);   /* shrink to ~60% of A4 */
-        transform-origin: top center;
+        width: 100% !important;
+        max-width: 800px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        transform: none !important;
         height: auto;
       }
-            body {
-                padding: 5px;
-                font-size: 8px;
-            }
+      .min-h-screen {
+        margin: 0 auto !important;
+        padding: 0 !important;
+        max-width: 800px !important;
+      }
         }
     </style>
 </head>
@@ -567,27 +616,27 @@ const lorryReceiptPrintTemplate = (data) => {
                     <table class="right-table">
                         <tbody>
                             <tr style="height: auto;">
-                                <td colspan="2" style="padding: 1px 3px; height: auto;">
+                                <td colspan="2" style="padding: 12px 16px; height: auto;">
                                     <strong>CN't No. - </strong>
                                     <span class="form-value-small">${getValue(data.lorryReceiptNumber || data.cn_number || data.lr_number)}</span>
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 50%; padding: 1px 3px; height: auto;">
+                                <td style="width: 50%; padding: 3px; height: auto;">
                                     <strong>Date - </strong>
                                     <span class="form-value-small">${formatDate(data.date || data.lr_date)}</span>
                                 </td>
-                                <td style="width: 50%; text-align: center; padding: 1px 3px; height: auto;">
+                                <td style="width: 50%; text-align: center; padding: 3px; height: auto;">
                                     <strong>Truck No. - </strong>
                                     <span class="form-value-small">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 40%; padding: 1px 3px; height: auto;">
+                                <td style="width: 40%; padding: 3px; height: auto;">
                                     <strong>From - </strong>
                                     <span class="form-value-small">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
-                                <td style="width: 40%; padding: 1px 3px; height: auto;">
+                                <td style="width: 40%; padding: 3px; height: auto;">
                                     <strong>To - </strong>
                                     <span class="form-value-small">${getValue(data.toLocation || data.to_location)}</span>
                                 </td>
@@ -601,7 +650,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong style="font-size: 8px;">TARAPUR</strong><br />
+                                <strong style="font-size: 10px;">TARAPUR</strong><br />
                                 Plot No. W-4,<br />
                                 Camlin Naka,<br />
                                 MIDC, Tarapur<br />
@@ -609,7 +658,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027869 /<br />
                                 7276272828<br />
                                 <hr />
-                                <strong style="font-size: 8px;">BHIWANDI</strong><br />
+                                <strong style="font-size: 10px;">BHIWANDI</strong><br />
                                 Godown No. A-2,<br />
                                 Gali No. 2,<br />
                                 Opp. Capital Roadlines,<br />
@@ -619,7 +668,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027868<br />
                                 <hr />
                                 <br />
-                                <b style="font-size: 8px;">PAN: AGTPV0112D<br />
+                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
                                 GSTIN: 27AGTPV0112D1ZG</b>
                             </td>
                             <td colspan="3">
@@ -717,43 +766,41 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td style="padding: 6px 8px; border: 1px solid #000; text-align: left; background-color: #f9f9f9;">
-                                <span style="font-family: Arial; font-size: 9px; font-weight: bold;">E-way Bill: </span>
-                                <span style="font-family: Arial; font-size: 9px;">${getValue(data.ewayBill || data.eway_bill)}</span>
+                                <span style="font-family: Arial; font-size: 12px; font-weight: bold;">E-way Bill: </span>
+                                <span style="font-family: Arial; font-size: 12px;">${getValue(data.ewayBill || data.eway_bill)}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <!-- Footer Sections -->
+                <!-- Footer Sections with Continuous Right Box -->
                 <table style="width: 100%; border-collapse: collapse; margin-top: 0; table-layout: fixed;">
                     <tbody>
                         <tr>
-                            <td colspan="2" style="padding: 4px 8px; border: 1px solid #000; vertical-align: top;">
+                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; vertical-align: top;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 9px;">Delivery At:</span>
-                                    <span style="font-family: Arial; font-size: 9px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                                    <span style="font-family: Arial; font-size: 12px;">Delivery At:</span>
+                                    <span style="font-family: Arial; font-size: 12px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
                                 </div>
-                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
+                            </td>
+                            <td rowspan="3" style="width: 30%; padding: 3px; border: 1px solid #000; border-left: 2px solid #000; vertical-align: bottom; text-align: center;">
+                                <div style="margin-top: auto;">
+                                    <span style="font-family: Arial; font-size: 12px;">For Shree Dattaguru Road Lines</span>
+                                </div>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="padding: 4px 8px; border: 1px solid #000;">
+                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; border-top: none;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 9px;">Remarks:</span>
-                                    <span style="font-family: Arial; font-size: 9px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
+                                    <span style="font-family: Arial; font-size: 12px;">Remarks:</span>
+                                    <span style="font-family: Arial; font-size: 12px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
                                 </div>
-                                <div style="border-bottom: 1px solid #000; margin-top: 2px;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 8px; border: 1px solid #000;">
+                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; border-top: none;">
                                 <div>
-                                    <span style="font-family: Arial; font-size: 9px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
-                                </div>
-                            </td>
-                            <td style="padding: 4px 8px; border: 1px solid #000;">
-                                <div style="text-align: right;">
-                                    <span style="font-family: Arial; font-size: 9px;">For Shree Dattaguru Road Lines</span>
+                                    <span style="font-family: Arial; font-size: 12px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
                                 </div>
                             </td>
                         </tr>

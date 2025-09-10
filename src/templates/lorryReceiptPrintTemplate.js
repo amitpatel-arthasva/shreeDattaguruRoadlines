@@ -164,20 +164,27 @@ const lorryReceiptPrintTemplate = (data) => {
             line-height: 1.2;
             color: #000;
             background: white;
-            padding: 0; /* Remove body padding */
-            max-width: 100%;
+            padding: 10px; /* Add some padding for centering */
+            margin: 0 auto;
+            max-width: 800px; /* Set reasonable max width */
             overflow-x: hidden;
         }
         
         .min-h-screen {
             min-height: auto; /* Remove full height requirement */
-            background-color: #f9fafb;
-            padding: 6px; /* Reduced padding for compact layout */
+            background-color: white;
+            padding: 0 !important;
+            margin: 0 auto !important;
+            position: relative;
+            top: 0;
+            width: 100%;
         }
         
         .max-w-7xl {
-            max-width: 100%; /* Use full width */
-            margin: 0 auto;
+            max-width: 800px; /* Set reasonable max width */
+            margin: 0 auto !important;
+            padding: 0 !important;
+            width: 100%;
         }
         
         .header-controls {
@@ -282,15 +289,17 @@ const lorryReceiptPrintTemplate = (data) => {
         .left-table {
             flex: 2;
             border-collapse: collapse;
+            border: 0px; /* Remove outer border to avoid overlap */
         }
 
         .right-table {
             flex: 1;
             border-collapse: collapse;
+            border: 0px; /* Remove outer border to avoid overlap */
         }
 
         .left-table td, .right-table td {
-            border: 1px solid #000;
+            border: 1px solid #000; /* Keep inner borders for separation */
             padding: 2px 3px; /* Reduced padding */
             vertical-align: top;
         }
@@ -349,17 +358,38 @@ const lorryReceiptPrintTemplate = (data) => {
             border-collapse: collapse;
             width: 100%;
         }
+
+        /* Remove outer borders from freight table header cells but keep separators */
+        .freight-table-container tr:first-child td {
+            border-top: 0px !important;
+            border-left: 0px !important;
+            border-bottom: 1px solid #000 !important; /* Keep bottom border */
+        }
+
+        .freight-table-container tr:first-child td:not(:last-child) {
+            border-right: 1px solid #000 !important; /* Keep separators between header columns */
+        }
+
+        .freight-table-container tr:first-child td:last-child {
+            border-right: 0px !important; /* Remove right border on last column */
+        }
         
         .nos-column {
             width: 10%;
-            border-right: 1px solid #000;
+            border-right: 1px solid #000; /* Keep separating border */
+            border-left: 0px; /* Remove outer border */
+            border-top: 0px; /* Remove top border */
+            border-bottom: 1px solid #000; /* Keep bottom border */
             padding: 2px; /* Reduced padding */
             vertical-align: top;
         }
         
         .particulars-column {
             width: 60%;
-            border-right: 1px solid #000;
+            border-right: 1px solid #000; /* Keep separating border */
+            border-left: 0px; /* Remove outer border */
+            border-top: 0px; /* Remove top border */
+            border-bottom: 1px solid #000; /* Keep bottom border */
             padding: 2px; /* Reduced padding */
             vertical-align: top;
         }
@@ -367,21 +397,30 @@ const lorryReceiptPrintTemplate = (data) => {
         .rate-left-column {
             padding: 0;
             vertical-align: top;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid #000; /* Keep bottom border */
+            border-left: 0px; /* Remove outer border */
+            border-top: 0px; /* Remove top border */
+            border-right: 1px solid #000; /* Add separator between Rate Rs. columns */
             width: 17%;
         }
         
         .rate-right-column {
             padding: 0;
             vertical-align: top;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid #000; /* Keep bottom border */
+            border-left: 0px; /* Remove outer border */
+            border-top: 0px; /* Remove top border */
+            border-right: 1px solid #000; /* Keep separating border */
             width: 15%;
         }
         
         .weight-column {
             padding: 0;
             vertical-align: top;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid #000; /* Keep bottom border */
+            border-left: 0px; /* Remove outer border */
+            border-top: 0px; /* Remove top border */
+            border-right: 0px; /* Remove outer border */
             width: 17%;
         }
         
@@ -584,7 +623,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong style="font-size: 11px;">TARAPUR</strong><br />
+                                <strong style="font-size: 9px;">TARAPUR</strong><br />
                                 Plot No. W-4,<br />
                                 Camlin Naka,<br />
                                 MIDC, Tarapur<br />
@@ -592,7 +631,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027869 /<br />
                                 7276272828<br />
                                 <hr />
-                                <strong style="font-size: 11px;">BHIWANDI</strong><br />
+                                <strong style="font-size: 9px;">BHIWANDI</strong><br />
                                 Godown No. A-2,<br />
                                 Gali No. 2,<br />
                                 Opp. Capital Roadlines,<br />
@@ -602,7 +641,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 9168027868<br />
                                 <hr />
                                 <br />
-                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
+                                <b style="font-size: 8px;">PAN: AGTPV0112D<br />
                                 GSTIN: 27AGTPV0112D1ZG</b>
                             </td>
                             <td colspan="3">

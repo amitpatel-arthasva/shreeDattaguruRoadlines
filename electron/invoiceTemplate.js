@@ -182,6 +182,10 @@ const invoiceTemplate = (data) => {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
+      font-size: 12px;
+    }
+    * {
+      font-size: inherit;
     }
     .invoice {
       width: 800px;
@@ -289,7 +293,7 @@ const invoiceTemplate = (data) => {
       </tr>
       <tr>
         <td colspan="5" class="no-border" style="border-left: 1px solid black; border-bottom: none; border-right: none;"></td>
-        <td style="border-right: 1px solid black; text-align: left; width: 260px; min-width: 220px; max-width: 320px; border-bottom: none; padding: 2px 8px 6px 8px; vertical-align: top;">
+        <td style="border-right: 1px solid black; text-align: center; width: 260px; min-width: 220px; max-width: 320px; border-bottom: none; padding: 2px 8px 6px 8px; vertical-align: middle;">
           <span style="font-size: 13px; line-height: 1.1;">Date : <span style='font-size: 15px; font-weight: bold;'>${formatDate(data.date)}</span></span>
         </td>
       </tr>
@@ -338,7 +342,7 @@ const invoiceTemplate = (data) => {
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
         <!-- PAN No. and GSTIN cell -->
-        <td style="width: 15%; text-align: left; vertical-align: top; padding: 4px 6px 2px 6px; font-size: 13px; line-height: 1.1;">
+        <td style="width: 15%; text-align: center; vertical-align: middle; padding: 4px 6px 2px 6px; font-size: 13px; line-height: 1.1;">
           <b>PAN No. AGTPV0112D</b><br>
           <b>GSTIN : 27AGTPV0112D1ZG</b>
         </td>

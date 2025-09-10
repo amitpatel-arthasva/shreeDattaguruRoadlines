@@ -23,36 +23,37 @@ const quotationTemplate = (data, imageBase64 = null) => {
             <meta charset="UTF-8">
             <title>Quotation - ${getValue(data.quotationNumber)}</title>
             <style>
-                body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
+                body { font-family: Arial, sans-serif; font-size: 12px; color: #222; margin: 0; padding: 0; }
+                * { font-size: inherit; }
                 .main-container { max-width: 700px; margin: 16px auto;  background: #fff; padding: 0; }
                 .header-red { background: #fff; color: #b71c1c; text-align: center; padding: 4px 0 0 0; border-bottom: none; }
                 .header-hindi { font-size: 22px; font-weight: bold; color: #b71c1c; font-family: 'Mangal', Arial, sans-serif; margin-bottom: 0px; }
                 .header-eng { font-size: 22px; font-weight: bold; color: #0d47a1; letter-spacing: 1px; margin-top: 0px; margin-bottom: 0px; }
                 .header-underline { border-bottom: 2px solid #0d47a1; width: 80%; margin: 0 auto 2px auto; }
                 .sub-header { text-align: center; color: #b71c1c; font-size: 12px; font-weight: bold; margin: 0; background: #fff; border-bottom: none; padding: 0; letter-spacing: 1px; }
-                .info-row { display: flex; justify-content: space-between; font-size: 10px; margin: 0 8px 0 8px; align-items: flex-start; }
+                .info-row { display: flex; justify-content: space-between; font-size: 12px; margin: 0 8px 0 8px; align-items: flex-start; }
                 .info-left { text-align: left; width: 70%; line-height: 1.1; }
                 .info-branch { font-weight: bold; color: #b71c1c; display: inline; }
                 .info-address { color: #0d47a1; font-weight: normal; display: inline; }
-                .info-mob { color: #0d47a1; font-weight: normal; display: block; margin-left: 60px; font-size: 9px; }
+                .info-mob { color: #0d47a1; font-weight: normal; display: block; margin-left: 60px; font-size: 12px; }
                 .info-right { text-align: left; width: 30%; line-height: 1.1; vertical-align: top; }
                 .info-email { color: #b71c1c; font-weight: bold; display: block; text-align: center; margin-top: 2px; }
                 .info-pan { color: #b71c1c; font-weight: bold; display: block; text-align: left; }
                 .info-gstin { color: #b71c1c; font-weight: bold; display: block; text-align: left; }
-                .ref-date-row { display: flex; justify-content: space-between; margin: 0 8px 0 8px; font-size: 10px; }
+                .ref-date-row { display: flex; justify-content: space-between; margin: 0 8px 0 8px; font-size: 12px; }
                 .ref-date-row .ref { color: #0d47a1; font-weight: bold; }
                 .ref-date-row .date { color: #0d47a1; font-weight: bold; }
-                .to-block { margin: 8px 18px 0 18px; font-size: 11px; }
+                .to-block { margin: 8px 18px 0 18px; font-size: 12px; }
                 .to-block b { color: #b71c1c; }
                 .to-label { display: inline-block; min-width: 30px; }
                 .sub-label, .attn-label { font-weight: bold; color: #b71c1c; }
                 .table-section { margin: 10px 18px 0 18px; }
-                table { width: 98%; margin: 0 auto; border-collapse: collapse; font-size: 11px; }
+                table { width: 98%; margin: 0 auto; border-collapse: collapse; font-size: 12px; }
                 th, td { border: 1px solid #0d47a1; padding: 4px 6px; text-align: center; }
                 th { background: #0d47a1; color: #fff; font-weight: bold; font-size: 12px; }
-                .footer { margin: 16px 18px 0 18px; font-size: 10px; }
+                .footer { margin: 16px 18px 0 18px; font-size: 12px; }
                 .footer-sign { text-align: right; font-weight: bold; margin-top: 30px; font-size: 12px; color: #0d47a1; }
-                .note { font-size: 9px; margin-top: 8px; text-align: left; }
+                .note { font-size: 12px; margin-top: 8px; text-align: left; }
                 .signature-space { height: 30px; }
             </style>
         </head>
@@ -116,7 +117,7 @@ const quotationTemplate = (data, imageBase64 = null) => {
                     <span style="margin-left: 18px;">2) Loading / unloading charges &amp; other charges will be extra as actual paid by us.</span><br>
                     <span style="margin-left: 18px;">3) Detention charges will be extra as per destination / vehicle.</span>
                 </div>
-                <div class="footer" style="margin: 35px 40px 0 40px; font-size: 13px;">
+                <div class="footer" style="margin: 35px 40px 0 40px; font-size: 12px;">
                     <div style="margin-bottom: 18px;">Thanking you &amp; awaiting your favorable reply.</div>
                     <div class="signature-space" style="height: 60px;"></div>
                     <div class="footer-sign" style="text-align: right; font-weight: bold; font-size: 15px;">
