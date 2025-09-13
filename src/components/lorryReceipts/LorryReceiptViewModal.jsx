@@ -87,8 +87,8 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[95vw]" className="min-h-[90vh]">
       <div className="bg-white h-full flex flex-col">
-        {/* Modal Header - Print Controls */}
-        <div className="flex justify-between items-center p-4 border-b print:hidden bg-gray-50 sticky top-0 z-10">
+        {/* Modal Header - Controls (Print removed) */}
+        <div className="flex justify-between items-center p-4 border-b bg-gray-50 sticky top-0 z-10">
           <h2 className="text-xl font-bold text-gray-800">Lorry Receipt Details</h2>
           <div className="flex gap-2">
             <div className="flex items-center gap-1 bg-gray-200 rounded-lg p-1">
@@ -117,12 +117,6 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
                 100%
               </button>
             </div>
-            <button
-              onClick={handlePrint}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2"
-            >
-              🖨️ Print
-            </button>
             <button
               onClick={onClose}
               className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"

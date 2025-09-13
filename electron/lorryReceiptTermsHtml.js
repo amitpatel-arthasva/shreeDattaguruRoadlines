@@ -9,14 +9,14 @@ const lorryReceiptTermsHtml = () => `
   <title>Terms & Conditions - Owner's Risk</title>
   <style>
     body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 0; }
-    .container { max-width: 700px; margin: 40px auto 0 auto; padding: 40px 40px 40px 40px;  background: #fff; }
-    h2 { text-align: center; font-size: 18px; margin-bottom: 18px; color: #0d47a1; }
+  .container { max-width: 780px; margin: 10px auto 0 auto; padding: 10px 15px 20px 15px; background: #fff; box-sizing: border-box; }
+  h2 { text-align: center; font-size: 18px; margin-top: 30px; margin-bottom: 18px; color: #0d47a1; }
     ol { margin-left: 18px; margin-bottom: 18px; }
     li { margin-bottom: 7px; line-height: 1.5; }
-    .footer-row { display: flex; justify-content: space-between; margin-top: 40px; font-size: 13px; }
+    .footer-row { display: flex; justify-content: space-between; margin-top: 80px; font-size: 13px; }
     .footer-label { font-weight: bold; }
-    .marathi { margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left; }
-    .received { margin-top: 10px; font-size: 13px; }
+  .marathi { margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left; }
+  .received { margin-top: 10px; font-size: 13px; text-align: left; }
   </style>
 </head>
 <body>

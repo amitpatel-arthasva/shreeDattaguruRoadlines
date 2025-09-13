@@ -88,7 +88,9 @@ const lorryReceiptPrintTemplate = (data) => {
     } catch (e) {
       particularsArray = [''];
     }
-  }  // Calculate total - handle both flat structure and nested freightDetails
+  }
+  
+  // Calculate total - handle both flat structure and nested freightDetails
   const freight = parseFloat(data.freightDetails?.freight || data.freight || 0);
   const hamali = parseFloat(data.freightDetails?.hamali || data.hamali || 0);
   const aoc = parseFloat(data.freightDetails?.aoc || data.aoc || 0);
@@ -105,17 +107,14 @@ const lorryReceiptPrintTemplate = (data) => {
   const billheader5Base64 = getImageAsBase64('billheader5.png');
   
   function formatDate(dateStr) {
-  if (!dateStr) return "";
-
-  const date = new Date(dateStr);
-  if (isNaN(date)) return dateStr; // fallback if invalid
-
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-
-  return `${day}-${month}-${year}`; // ddmmyyyy format
-}
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr; // fallback if invalid
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`; // ddmmyyyy format
+  }
 
 
   // Fallback SVG if billHeader.png is not found - stretched to full width
@@ -142,12 +141,12 @@ const lorryReceiptPrintTemplate = (data) => {
     // Handle btoa for Node.js vs Browser environments for fallback
     try {
       if (typeof btoa !== 'undefined') {
-        headerImage = `data:image/svg+xml;base64,${btoa(fallbackLogoSvg)}`;
-      } else if (typeof Buffer !== 'undefined') {
-        headerImage = `data:image/svg+xml;base64,${Buffer.from(fallbackLogoSvg).toString('base64')}`;
-      } else {
-        headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
-      }
+                headerImage = `data:image/svg+xml;base64,${btoa(fallbackLogoSvg)}`;
+            } else if (typeof Buffer !== 'undefined') {
+                headerImage = `data:image/svg+xml;base64,${Buffer.from(fallbackLogoSvg).toString('base64')}`;
+            } else {
+                headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
+            }
     } catch (e) {
       // Final fallback to encoded SVG
       headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
@@ -161,6 +160,27 @@ const lorryReceiptPrintTemplate = (data) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lorry Receipt - ${getValue(data.lr_number || data.cnNumber)}</title>
     <style>
+        .rate-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        .rate-label {
+            padding: 0;
+            border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+        }
+        .rate-amount {
+            padding: 0;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        @page {
+            margin: 0; /* Remove all print margins */
+            size: A4;
+        }
+        
         * {
             margin: 0;
             box-sizing: border-box;
@@ -169,14 +189,16 @@ const lorryReceiptPrintTemplate = (data) => {
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px; /* Increased from 8px to 12px */
-            line-height: 1.2;
+            font-size: 12px; /* Readable font size */
+            line-height: 1.0; /* Tighter line height for compactness */
             color: #000;
             background: white;
-            padding: 10px !important;
-            margin: 0 auto !important;
-            max-width: 800px; /* Set reasonable max width */
+            padding: 0 !important; /* Remove padding for precise margin control */
+            margin: 0 !important; /* Remove margin for precise control */
+            max-width: 100%; /* Use full width */
             overflow-x: hidden;
+            width: 100%;
+            height: 100vh; /* Full viewport height */
         }
 
         body, .container, table {
@@ -184,25 +206,48 @@ const lorryReceiptPrintTemplate = (data) => {
             border-color: #000 !important; /* only black borders */
         }
 
+        table, th, td {
+            border: 1px solid #000 !important;
+            box-sizing: border-box;
+        }
+
         .min-h-screen {
             min-height: auto;
             background-color: white;
             padding: 0 !important;
-            margin: 0 auto !important;
+            margin: 0 auto !important; /* Center with equal margins */
             position: relative;
             top: 0;
-            width: 100%;
+            width: 94%; /* Match main page width for consistency */
+            max-width: 94% !important;
+            height: auto; /* Allow natural height for full content visibility */
+            overflow: visible; /* Allow content to be fully visible */
+            transform-origin: top center; /* Scale from top center */
+            transform: scale(1.0); /* No scaling, natural size */
         }
 
         .max-w-7xl {
-            max-width: 800px; /* Set reasonable max width */
-            margin: 0 auto !important;
-            padding: 0 !important;
+            max-width: 100% !important; /* Use full width of scaled container */
+            margin: 0 auto !important; /* Center with equal auto margins on both sides */
+            padding: 0 !important; /* Remove padding to avoid uneven spacing */
             width: 100%;
+            height: 100%; /* Fill the container height */
         }
 
         .header-controls {
             display: none;
+        }
+
+        /* Global styles for 50% page usage - readable font sizes */
+        td {
+            padding: 1px !important; /* Minimal padding for compact layout */
+            font-size: 12px !important; /* Readable font size minimum 12px */
+            border: 1px solid #000 !important; /* Ensure all cells have consistent borders */
+            box-sizing: border-box;
+        }
+
+        table {
+            margin-bottom: 0px !important; /* No margin between tables for tightest spacing */
         }
 
         .header-section {
@@ -210,7 +255,7 @@ const lorryReceiptPrintTemplate = (data) => {
             justify-content: center;
             align-items: center;
             position: center;
-            margin-bottom: 10px;
+            margin-bottom: 1px; /* Reduced for compactness */
         }
 
         .header-inner {
@@ -229,24 +274,30 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .logo-image {
-            max-width: 600px;
+            max-width: 580px; /* Reduced from 650px for a slightly smaller header */
             height: auto;
-        
+            min-height: 50px; /* Reduced minimum height for better balance */
         }
 
         .jurisdiction-section {
             position: absolute;
             right: 0;
             text-align: right;
-            font-size: 11px; /* Increased from 8px to 12px */
+            font-size: 12px; /* Increased to meet 12px minimum */
             font-weight: 500;
             color: #374151;
             line-height: 1.1;
         }
 
         .jurisdiction-title {
+            font-size: 14px; /* Reduced from default for less overlap */
             margin-bottom: 4px;
             font-weight: bold;
+            text-align: right; /* Move text to the right */
+            margin-left: auto; /* Push the element to the right */
+            padding-right: 5px; /* Reduced padding from the right edge */
+            padding-left: 30px; /* Add left padding to push it further right */
+            margin-top: 30px; /* Further increased top margin for more space from smaller header */
         }
 
         .service-details {
@@ -269,8 +320,8 @@ const lorryReceiptPrintTemplate = (data) => {
             width: 100%;
             padding: 0 !important;
             font-family: Arial, sans-serif;
-            font-size: 12px; /* Increased from 8px to 12px */
-            margin: 0 auto !important;
+            font-size: 12px; /* Restored to 12px for readability */
+            margin: 0 !important; /* Remove auto centering */
             background: white;
             position: relative;
             top: 0;
@@ -353,23 +404,26 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .address-section {
             width: 18%;
-            padding: 3px; /* Consistent 3px padding throughout */
-            font-size: 12px; /* Increased from 8px to 12px */
-            line-height: 1.2; /* Tighter line height */
+            padding: 5px; /* Increased padding for more space */
+            font-size: 12px; /* Readable font size minimum 12px */
+            line-height: 1.3; /* More vertical space for clarity */
             vertical-align: top;
+            height: 220px; /* Increased height for less cramped look */
         }
 
         .address-section hr {
-            margin: 4px 0;
+            margin: 6px 0; /* More margin for visual separation */
             border: 0;
             border-top: 1px solid #000;
         }
 
         .freight-table-container {
-            height: 180px; /* Reduced from 300px to 180px */
-            border-collapse: collapse;
+            height: 180px; /* Reduced from 250px to minimize empty space */
+            border-collapse: separate; /* Use separate to avoid border overlap */
+            border-spacing: 0; /* No spacing between cells */
             width: 100%;
-            border: 0px; /* Remove outer border to avoid overlap */
+            border: 1px solid #000; /* Consistent outer border */
+            table-layout: fixed; /* Fixed layout for consistent column widths */
         }
 
         /* Remove outer borders from freight table header cells but keep separators */
@@ -389,120 +443,140 @@ const lorryReceiptPrintTemplate = (data) => {
 
         .nos-column {
             width: 10%;
-            border-right: 1px solid #000; /* Keep separating border */
-            border-left: 1px solid #000; /* Restore left border for proper separation */
-            border-top: 1px solid #000; /* Restore top border */
-            border-bottom: 1px solid #000; /* Keep bottom border */
-            padding: 3px; /* Consistent 3px padding throughout */
+            border-right: 1px solid #000;
+            border-left: none; /* Remove to avoid double borders */
+            border-top: none; /* Remove to avoid double borders */
+            border-bottom: none; /* Remove to avoid double borders */
+            padding: 3px;
             vertical-align: top;
         }
 
         .particulars-column {
-            width: 52%; /* Adjusted width to account for rate columns being equal */
-            border-right: 1px solid #000; /* Keep separating border */
-            border-left: 0px; /* No left border as nos-column already has right border */
-            border-top: 1px solid #000; /* Restore top border */
-            border-bottom: 1px solid #000; /* Keep bottom border */
-            padding: 3px; /* Consistent 3px padding throughout */
+            width: 45%; /* Increased width to stretch to available space */
+            border-right: 1px solid #000;
+            border-left: none; /* Remove to avoid double borders */
+            border-top: none; /* Remove to avoid double borders */
+            border-bottom: none; /* Remove to avoid double borders */
+            padding: 3px;
             vertical-align: top;
         }
 
-        .rate-left-column {
-            padding: 3px; /* Consistent 3px padding throughout */
-            vertical-align: top;
-            border-bottom: 1px solid #000;
-            border-left: 1px solid #000; /* Restore left border for proper separation */
-            border-top: 1px solid #000; /* Restore top border */
-            border-right: 1px solid #000; /* Separator between Rate Rs. columns */
-            width: 16%; /* Match width to rate-right-column */
+        .rate-label {
+            width: 50%; /* Equal width for labels */
+            padding: 2px 4px; /* Restored padding */
+            border-right: 1px solid #000; /* Separator between label and amount */
+            border-bottom: 1px solid #000; /* Row separator */
+            font-size: 12px; /* Restored font size */
+            line-height: 1.0;
+            vertical-align: middle;
+            text-align: left;
         }
 
-        .rate-right-column {
-            padding: 3px; /* Consistent 3px padding throughout */
-            vertical-align: top;
-            border-bottom: 1px solid #000;
-            border-left: 0px; /* No left border as rate-left already has right border */
-            border-top: 1px solid #000; /* Restore top border */
-            border-right: 1px solid #000; /* Right border for proper separation */
-            width: 16%; /* Match width to rate-left-column */
+        .rate-amount {
+            width: 50%; /* Equal width for amounts */
+            padding: 2px 4px; /* Restored padding */
+            border-bottom: 1px solid #000; /* Row separator */
+            font-size: 12px; /* Restored font size */
+            line-height: 1.0;
+            vertical-align: middle;
+            text-align: right; /* Right alignment for amounts */
+        }
+
+        /* Remove border from last row */
+        .rate-label:last-child, .rate-amount:last-child {
+            border-bottom: none;
         }
 
         .weight-column {
             padding: 3px; /* Consistent 3px padding throughout */
             vertical-align: top;
             border-bottom: 1px solid #000;
-            border-left: 0px; /* No left border as rate-right already has right border */
+            border-left: 0px; /* No left border as rate table already has right border */
             border-top: 1px solid #000; /* Restore top border */
             border-right: 1px solid #000; /* Right border for proper separation */
-            width: 16%; /* Match other columns */
+            width: 22%; /* Width to accommodate weight info */
         }        .rate-container, .weight-container {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 150px; /* Reduced from previous height for more compact layout */
+            min-height: 280px; /* Increased to match the new table height */
+            width: 100%;
+            justify-content: flex-start; /* Align content to top */
         }
 
-        .rate-item {
-            flex: 1; /* Equal distribution to eliminate empty space */
-            border-bottom: 1px solid #000; /* Row separator for proper alignment */
-            padding: 3px; /* Consistent 3px padding throughout */
-            display: flex;
-            align-items: center;
-            min-height: 24px; /* Increased to prevent text cutting */
-            line-height: 1.3; /* Better line height for text alignment */
+        .rate-label {
+            padding-left: 4px;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-size: 12px;
+            vertical-align: top;
         }
-
+        .rate-amount {
+            text-align: right;
+            padding-right: 4px;
+            border-bottom: 1px solid #000;
+            font-size: 12px;
+            border-left: none !important;
+        }
         .rate-item:last-child {
             border-bottom: none; /* Remove border from last item */
+            font-weight: bold; /* Bold for total */
         }
 
-        .rate-value {
-            flex: 1; /* Equal distribution to match rate-item */
-            border-bottom: 1px solid #000; /* Row separator aligned with rate-item */
-            padding: 3px; /* Consistent 3px padding throughout */
-            display: flex;
-            align-items: center;
-            text-align: center;
-            justify-content: center;
-            min-height: 24px; /* Same height as rate-item to prevent text cutting */
-            line-height: 1.3; /* Better line height for text alignment */
+        .rate-label {
+            padding-left: 4px;
+            border-left: none !important;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-size: 12px;
+            vertical-align: top;
+        }
+        .rate-amount {
+            text-align: right;
+            padding-right: 4px;
+            border-right: none !important;
+            border-bottom: 1px solid #000;
+            font-size: 12px;
         }
 
         .rate-value:last-child {
             border-bottom: none; /* Remove border from last item to match rate-item */
+            font-weight: bold; /* Bold for total */
         }
 
         .weight-item {
             flex: 1; /* Equal distribution to match other columns */
             border-bottom: 1px solid #000; /* Row separator */
-            padding: 3px; /* Consistent 3px padding throughout */
+            padding: 2px; /* Compact padding */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 24px; /* Same height as rate items to prevent text cutting */
-            line-height: 1.3; /* Better line height for text alignment */
+            min-height: 16px; /* Same height as rate items */
+            line-height: 1.0; /* Tight line height for compactness */
+            font-size: 12px; /* Maintain 12px minimum for readability */
         }
 
         .payment-section {
             flex: 2;
             border-bottom: 1px solid #000;
-            padding: 8px; /* Increased padding for better spacing */
+            padding: 4px; /* Compact padding */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            font-size: 12px; /* Increased from 9px to 12px */
+            font-size: 12px; /* Maintain 12px for readability */
         }
 
         .risk-section {
-            flex: 1;
-            padding: 8px; /* Increased padding for better spacing */
+            flex: 0.5; /* Reduce flex to take less space */
+            padding: 2px; /* Minimal padding */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 12px; /* Increased from 9px to 12px */
+            font-size: 12px; /* Maintain 12px for readability */
+            line-height: 1.0; /* Tight line height */
         }
 
         .payment-option {
@@ -523,11 +597,11 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .delivery-section, .remarks-section {
-            height: 20px;
+            height: 25px; /* Increased for better visibility */
         }
 
         .remarks-section {
-            height: 20px;
+            height: 25px; /* Increased for better visibility */
         }
 
         .footer-section {
@@ -557,7 +631,8 @@ const lorryReceiptPrintTemplate = (data) => {
       .min-h-screen {
         margin: 0 auto !important;
         padding: 0 !important;
-        max-width: 800px !important;
+        max-width: 94% !important; /* Match the main page width for perfectly balanced spacing */
+        width: 94% !important;
       }
         }
     </style>
@@ -622,19 +697,19 @@ const lorryReceiptPrintTemplate = (data) => {
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 50%; padding: 3px; height: auto;">
+                                <td style="width: 50%; padding: 3px; height: auto; white-space: nowrap;">
                                     <strong>Date - </strong>
-                                    <span class="form-value-small">${formatDate(data.date || data.lr_date)}</span>
+                                    <span class="form-value-small" style="white-space: nowrap;">${formatDate(data.date || data.lr_date)}</span>
                                 </td>
-                                <td style="width: 50%; text-align: center; padding: 3px; height: auto;">
+                                <td style="width: 50%; text-align: center; padding: 3px; height: auto; white-space: nowrap;">
                                     <strong>Truck No. - </strong>
-                                    <span class="form-value-small">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
+                                    <span class="form-value-small" style="white-space: nowrap;">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 40%; padding: 3px; height: auto;">
+                                <td style="width: 40%; padding: 3px; height: auto; white-space: nowrap;">
                                     <strong>From - </strong>
-                                    <span class="form-value-small">${getValue(data.fromLocation || data.from_location)}</span>
+                                    <span class="form-value-small" style="white-space: nowrap;">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
                                 <td style="width: 40%; padding: 3px; height: auto;">
                                     <strong>To - </strong>
@@ -646,39 +721,32 @@ const lorryReceiptPrintTemplate = (data) => {
                 </div>
 
                 <!-- Main Freight Table -->
-                <table>
+                <table style="margin-bottom: 0 !important;">
                     <tbody>
                         <tr>
                             <td rowspan="2" class="address-section">
-                                <strong style="font-size: 10px;">TARAPUR</strong><br />
-                                Plot No. W-4,<br />
-                                Camlin Naka,<br />
+                                <strong style="font-size: 12px;">TARAPUR</strong><br />
+                                Plot No. W-4, Camlin Naka,<br />
                                 MIDC, Tarapur<br />
-                                M: 9823364283 /<br />
-                                9168027869 /<br />
-                                7276272828<br />
+                                M: 9823364283 / 9168027869 / 7276272828<br />
                                 <hr />
-                                <strong style="font-size: 10px;">BHIWANDI</strong><br />
-                                Godown No. A-2,<br />
-                                Gali No. 2,<br />
-                                Opp. Capital Roadlines,<br />
-                                Khandagale Estate,<br />
+                                <strong style="font-size: 12px;">BHIWANDI</strong><br />
+                                Godown No. A-2, Gali No. 2,<br />
+                                Opp. Capital Roadlines, Khandagale Estate,<br />
                                 Purna Village, Bhiwandi.<br />
-                                M.: 7507844317 /<br />
-                                9168027868<br />
+                                M.: 7507844317 / 9168027868<br />
                                 <hr />
-                                <br />
-                                <b style="font-size: 10px;">PAN: AGTPV0112D<br />
-                                GSTIN: 27AGTPV0112D1ZG</b>
+                                PAN: AGTPV0112D<br />
+                                GSTIN: 27AGTPV0112D1ZG
                             </td>
                             <td colspan="3">
                                 <table class="freight-table-container">
                                     <tbody>
                                         <tr class="bold center">
-                                            <td style="width: 10%;">Nos.</td>
-                                            <td style="width: 50%;">Particulars</td>
-                                            <td style="width: 18%;" colspan="2">Rate Rs.</td>
-                                            <td style="width: 22%;">Weight</td>
+                                            <td style="width: 10%; border: 1px solid #000;">Nos.</td>
+                                            <td style="width: 45%; border: 1px solid #000;">Particulars</td>
+                                            <td style="width: 22%; border: 1px solid #000;" colspan="2">Rate Rs.</td>
+                                            <td style="width: 23%; border: 1px solid #000;">Weight</td>
                                         </tr>
                                         <tr>
                                             <!-- Nos Column -->
@@ -695,45 +763,56 @@ const lorryReceiptPrintTemplate = (data) => {
                                                 ).join('')}
                                             </td>
 
-                                            <!-- Rate Left Column -->
-                                            <td class="rate-left-column">
-                                                <div class="rate-container">
-                                                    <div class="rate-item">Freight</div>
-                                                    <div class="rate-item">Hamali</div>
-                                                    <div class="rate-item">A.O.C</div>
-                                                    <div class="rate-item">Door Dely</div>
-                                                    <div class="rate-item">Detention</div>
-                                                    <div class="rate-item">Collection</div>
-                                                    <div class="rate-item">St.Charge</div>
-                                                    <div class="rate-item">Extra Loading<br />paid by us</div>
-                                                    <div class="rate-item">Total</div>
-                                                </div>
-                                            </td>
-
-                                            <!-- Rate Right Column -->
-                                            <td class="rate-right-column">
-                                                <div class="rate-container">
-                                                    <div class="rate-value">${formatCurrency(freight)}</div>
-                                                    <div class="rate-value">${formatCurrency(hamali)}</div>
-                                                    <div class="rate-value">${formatCurrency(aoc)}</div>
-                                                    <div class="rate-value">${formatCurrency(doorDelivery)}</div>
-                                                    <div class="rate-value">${formatCurrency(detention)}</div>
-                                                    <div class="rate-value">${formatCurrency(collection)}</div>
-                                                    <div class="rate-value">${formatCurrency(stCharge)}</div>
-                                                    <div class="rate-value">${formatCurrency(extraLoading)}</div>
-                                                    <div class="rate-value"><strong>${formatCurrency(totalAmount)}</strong></div>
-                                                </div>
+                                            <!-- Rate Columns as Single Table -->
+                                            <td colspan="2" style="padding: 0; border: 1px solid #000;">
+                                                <table class="rate-table" style="height: 280px;">
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Freight</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(freight)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Hamali</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(hamali)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">A.O.C</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(aoc)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Door Dely</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(doorDelivery)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Detention</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(detention)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Collection</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(collection)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">St.Charge</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(stCharge)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label">Extra Loading<br />paid by us</td>
+                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(extraLoading)}</td>
+                                                    </tr>
+                                                    <tr style="height: 31px;">
+                                                        <td class="rate-label" style="font-weight: bold; border-bottom: none;">Total</td>
+                                                        <td class="rate-amount" style="font-weight: bold; border-bottom: none; border-left:none;">${formatCurrency(totalAmount)}</td>
+                                                    </tr>
+                                                </table>
                                             </td>
 
                                             <!-- Weight Column -->
                                             <td class="weight-column">
                                                 <div class="weight-container">                                                    <div class="weight-item">
                                                         <p>Actual<br />
-                                                        <strong>${getValue(data.actualWeight || data.actual_weight)}</strong> <br> Kg.</p>
+                                                        <strong>${getValue(data.actualWeight || data.actual_weight)} Kg.</strong></p>
                                                     </div>
                                                     <div class="weight-item">
-                                                        <p>Chargeable <br><strong>${getValue(data.chargeableWeight || data.chargeable_weight || data.charged_weight)}</strong>
-                                                        </p>
+                                                        <p>Chargeable<br /><strong>${getValue(data.chargeableWeight || data.chargeable_weight || data.charged_weight)}</strong></p>
                                                     </div>                                                    <div class="payment-section">
                                                         <div class="payment-option">
                                                             <input type="radio" ${(data.freightDetails?.paymentType || data.paymentType || data.payment_type) === 'paid' ? 'checked' : ''} disabled class="payment-radio" />
@@ -754,6 +833,12 @@ const lorryReceiptPrintTemplate = (data) => {
                                                 </div>
                                             </td>
                                         </tr>
+                                        <!-- E-way Bill row moved up within freight table -->
+                                        <tr>
+                                            <td colspan="4" style="padding: 3px; border: 1px solid #000; border-top: 1px solid #000; font-size: 12px; font-weight: bold; text-align: left; background-color: #f9f9f9;">
+                                                E-way Bill: ${getValue(data.ewayBill || data.eway_bill || data.ewaybill)}
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </td>
@@ -761,26 +846,14 @@ const lorryReceiptPrintTemplate = (data) => {
                     </tbody>
                 </table>
 
-                <!-- E-way Bill Section -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 2px;">
-                    <tbody>
-                        <tr>
-                            <td style="padding: 6px 8px; border: 1px solid #000; text-align: left; background-color: #f9f9f9;">
-                                <span style="font-family: Arial; font-size: 12px; font-weight: bold;">E-way Bill: </span>
-                                <span style="font-family: Arial; font-size: 12px;">${getValue(data.ewayBill || data.eway_bill)}</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <!-- Footer Sections with Continuous Right Box -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 0; table-layout: fixed;">
+                <table style="width: 100%; border-collapse: collapse; margin: 0 !important; table-layout: fixed;">
                     <tbody>
                         <tr>
-                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; vertical-align: top;">
-                                <div>
+                            <td style="width: 70%; padding: 1px 3px; border: 1px solid #000; border-right: none; vertical-align: top;">
+                                <div style="margin-bottom: 0;">
                                     <span style="font-family: Arial; font-size: 12px;">Delivery At:</span>
-                                    <span style="font-family: Arial; font-size: 12px; margin-left: 4px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
+                                    <span style="font-family: Arial; font-size: 12px; margin-left: 2px;">${getValue(data.deliveryAt || data.delivery_at)}</span>
                                 </div>
                             </td>
                             <td rowspan="3" style="width: 30%; padding: 3px; border: 1px solid #000; border-left: 2px solid #000; vertical-align: bottom; text-align: center;">
@@ -790,16 +863,16 @@ const lorryReceiptPrintTemplate = (data) => {
                             </td>
                         </tr>
                         <tr>
-                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; border-top: none;">
-                                <div>
+                            <td style="width: 70%; padding: 1px 3px; border: 1px solid #000; border-right: none; border-top: none;">
+                                <div style="margin-bottom: 0;">
                                     <span style="font-family: Arial; font-size: 12px;">Remarks:</span>
-                                    <span style="font-family: Arial; font-size: 12px; margin-left: 4px;">${getValue(data.remarks || data.notes)}</span>
+                                    <span style="font-family: Arial; font-size: 12px; margin-left: 2px;">${getValue(data.remarks || data.notes)}</span>
                                 </div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="width: 70%; padding: 3px; border: 1px solid #000; border-right: none; border-top: none;">
-                                <div>
+                            <td style="width: 70%; padding: 1px 3px; border: 1px solid #000; border-right: none; border-top: none;">
+                                <div style="margin-bottom: 0;">
                                     <span style="font-family: Arial; font-size: 12px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
                                 </div>
                             </td>
@@ -807,8 +880,10 @@ const lorryReceiptPrintTemplate = (data) => {
                     </tbody>
                 </table>
             </div>
+            
         </div>
     </div>
+    
 </body>
 </html>
 `;
@@ -816,4 +891,4 @@ const lorryReceiptPrintTemplate = (data) => {
   return html;
 };
 
-export default lorryReceiptPrintTemplate; 
+export default lorryReceiptPrintTemplate;

@@ -1515,13 +1515,13 @@ const LorryReceiptFormPage = () => {
                       </div>
                     </td>
                   </tr>
-                  <td className="text-center align-middle">
-                    <div className="mt-4 inline-block">
-                      <strong>
+                  <td style={{ verticalAlign: 'middle', textAlign: 'left', padding: '16px 8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <strong style={{ minWidth: 90 }}>
                         Truck No. - <span className="text-red-500">*</span>
                       </strong>
-                      <div className="relative inline-block">
-                        <div className="input-container inline-block" onClick={handleDivClick}>
+                      <div className="relative" style={{ flex: 1 }}>
+                        <div className="input-container" onClick={handleDivClick}>
                           <input
                             type="text"
                             name="truckNumber"
@@ -1529,8 +1529,7 @@ const LorryReceiptFormPage = () => {
                             onChange={handleTruckInputChange}
                             onFocus={() => setShowTruckDropdown(true)}
                             onBlur={handleTruckInputBlur}
-                            className={`form-input-small ${validationErrors.truckNumber ? "border-red-500" : ""
-                              }`}
+                            className={`form-input-small ${validationErrors.truckNumber ? "border-red-500" : ""}`}
                             placeholder="Truck Number"
                             autoComplete="off"
                           />
@@ -1617,28 +1616,28 @@ const LorryReceiptFormPage = () => {
               <tbody>
                 <tr>
                   <td rowSpan="2" width="18%">
-                    <strong>TARAPUR</strong><br />
-                    Plot No. W-4,<br />
-                    Camlin Naka,<br />
-                    MIDC, Tarapur<br />
-                    M: 9823364283 /<br />
-                    9168027869 /<br />
-                    7276272828<br />
-
-                    <hr />
-
-                    <strong>BHIWANDI</strong><br />
-                    Godown No. A-2,<br />
-                    Gali No. 2,<br />
-                    Opp. Capital Roadlines,<br />
-                    Khandagale Estate,<br />
-                    Purna Village, Bhiwandi.<br />
-                    M.: 7507844317 /<br />
-                    9168027868<br />
-                    <hr />
-                    <br />
-                    <b>PAN: AGTPV0112D<br />
-                      GSTIN: 27AGTPV0112D1ZG</b>
+                    <div style={{ lineHeight: '1', fontSize: '12px', marginBottom: '0px', marginTop: '0px' }}>
+                      <strong>TARAPUR</strong><br />
+                      Plot No. W-4,<br />
+                      Camlin Naka,<br />
+                      MIDC, Tarapur<br />
+                      M: 9823364283 / 9168027869 / 7276272828<br />
+                    </div>
+                    <hr style={{ margin: '2px 0' }} />
+                    <div style={{ lineHeight: '1', fontSize: '12px', marginBottom: '0px', marginTop: '0px' }}>
+                      <strong>BHIWANDI</strong><br />
+                      Godown No. A-2,<br />
+                      Gali No. 2,<br />
+                      Opp. Capital Roadlines,<br />
+                      Khandagale Estate,<br />
+                      Purna Village, Bhiwandi.<br />
+                      M.: 7507844317 / 9168027868<br />
+                      <div style={{ border: '1px solid #000', borderRadius: '2px', margin: '4px 0 0 0', padding: '2px 6px', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', background: '#fff' }}>
+                        <span style={{ display: 'block' }}>PAN: <span style={{ fontWeight: 'bold' }}>AGTPV0112D</span></span>
+                        <span style={{ display: 'block' }}>GSTIN: <span style={{ fontWeight: 'bold' }}>27AGTPV0112D1ZG</span></span>
+                      </div>
+                    </div>
+                    <hr style={{ margin: '2px 0' }} />
                   </td>
                   {/* Freight Table */}
                   <td colSpan="3">                    <table style={{ height: '330px', borderCollapse: 'collapse', width: '100%' }}>
@@ -1717,7 +1716,7 @@ const LorryReceiptFormPage = () => {
                         </td>
                         {/* Left Rate Rs. subcolumn */}
                         <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px', justifyContent: 'space-between' }}>
                             <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                               Freight
                             </div>
@@ -1750,7 +1749,7 @@ const LorryReceiptFormPage = () => {
 
                         {/* Right Rate Rs. subcolumn */}
                         <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '13%' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px', justifyContent: 'space-between' }}>
                             <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
                               <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
                                 <input

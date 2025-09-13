@@ -49,13 +49,7 @@ const QuotationViewModal = ({ isOpen, onClose, quotation }) => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-3 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
-          >
-            <FontAwesomeIcon icon={faPrint} className="h-4 w-4" />
-            Print
-          </button>
+          {/* Print button removed */}
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 p-2 rounded-lg hover:bg-white/10 transition-colors"

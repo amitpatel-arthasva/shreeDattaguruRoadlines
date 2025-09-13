@@ -182,24 +182,24 @@ const invoiceTemplate = (data) => {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      font-size: 12px;
+       font-size: 14px;
     }
     * {
       font-size: inherit;
     }
     .invoice {
-      width: 800px;
-      padding: 20px;
+      width: 1000px;
+      padding: 4px;
       margin: 0 auto;
     }
     .header-section {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
     }
     .header-image {
-      max-width: 300px ;
+      max-width: 400px ;
       height: auto;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
     table {
       width: 100%;
@@ -207,14 +207,14 @@ const invoiceTemplate = (data) => {
       table-layout: fixed;
     }
     table th, table td {
-      padding: 0;
+      padding: 1px 2px;
       margin: 0;
     }
     th, td {
       border: 1px solid black;
       text-align: center;
       vertical-align: middle;
-      font-size: 12px;
+       font-size: 14px !important;
       height: 36px;
       padding: 2px 4px;
       max-width: 100px;

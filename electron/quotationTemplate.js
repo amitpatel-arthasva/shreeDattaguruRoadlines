@@ -25,7 +25,7 @@ const quotationTemplate = (data, imageBase64 = null) => {
             <style>
                 body { font-family: Arial, sans-serif; font-size: 12px; color: #222; margin: 0; padding: 0; }
                 * { font-size: inherit; }
-                .main-container { max-width: 700px; margin: 16px auto;  background: #fff; padding: 0; }
+                .main-container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 0; }
                 .header-red { background: #fff; color: #b71c1c; text-align: center; padding: 4px 0 0 0; border-bottom: none; }
                 .header-hindi { font-size: 22px; font-weight: bold; color: #b71c1c; font-family: 'Mangal', Arial, sans-serif; margin-bottom: 0px; }
                 .header-eng { font-size: 22px; font-weight: bold; color: #0d47a1; letter-spacing: 1px; margin-top: 0px; margin-bottom: 0px; }
@@ -47,11 +47,11 @@ const quotationTemplate = (data, imageBase64 = null) => {
                 .to-block b { color: #b71c1c; }
                 .to-label { display: inline-block; min-width: 30px; }
                 .sub-label, .attn-label { font-weight: bold; color: #b71c1c; }
-                .table-section { margin: 10px 18px 0 18px; }
-                table { width: 98%; margin: 0 auto; border-collapse: collapse; font-size: 12px; }
-                th, td { border: 1px solid #0d47a1; padding: 4px 6px; text-align: center; }
+                .table-section { margin: 0 2px 0 2px; }
+                table { width: 100%; margin: 0 auto; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #0d47a1; padding: 1px 2px; text-align: center; }
                 th { background: #0d47a1; color: #fff; font-weight: bold; font-size: 12px; }
-                .footer { margin: 16px 18px 0 18px; font-size: 12px; }
+                .footer { margin: 0 2px 0 2px; font-size: 12px; }
                 .footer-sign { text-align: right; font-weight: bold; margin-top: 30px; font-size: 12px; color: #0d47a1; }
                 .note { font-size: 12px; margin-top: 8px; text-align: left; }
                 .signature-space { height: 30px; }
