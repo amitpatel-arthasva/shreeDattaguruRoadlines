@@ -549,7 +549,7 @@ ipcMain.handle('generate-quotation-pdf', async (event, quotationData) => {
 
 
   // Resolve absolute path to billHeader5.png and read as base64
-  const imagePath = path.join(__dirname, '../assets/billHeader5.png');
+  const imagePath = path.join(__dirname, '../assets/shree-datta-guru.png');
     let imageBase64 = '';
     try {
       const imageBuffer = fs.readFileSync(imagePath);

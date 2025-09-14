@@ -496,7 +496,7 @@ const MemoFormPage = () => {
             <div>
               <span className="text-red-600 font-bold">TARAPUR:</span>
               Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
-              M.: 9823364283 / 7276272828
+              M.: 9823364283 / 8446665945
             </div>
             <div>
               <span className="text-red-600 font-bold">BHIWANDI:</span>

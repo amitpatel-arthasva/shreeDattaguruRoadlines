@@ -8,15 +8,15 @@ const lorryReceiptTermsHtml = () => `
   <meta charset="UTF-8">
   <title>Terms & Conditions - Owner's Risk</title>
   <style>
-    body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 9px; color: #222; margin: 0; padding: 0; }
   .container { max-width: 780px; margin: 10px auto 0 auto; padding: 10px 15px 20px 15px; background: #fff; box-sizing: border-box; }
-  h2 { text-align: center; font-size: 18px; margin-top: 30px; margin-bottom: 18px; color: #0d47a1; }
+  h2 { text-align: center; font-size: 16px; margin-top: 8px; margin-bottom: 10px; color: #0d47a1; }
     ol { margin-left: 18px; margin-bottom: 18px; }
-    li { margin-bottom: 7px; line-height: 1.5; }
-    .footer-row { display: flex; justify-content: space-between; margin-top: 80px; font-size: 13px; }
+    li { margin-bottom: 4px; line-height: 1.5; }
+    .footer-row { display: flex; justify-content: space-between; margin-top: 80px; font-size: 11px; }
     .footer-label { font-weight: bold; }
-  .marathi { margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left; }
-  .received { margin-top: 10px; font-size: 13px; text-align: left; }
+  .marathi { margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left;padding-left: 5px }
+  .received { margin-top: 10px; font-size: 13px; text-align: left;padding-left: 5px }
   </style>
 </head>
 <body>
@@ -39,7 +39,7 @@ const lorryReceiptTermsHtml = () => `
     <div class="marathi">(कंपनी कडील स्वत्तः स्टॅम्प असलेल्या मालाची डिलिव्हरी मिळणार नाही.)</div>
     <div class="received">Received the consignment as per particulars overleaf from Shree Dattaguru Road Lines in good condition.</div>
     <div class="footer-row">
-      <div>Date :</div>
+      <div style="padding-left: 5px">Date :</div>
       <div class="footer-label">Rubber Stamp</div>
       <div class="footer-label">Consignee's Sign.</div>
     </div>

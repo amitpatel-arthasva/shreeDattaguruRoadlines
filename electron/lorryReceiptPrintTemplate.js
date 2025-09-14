@@ -54,7 +54,7 @@ const lorryReceiptPrintTemplate = (data) => {
   // Helper function to format currency
   const formatCurrency = (amount) => {
     if (!amount && amount !== 0) return '';
-    return parseFloat(amount).toFixed(2);
+    return parseFloat(amount);
   };
 
 
@@ -104,7 +104,7 @@ const lorryReceiptPrintTemplate = (data) => {
 
   // Get the actual company header image as base64
   const billHeaderBase64 = getBillHeaderAsBase64();
-  const billheader5Base64 = getImageAsBase64('billheader5.png');
+  const billheader5Base64 = getImageAsBase64('shree-datta-guru.png');
   
   function formatDate(dateStr) {
     if (!dateStr) return "";
@@ -290,7 +290,7 @@ const lorryReceiptPrintTemplate = (data) => {
         }
 
         .jurisdiction-title {
-            font-size: 14px; /* Reduced from default for less overlap */
+            font-size: 12px; /* Reduced from default for less overlap */
             margin-bottom: 4px;
             font-weight: bold;
             text-align: right; /* Move text to the right */
@@ -509,7 +509,6 @@ const lorryReceiptPrintTemplate = (data) => {
             border-right: 1px solid #000;
             border-bottom: 1px solid #000;
             font-size: 12px;
-            vertical-align: top;
         }
         .rate-amount {
             text-align: right;
@@ -529,7 +528,7 @@ const lorryReceiptPrintTemplate = (data) => {
             border-right: 1px solid #000;
             border-bottom: 1px solid #000;
             font-size: 12px;
-            vertical-align: top;
+
         }
         .rate-amount {
             text-align: right;
@@ -669,7 +668,7 @@ const lorryReceiptPrintTemplate = (data) => {
                     <table class="left-table">
                         <tbody>
                             <tr style="height: auto;">
-                                <td class="left-cell" style="height: auto;">
+                                <td class="left-cell" style="height: auto; padding 5px 5px;">
                                     <div>
                                         <strong>Consignor - M/s ${getValue(data.consignor?.consignorName || data.consignor_name)}</strong>
                                     </div>
@@ -677,7 +676,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td class="left-cell" style="height: auto;">
+                                <td class="left-cell" style="height: auto;padding 5px 5px;">
                                     <div>
                                         <strong>Consignee - M/s ${getValue(data.consignee?.consigneeName || data.consignee_name)}</strong>
                                     </div>
@@ -697,21 +696,21 @@ const lorryReceiptPrintTemplate = (data) => {
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 50%; padding: 3px; height: auto; white-space: nowrap;">
+                                <td style="width: 50%; padding: 3px 3px; height: auto; white-space: nowrap;">
                                     <strong>Date - </strong>
                                     <span class="form-value-small" style="white-space: nowrap;">${formatDate(data.date || data.lr_date)}</span>
                                 </td>
-                                <td style="width: 50%; text-align: center; padding: 3px; height: auto; white-space: nowrap;">
+                                <td style="width: 50%; text-align: center; padding: 3px 3px; height: auto; white-space: nowrap;">
                                     <strong>Truck No. - </strong>
                                     <span class="form-value-small" style="white-space: nowrap;">${getValue(data.truckDetails?.truckNumber || data.truck_number || data.truckNumber)}</span>
                                 </td>
                             </tr>
                             <tr style="height: auto;">
-                                <td style="width: 40%; padding: 3px; height: auto; white-space: nowrap;">
+                                <td style="width: 40%; padding: 3px 3px; height: auto; white-space: nowrap;">
                                     <strong>From - </strong>
                                     <span class="form-value-small" style="white-space: nowrap;">${getValue(data.fromLocation || data.from_location)}</span>
                                 </td>
-                                <td style="width: 40%; padding: 3px; height: auto;">
+                                <td style="width: 40%; padding: 3px 3px; height: auto;">
                                     <strong>To - </strong>
                                     <span class="form-value-small">${getValue(data.toLocation || data.to_location)}</span>
                                 </td>
@@ -728,7 +727,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                 <strong style="font-size: 12px;">TARAPUR</strong><br />
                                 Plot No. W-4, Camlin Naka,<br />
                                 MIDC, Tarapur<br />
-                                M: 9823364283 / 9168027869 / 7276272828<br />
+                                M: 9823364283 / 9168027869 / 8446665945<br />
                                 <hr />
                                 <strong style="font-size: 12px;">BHIWANDI</strong><br />
                                 Godown No. A-2, Gali No. 2,<br />
@@ -764,43 +763,43 @@ const lorryReceiptPrintTemplate = (data) => {
                                             </td>
 
                                             <!-- Rate Columns as Single Table -->
-                                            <td colspan="2" style="padding: 0; border: 1px solid #000;">
+                                            <td colspan="2" style="padding: 0;">
                                                 <table class="rate-table" style="height: 280px;">
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">Freight</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(freight)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(freight)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">Hamali</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(hamali)}</td>
+                                                        <td class="rate-amount" style="border-left:none;padding-right: 10px;">${formatCurrency(hamali)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">A.O.C</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(aoc)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(aoc)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">Door Dely</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(doorDelivery)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(doorDelivery)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">Detention</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(detention)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(detention)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">Collection</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(collection)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(collection)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label">St.Charge</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(stCharge)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(stCharge)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 34px;">
                                                         <td class="rate-label">Extra Loading<br />paid by us</td>
-                                                        <td class="rate-amount" style="border-left:none;">${formatCurrency(extraLoading)}</td>
+                                                        <td class="rate-amount" style="border-left:none; padding-right: 10px;">${formatCurrency(extraLoading)}</td>
                                                     </tr>
-                                                    <tr style="height: 31px;">
+                                                    <tr style="height: 25px;">
                                                         <td class="rate-label" style="font-weight: bold; border-bottom: none;">Total</td>
-                                                        <td class="rate-amount" style="font-weight: bold; border-bottom: none; border-left:none;">${formatCurrency(totalAmount)}</td>
+                                                        <td class="rate-amount" style="font-weight: bold; border-bottom: none; border-left:none; padding-right: 10  px;">${formatCurrency(totalAmount)}</td>
                                                     </tr>
                                                 </table>
                                             </td>
@@ -812,7 +811,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                                         <strong>${getValue(data.actualWeight || data.actual_weight)} Kg.</strong></p>
                                                     </div>
                                                     <div class="weight-item">
-                                                        <p>Chargeable<br /><strong>${getValue(data.chargeableWeight || data.chargeable_weight || data.charged_weight)}</strong></p>
+                                                        <p>Chargeable<br /><br/><strong>${getValue(data.chargeableWeight || data.chargeable_weight || data.charged_weight)}</strong></p>
                                                     </div>                                                    <div class="payment-section">
                                                         <div class="payment-option">
                                                             <input type="radio" ${(data.freightDetails?.paymentType || data.paymentType || data.payment_type) === 'paid' ? 'checked' : ''} disabled class="payment-radio" />
@@ -835,7 +834,7 @@ const lorryReceiptPrintTemplate = (data) => {
                                         </tr>
                                         <!-- E-way Bill row moved up within freight table -->
                                         <tr>
-                                            <td colspan="4" style="padding: 3px; border: 1px solid #000; border-top: 1px solid #000; font-size: 12px; font-weight: bold; text-align: left; background-color: #f9f9f9;">
+                                            <td colspan="4" style="padding: 3px;  font-size: 12px; font-weight: bold; text-align: left; ">
                                                 E-way Bill: ${getValue(data.ewayBill || data.eway_bill || data.ewaybill)}
                                             </td>
                                         </tr>
@@ -873,7 +872,7 @@ const lorryReceiptPrintTemplate = (data) => {
                         <tr>
                             <td style="width: 70%; padding: 1px 3px; border: 1px solid #000; border-right: none; border-top: none;">
                                 <div style="margin-bottom: 0;">
-                                    <span style="font-family: Arial; font-size: 12px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
+                                    <span style="font-family: Arial; font-size: 10px;">We are not responsible for any type of damages, leakage, fire & shortages. Kindly Insured by Consignor or Consignee</span>
                                 </div>
                             </td>
                         </tr>

@@ -453,7 +453,7 @@ const quotationTemplate = (data) => {
                             MIDC, Tarapur<br />
                             M: 9823364283 /<br />
                             9168027869 /<br />
-                            7276272828<br />
+                            8446665945<br />
                             <hr />
                             <strong>BHIWANDI</strong><br />
                             Godown No. A-2,<br />

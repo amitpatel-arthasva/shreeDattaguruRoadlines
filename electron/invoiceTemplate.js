@@ -259,7 +259,7 @@ const invoiceTemplate = (data) => {
 
   <!-- Tarapur Branch --> 
   <div style="margin-bottom:4px; white-space:nowrap;">
-    <span style="color:#DC2626; font-weight:bold;">TARAPUR:</span>Plot No. W - 4, Camlin Naka, MIDC, Tarapur. M.: 9823364283 / 7276272828
+    <span style="color:#DC2626; font-weight:bold;">TARAPUR:</span>Plot No. W - 4, Camlin Naka, MIDC, Tarapur. M.: 9823364283 / 8446665945
   </div>
 
   <!-- Bhiwandi Branch -->

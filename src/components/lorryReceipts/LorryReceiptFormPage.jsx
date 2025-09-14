@@ -1200,7 +1200,7 @@ const LorryReceiptFormPage = () => {
                     <div>
                       <span className="text-red-600 font-bold">TARAPUR:</span>
                       Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
-                      M.: 9823364283 / 7276272828
+                      M.: 9823364283 / 8446665945
                     </div>
                     <div>
                       <span className="text-red-600 font-bold">BHIWANDI:</span>
@@ -1615,30 +1615,47 @@ const LorryReceiptFormPage = () => {
             <table>
               <tbody>
                 <tr>
-                  <td rowSpan="2" width="18%">
-                    <div style={{ lineHeight: '1', fontSize: '12px', marginBottom: '0px', marginTop: '0px' }}>
-                      <strong>TARAPUR</strong><br />
-                      Plot No. W-4,<br />
-                      Camlin Naka,<br />
-                      MIDC, Tarapur<br />
-                      M: 9823364283 / 9168027869 / 7276272828<br />
-                    </div>
-                    <hr style={{ margin: '2px 0' }} />
-                    <div style={{ lineHeight: '1', fontSize: '12px', marginBottom: '0px', marginTop: '0px' }}>
-                      <strong>BHIWANDI</strong><br />
-                      Godown No. A-2,<br />
-                      Gali No. 2,<br />
-                      Opp. Capital Roadlines,<br />
-                      Khandagale Estate,<br />
-                      Purna Village, Bhiwandi.<br />
-                      M.: 7507844317 / 9168027868<br />
-                      <div style={{ border: '1px solid #000', borderRadius: '2px', margin: '4px 0 0 0', padding: '2px 6px', fontWeight: 'bold', fontSize: '12px', letterSpacing: '1px', background: '#fff' }}>
-                        <span style={{ display: 'block' }}>PAN: <span style={{ fontWeight: 'bold' }}>AGTPV0112D</span></span>
-                        <span style={{ display: 'block' }}>GSTIN: <span style={{ fontWeight: 'bold' }}>27AGTPV0112D1ZG</span></span>
-                      </div>
-                    </div>
-                    <hr style={{ margin: '2px 0' }} />
-                  </td>
+                 <td rowSpan="2" style={{ width: '25%', height: '100%', verticalAlign: 'top', padding: '4px' }}>
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%'
+  }}>
+    {/* Top Part */}
+    <div style={{ fontSize: '14px', lineHeight: '1.3' }}>
+      <strong>TARAPUR</strong><br />
+      Plot No. W-4,<br />
+      Camlin Naka,<br />
+      MIDC, Tarapur<br />
+      M: 9823364283 / 9168027869 / 8446665945<br />
+      <hr style={{ margin: '6px 0' }} />
+      <strong>BHIWANDI</strong><br />
+      Godown No. A-2,<br />
+      Gali No. 2,<br />
+      Opp. Capital Roadlines,<br />
+      Khandagale Estate,<br />
+      Purna Village, Bhiwandi.<br />
+      M.: 7507844317 / 9168027868<br />
+    </div>
+
+    {/* Bottom Part */}
+    <div style={{
+      border: '1px solid #000',
+      borderRadius: '3px',
+      padding: '6px 10px',
+      fontWeight: 'bold',
+      fontSize: '13px',
+      letterSpacing: '1px',
+      background: '#fff',
+      marginTop: '10px'
+    }}>
+      <span style={{ display: 'block' }}>PAN: <span style={{ fontWeight: 'bold' }}>AGTPV0112D</span></span>
+      <span style={{ display: 'block' }}>GSTIN: <span style={{ fontWeight: 'bold' }}>27AGTPV0112D1ZG</span></span>
+    </div>
+  </div>
+</td>
+
                   {/* Freight Table */}
                   <td colSpan="3">                    <table style={{ height: '330px', borderCollapse: 'collapse', width: '100%' }}>
                     <tbody>
