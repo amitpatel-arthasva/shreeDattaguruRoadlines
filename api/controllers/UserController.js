@@ -1,5 +1,5 @@
 import User from '../../database/models/User.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 class UserController {
   static async getAll(req, res) {

@@ -64,7 +64,7 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   const doorDelivery = parseFloat(lorryReceipt.freightDetails?.doorDelivery || lorryReceipt.door_delivery || 0);
   const detention = parseFloat(lorryReceipt.freightDetails?.detention || lorryReceipt.detention || 0);
   const collection = parseFloat(lorryReceipt.freightDetails?.collection || lorryReceipt.collection || 0);
-  const stCharge = parseFloat(lorryReceipt.freightDetails?.stCharge || lorryReceipt.st_charge || lorryReceipt.service_charge || 20);
+  const stCharge = parseFloat(lorryReceipt.freightDetails?.stCharge || lorryReceipt.st_charge || lorryReceipt.service_charge ||0);
   const extraLoading = parseFloat(lorryReceipt.freightDetails?.extraLoading || lorryReceipt.extra_loading || 0);
   const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
 
@@ -339,6 +339,16 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
                               </div>
                             </td>
                           </tr>
+                          <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ width: '80px' }}>E-way Bill:</span>
+                        <div className="input-container flex-grow">
+                          <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
+                            {getValue(lorryReceipt.ewayBill || lorryReceipt.eway_bill)}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                         </tbody>
                       </table>
                     </td>
@@ -350,23 +360,13 @@ const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
               <table>
                 <tbody>
                   <tr className="delivery-section">
-                    <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
+                    <td colSpan="3" style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <span style={{ width: '80px' }}>Delivery At:</span>
                         <span style={{ color: 'red', marginRight: '4px' }}>*</span>
                         <div className="input-container flex-grow">
                           <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
                             {getValue(lorryReceipt.deliveryAt || lorryReceipt.delivery_at)}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{ width: '80px' }}>E-way Bill:</span>
-                        <div className="input-container flex-grow">
-                          <div className="form-value" style={{ border: '1px solid #000', padding: '4px 8px', minWidth: '250px' }}>
-                            {getValue(lorryReceipt.ewayBill || lorryReceipt.eway_bill)}
                           </div>
                         </div>
                       </div>

@@ -221,8 +221,8 @@ class DatabaseManager {
 
     try {
       // Debug log: print SQL and params before executing
-      console.log('Executing SQL:', sql);
-      console.log('With params:', params);
+      // console.log('Executing SQL:', sql);
+      // console.log('With params:', params);
       if (sql.trim().toUpperCase().startsWith('SELECT')) {
         const stmt = this.db.prepare(sql);
         return stmt.all(params);

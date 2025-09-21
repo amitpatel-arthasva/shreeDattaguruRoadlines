@@ -59,7 +59,7 @@ import isDev from 'electron-is-dev';
 import { createMenu } from './menu.js';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import process from 'process';
 import { spawn } from 'child_process';
 import { generateLorryReceiptPrintPdf } from './pdfService.js';
@@ -71,42 +71,55 @@ const __dirname = path.dirname(__filename);
 let mainWindow;
 let dbManager;
 
+
+
 // Initialize database
 async function initializeDatabase() {
   try {
-    // Only initialize if not already initialized
     if (dbManager) {
       console.log('Database already initialized, skipping...');
       return;
     }
-    
+
     const DatabaseManager = await import('../database/config/database.js');
     dbManager = new DatabaseManager.default();
-    
-    // Set up default database path in user documents
-    const documentsPath = app.getPath('documents');
-    const appDataPath = path.join(documentsPath, 'ShreedattaguruRoadlines');
-    
-    // Create app data directory if it doesn't exist
+
+    // Use Electron's recommended userData path
+    const userDataPath = app.getPath('userData');
+    const appDataPath = path.join(userDataPath, 'ShreedattaguruRoadlines');
+
     if (!fs.existsSync(appDataPath)) {
       fs.mkdirSync(appDataPath, { recursive: true });
     }
-    
+
+    // New database path
+    const newDbPath = path.join(appDataPath, 'roadlines.db');
+
+    // If dbManager.dbPath exists and differs, migrate
+    if (dbManager.dbPath && dbManager.dbPath !== newDbPath && fs.existsSync(dbManager.dbPath)) {
+      try {
+        await fs.promises.copyFile(dbManager.dbPath, newDbPath);
+        console.log(`Database migrated from ${dbManager.dbPath} to ${newDbPath}`);
+      } catch (err) {
+        console.warn('Migration failed, will create new DB:', err.message);
+      }
+    }
+
     // Set database path
-    dbManager.dbPath = path.join(appDataPath, 'roadlines.db');
-    
-    // Check if database file exists, if not copy from template
+    dbManager.dbPath = newDbPath;
+
+    // Copy template if DB does not exist
     const templateDbPath = path.join(__dirname, '../database/roadlines.db');
     if (!fs.existsSync(dbManager.dbPath) && fs.existsSync(templateDbPath)) {
-      fs.copyFileSync(templateDbPath, dbManager.dbPath);
+      await fs.promises.copyFile(templateDbPath, dbManager.dbPath);
     }
-    
+
     await dbManager.initialize();
     console.log('Database initialized successfully at:', dbManager.dbPath);
-    
-    // Test database connection
+
+    // Test connection
     try {
-      const testResult = dbManager.query('SELECT 1');
+      const testResult = await dbManager.query('SELECT 1');
       console.log('Database connection test successful:', testResult);
     } catch (testError) {
       console.error('Database connection test failed:', testError);
@@ -114,8 +127,8 @@ async function initializeDatabase() {
     }
   } catch (error) {
     console.error('Database initialization failed:', error);
-  // dialog.showErrorBox('Database Error', 'Failed to initialize database: ' + error.message);
-    throw error; // Re-throw to prevent app from starting with broken DB
+    dialog.showErrorBox('Database Error', 'Failed to initialize database: ' + error.message);
+    throw error;
   }
 }
 
@@ -234,12 +247,12 @@ ipcMain.handle('db-query', async (event, sql, params) => {
     }
 
     // Log the query for debugging
-    console.log('Executing query:', sql, 'with params:', params);
+    // console.log('Executing query:', sql, 'with params:', params);
 
     let result;
     try {
       result = await dbManager.query(sql, params);
-      console.log('Query result:', result);
+      // console.log('Query result:', result);
       if (!sql.trim().toUpperCase().startsWith('SELECT')) {
         console.log('Non-SELECT query executed. Result object:', JSON.stringify(result, null, 2));
       }
@@ -368,6 +381,8 @@ ipcMain.handle('select-database-folder', async (event, shouldMigrate = true) => 
   return { success: false, message: 'No folder selected' };
 });
 
+
+//getdb path
 ipcMain.handle('get-database-path', () => {
   return dbManager ? path.dirname(dbManager.dbPath) : null;
 });

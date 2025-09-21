@@ -13,7 +13,7 @@ const DatabaseSettings = () => {
   }, []);
 
   const loadCurrentPath = async () => {
-    try {
+    try { 
       if (window.electronAPI) {
         const path = await apiService.getDatabasePath();
         setCurrentPath(path || 'Not set');

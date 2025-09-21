@@ -12,7 +12,9 @@ const LorryReceiptFormPage = () => {
   const toast = useToast();
   const navigate = useNavigate();    // Company autocomplete state
   const [companies, setCompanies] = useState([]);
-  const [showConsignorDropdown, setShowConsignorDropdown] = useState(false); const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
+  const [locations, setLocations] = useState(['Tarapur', 'Bhiwandi']);
+  const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);
+  const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showTruckDropdown, setShowTruckDropdown] = useState(false);
   const [trucks, setTrucks] = useState([]);
@@ -179,7 +181,8 @@ const LorryReceiptFormPage = () => {
       total: '26220',
       remarks: 'High-value electronic equipment'
     }
-  ]; const [formData, setFormData] = useState({
+  ];
+  const [formData, setFormData] = useState({
     consignorName: '',
     consignorAddress1: '',
     consignorCity: '',
@@ -196,7 +199,7 @@ const LorryReceiptFormPage = () => {
     consigneePan: '',
     cnNumber: '',
     truckNumber: '',
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     to: '',
     from: '',
     nos: [''],
@@ -207,7 +210,7 @@ const LorryReceiptFormPage = () => {
     doorDelivery: '',
     detention: '',
     collection: '',
-    stCharge: '20', // Default value is 20
+    stCharge: '', // Default value is 20
     extraLoading: '',
     actualWeight: '',
     chargeableWeight: '',
@@ -222,6 +225,17 @@ const LorryReceiptFormPage = () => {
   });
   // Validation errors state
   const [validationErrors, setValidationErrors] = useState({});
+
+  ///titlecase
+  const toTitleCase = (str) => {
+  if (!str) return '';
+  return str
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 
   // Validation functions
   const validateGSTIN = (gstin) => {
@@ -290,6 +304,87 @@ const LorryReceiptFormPage = () => {
       [name]: error
     })); return error === '';
   };
+
+  // adding fields for particulars
+  const [particularsList, setParticularsList] = useState([]); // default
+  const [showParticularsDropdown, setShowParticularsDropdown] = useState([false]); // one per input
+
+  useEffect(() => {
+    const fetchParticulars = async () => {
+      try {
+        const allParticulars = await lorryReceiptService.getParticulars();
+        setParticularsList(allParticulars.length ? allParticulars : ['JUTE', 'COTTON']);
+      } catch (error) {
+        console.error('Failed to load particulars:', error);
+        setParticularsList(['JUTE', 'COTTON']);
+      }
+    };
+
+    fetchParticulars();
+  }, []);
+
+  const handleParticularInputChange = (index, value) => {
+    setFormData(prev => {
+      const newArr = [...prev.particulars];
+      newArr[index] = value;
+      return { ...prev, particulars: newArr };
+    });
+
+    setShowParticularsDropdown(prev => {
+      const newArr = [...prev];
+      newArr[index] = true;
+      return newArr;
+    });
+  };
+
+  const handleSelectParticular = async (value, index) => {
+    console.log('Adding particular:', value)
+    // Save new value to DB if needed
+    if (!particularsList.includes(value)) {
+      const res = await lorryReceiptService.addParticular(value);
+      if (res.success) setParticularsList(prev => [...prev, value]);
+      else return alert('Failed to save particular');
+    }
+
+    setFormData(prev => {
+      const newArr = [...prev.particulars];
+      newArr[index] = value;
+      return { ...prev, particulars: newArr };
+    });
+
+    setShowParticularsDropdown(prev => {
+      const newArr = [...prev];
+      newArr[index] = false; // hide dropdown after selection
+      return newArr;
+    });
+  };
+
+  const handleCustomParticular = async (index) => {
+    const value = formData.particulars[index].trim();
+    if (!value) return;
+    await handleSelectParticular(value, index);
+  };
+
+  const addParticularField = () => {
+    setFormData(prev => ({
+      ...prev,
+      particulars: [...prev.particulars, ''],
+      nos: [...prev.nos, '']
+    }));
+
+    setShowParticularsDropdown(prev => [...prev, false]);
+  };
+
+  const removeParticularField = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      particulars: prev.particulars.filter((_, i) => i !== index),
+      nos: prev.nos.filter((_, i) => i !== index)
+    }));
+
+    setShowParticularsDropdown(prev => prev.filter((_, i) => i !== index));
+  };
+
 
   // Validate required fields
   const validateRequiredFields = () => {
@@ -381,13 +476,14 @@ const LorryReceiptFormPage = () => {
     setValidationErrors(prev => ({
       ...prev,
       ...errors
-    })); return !hasErrors;
+    }));
     // Log summary of errors before returning
     if (hasErrors) {
       console.log('Validation failed. Errors:', errors);
     } else {
       console.log('Validation passed. No errors.');
     }
+    return !hasErrors;
   };
 
   // Check if company already exists with same data
@@ -571,6 +667,7 @@ const LorryReceiptFormPage = () => {
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
+      console.log("error", error);
       return;
     }
 
@@ -704,6 +801,7 @@ const LorryReceiptFormPage = () => {
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
+      console.log("error", error);
       return;
     }
 
@@ -1041,36 +1139,82 @@ const LorryReceiptFormPage = () => {
     setFormData(prev => ({ ...prev, from: value }));
     setShowFromDropdown(true);
   };
+
+  const getPrefix = (location) => {
+    if (!location) return 'OTH';
+    const l = location.toLowerCase();
+    if (l.includes('tarapur')) return 'TPR';
+    if (l.includes('bhiwandi')) return 'BWD';
+    return 'OTH'; // shared sequence for all other locations
+  };
+
+
   const generateCnNumber = async (location) => {
     try {
-      const prefix = location === 'Tarapur' ? 'TPR' : 'BWD';
+      const prefix = getPrefix(location);
 
-      // Fetch the highest CN number from database for this prefix
-      const response = await lorryReceiptService.getNextCnNumber(prefix);
+      // Use getNextCnNumber instead of getLastCnNumber
+      const cnResult = await lorryReceiptService.getNextCnNumber(prefix);
 
-      if (response.success) {
-        return `${prefix}-${response.data.nextNumber.toString().padStart(3, '0')}`;
-      } else {
-        // Fallback to 001 if API fails
-        return `${prefix}-001`;
+      if (!cnResult.success) {
+        throw new Error('Failed to generate CN number');
       }
+
+      const nextNumber = cnResult.data.nextNumber;
+      return `${prefix}-${String(nextNumber).padStart(3, '0')}`;
     } catch (error) {
       console.error('Error generating CN number:', error);
-      // Fallback to 001 if API fails
-      const prefix = location === 'Tarapur' ? 'TPR' : 'BWD';
-      return `${prefix}-001`;
+      return `${getPrefix(location)}-001`;
     }
   };
 
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const savedLocations = await lorryReceiptService.getLocations();
+        // Merge saved locations with defaults, avoiding duplicates
+        const mergedLocations = Array.from(new Set([...locations, ...savedLocations]));
+        setLocations(mergedLocations);
+      } catch (error) {
+        console.error('Failed to load locations:', error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+
   const selectFromLocation = async (location) => {
     const cnNumber = await generateCnNumber(location);
+
     setFormData(prev => ({
       ...prev,
       from: location,
-      cnNumber: cnNumber
+      cnNumber
     }));
+
     setShowFromDropdown(false);
   };
+
+  const handleCustomLocation = async () => {
+    const newLocation = formData.from.trim();
+    if (!newLocation) return;
+
+    // Save to DB if not already present
+    if (!locations.includes(newLocation)) {
+      const res = await lorryReceiptService.addLocation(newLocation);
+      if (res.success) {
+        setLocations(prev => [...prev, newLocation]);
+      } else {
+        alert('Failed to save new location. Try again.');
+        return;
+      }
+    }
+
+    await selectFromLocation(newLocation); // fill input
+    setShowFromDropdown(false);
+  };
+
 
   const handleFromInputBlur = () => {
     // Delay hiding dropdown to allow for selection
@@ -1146,13 +1290,13 @@ const LorryReceiptFormPage = () => {
             Back
           </button>
           <div className="flex gap-2">
-            <button
+            {/* <button
               type="button"
               onClick={fillDummyData}
               className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
             >
               Fill Dummy Data
-            </button>
+            </button> */}
             <button
               type="submit"
               onClick={handleSubmit}
@@ -1178,19 +1322,24 @@ const LorryReceiptFormPage = () => {
           <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
             <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
               <div className='w-full flex flex-col items-center justify-center py-2'>
-                <div className='w-full flex flex-row items-start justify-between py-2'>
-                  <div className='flex-shrink-0 flex items-center w-2/3'>
-                    <img src={truckHeader} alt="BillLogo" className="h-40 object-contain " />
-                    <img src={nameHeader} alt="BillLogo" className=" h-30 object-contain  ml-30" />
+                <div className="w-full flex flex-row items-center justify-between py-2 gap-8">
+                  {/* Left side (truck + name) */}
+                  <div className="flex-shrink-0 flex items-center min-w-[600px] gap-6">
+                    <img src={truckHeader} alt="BillLogo" className="h-56 object-contain" />
+                    <img src={nameHeader} alt="BillLogo" className="h-36 object-contain" />
                   </div>
-                  <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
-                    <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
-                    <div className='mb-2 text-right text-xs'>
-                      <div className='font-semibold'>Daily Part Load Service to -</div>
+
+                  {/* Right side (jurisdiction + drivers copy) */}
+                  <div className="flex flex-col items-end text-base font-medium text-gray-700 leading-tight min-w-[360px] w-[40%]">
+                    <div className="mb-2 font-bold text-lg">
+                      SUBJECT TO PALGHAR JURISDICTION
+                    </div>
+                    <div className="mb-2 text-right text-base">
+                      <div className="font-semibold">Daily Part Load Service to -</div>
                       <div>Tarapur, Bhiwandi, Palghar,</div>
                       <div>Vashi, Taloja, Kolgoan Genises</div>
                     </div>
-                    <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                    <div className="font-bold text-red-600 border border-red-600 px-3 py-1 inline-block text-base mt-2">
                       DRIVERS COPY
                     </div>
                   </div>
@@ -1561,38 +1710,58 @@ const LorryReceiptFormPage = () => {
                     <td>
                       <strong>From - <span className="text-red-500">*</span></strong>
                       <div className="relative inline-block">
-                        <div className="input-container inline-block" onClick={handleDivClick}>
-                          <input
-                            type="text"
-                            name="from"
-                            value={formData.from}
-                            onChange={handleFromInputChange}
-                            onFocus={() => setShowFromDropdown(true)}
-                            onBlur={handleFromInputBlur}
-                            className="form-input-small"
-                            placeholder="From Location"
-                            autoComplete="off"
-                          />
-                        </div>                        {showFromDropdown && (
+                        <input
+                          type="text"
+                          name="from"
+                          value={formData.from}
+                          onChange={(e) => {
+                            setFormData({ ...formData, from: e.target.value });
+                            setShowFromDropdown(true);
+                          }}
+                          onFocus={() => setShowFromDropdown(true)} // Show dropdown on focus
+                          onBlur={handleFromInputBlur}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleCustomLocation(); }}
+                          placeholder="From Location"
+                          className="form-input-small"
+                          autoComplete="off"
+                        />
+
+                        {showFromDropdown && (
                           <div
                             ref={fromDropdownRef}
                             className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
                             style={{ minWidth: '150px' }}
                           >
-                            {['Tarapur', 'Bhiwandi'].map((location) => (
+                            {locations
+                              .filter(loc =>
+                                formData.from.trim() === '' // if input is empty, show all
+                                  ? true
+                                  : loc.toLowerCase().includes(formData.from.toLowerCase())
+                              )
+                              .map((location) => (
+                                <div
+                                  key={location}
+                                  className="px-3 py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-100"
+                                  onClick={() => selectFromLocation(location)}
+                                >
+                                  <div className="font-medium text-sm">{location}</div>
+                                </div>
+                              ))}
+
+                            {!locations.includes(formData.from.trim()) && formData.from.trim() !== '' && (
                               <div
-                                key={location}
-                                className="px-3 py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-100"
-                                onClick={() => selectFromLocation(location)}
+                                className="px-3 py-2 cursor-pointer font-bold hover:bg-gray-100"
+                                onClick={handleCustomLocation}
                               >
-                                <div className="font-medium text-sm">{location}</div>
+                                Add "{formData.from}"
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
                       </div>
                     </td>
                   </tr>
+
                   <tr>
                     <td>
                       <strong>To - <span className="text-red-500">*</span></strong>
@@ -1615,46 +1784,46 @@ const LorryReceiptFormPage = () => {
             <table>
               <tbody>
                 <tr>
-                 <td rowSpan="2" style={{ width: '25%', height: '100%', verticalAlign: 'top', padding: '4px' }}>
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: '100%'
-  }}>
-    {/* Top Part */}
-    <div style={{ fontSize: '14px', lineHeight: '1.3' }}>
-      <strong>TARAPUR</strong><br />
-      Plot No. W-4,<br />
-      Camlin Naka,<br />
-      MIDC, Tarapur<br />
-      M: 9823364283 / 9168027869 / 8446665945<br />
-      <hr style={{ margin: '6px 0' }} />
-      <strong>BHIWANDI</strong><br />
-      Godown No. A-2,<br />
-      Gali No. 2,<br />
-      Opp. Capital Roadlines,<br />
-      Khandagale Estate,<br />
-      Purna Village, Bhiwandi.<br />
-      M.: 7507844317 / 9168027868<br />
-    </div>
+                  <td rowSpan="2" style={{ width: '25%', height: '100%', verticalAlign: 'top', padding: '4px' }}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      height: '100%'
+                    }}>
+                      {/* Top Part */}
+                      <div style={{ fontSize: '14px', lineHeight: '1.3' }}>
+                        <strong>TARAPUR</strong><br />
+                        Plot No. W-4,<br />
+                        Camlin Naka,<br />
+                        MIDC, Tarapur<br />
+                        M: 9823364283 / 9168027869 / 8446665945<br />
+                        <hr style={{ margin: '6px 0' }} />
+                        <strong>BHIWANDI</strong><br />
+                        Godown No. A-2,<br />
+                        Gali No. 2,<br />
+                        Opp. Capital Roadlines,<br />
+                        Khandagale Estate,<br />
+                        Purna Village, Bhiwandi.<br />
+                        M.: 7507844317 / 9168027868<br />
+                      </div>
 
-    {/* Bottom Part */}
-    <div style={{
-      border: '1px solid #000',
-      borderRadius: '3px',
-      padding: '6px 10px',
-      fontWeight: 'bold',
-      fontSize: '13px',
-      letterSpacing: '1px',
-      background: '#fff',
-      marginTop: '10px'
-    }}>
-      <span style={{ display: 'block' }}>PAN: <span style={{ fontWeight: 'bold' }}>AGTPV0112D</span></span>
-      <span style={{ display: 'block' }}>GSTIN: <span style={{ fontWeight: 'bold' }}>27AGTPV0112D1ZG</span></span>
-    </div>
-  </div>
-</td>
+                      {/* Bottom Part */}
+                      <div style={{
+                        border: '1px solid #000',
+                        borderRadius: '3px',
+                        padding: '6px 10px',
+                        fontWeight: 'bold',
+                        fontSize: '13px',
+                        letterSpacing: '1px',
+                        background: '#fff',
+                        marginTop: '10px'
+                      }}>
+                        <span style={{ display: 'block' }}>PAN: <span style={{ fontWeight: 'bold' }}>AGTPV0112D</span></span>
+                        <span style={{ display: 'block' }}>GSTIN: <span style={{ fontWeight: 'bold' }}>27AGTPV0112D1ZG</span></span>
+                      </div>
+                    </div>
+                  </td>
 
                   {/* Freight Table */}
                   <td colSpan="3">                    <table style={{ height: '330px', borderCollapse: 'collapse', width: '100%' }}>
@@ -1694,43 +1863,57 @@ const LorryReceiptFormPage = () => {
                         {/* Particulars */}
                         <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
                           {formData.particulars.map((particular, index) => (
-                            <div key={index} className="flex items-center mb-2">
-                              <div className="input-container flex-1" onClick={handleDivClick}>
-                                <input
-                                  type="text"
-                                  value={particular}
-                                  onChange={(e) => handleArrayInputChange(index, 'particulars', e.target.value)}
-                                  className="form-input-particulars"
-                                  placeholder={`Particulars ${index + 1}`}
-                                />
-                              </div>
+                            <div key={index} className="flex items-center mb-2 relative">
+                              <input
+                                type="text"
+                                value={particular}
+                                onChange={(e) => handleParticularInputChange(index, e.target.value)}
+                                onFocus={() => handleParticularInputChange(index, particular)}
+                                placeholder={`Particulars ${index + 1}`}
+                                className="form-input-particulars"
+                              />
+
                               {formData.particulars.length > 1 && (
                                 <button
                                   type="button"
-                                  onClick={() => removeArrayField(index, 'particulars')}
+                                  onClick={() => removeParticularField(index)}
                                   className="ml-1 text-red-500 hover:text-red-700 text-xs"
                                 >
                                   ×
                                 </button>
                               )}
+
+                              {showParticularsDropdown[index] && (
+                                <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                                  {particularsList
+                                    .filter(item => item.toLowerCase().includes(particular.toLowerCase()))
+                                    .map(item => (
+                                      <div key={item} className="px-3 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectParticular(item, index)}>
+                                        {item}
+                                      </div>
+                                    ))}
+
+                                  {!particularsList.includes(particular) && particular.trim() !== '' && (
+                                    <div className="px-3 py-2 cursor-pointer font-bold hover:bg-gray-100" onClick={() => handleCustomParticular(index)}>
+                                      Add "{particular}"
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ))}
+
                           <div style={{ textAlign: 'left', marginTop: '8px' }}>
                             <button
                               type="button"
                               className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  nos: [...prev.nos, ''],
-                                  particulars: [...prev.particulars, '']
-                                }));
-                              }}
+                              onClick={addParticularField}
                             >
                               + Add More
                             </button>
                           </div>
                         </td>
+
                         {/* Left Rate Rs. subcolumn */}
                         <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px', justifyContent: 'space-between' }}>
@@ -1909,7 +2092,7 @@ const LorryReceiptFormPage = () => {
                                 onChange={(e) => setFormData(prev => ({
                                   ...prev,
                                   paymentType: e.target.value,
-                                  paid: '20',
+                                  paid: '0',
                                   toBeBill: '0',
                                   toPay: '0'
                                 }))}
@@ -1960,6 +2143,24 @@ const LorryReceiptFormPage = () => {
                           </div>
                         </td>
                       </tr>
+                      <tr>
+                        <td colSpan="5" style={{
+                          border: '1px solid #000',
+                          padding: '6px',
+                          fontSize: '13px'
+                        }}>
+                          <strong>E-way Bill:</strong>&nbsp;
+                          <input
+                            type="text"
+                            name="ewayBill"
+                            value={formData.ewayBill || ''}
+                            onChange={handleInputChange}
+                            className="form-input-delivery"
+                            placeholder="Enter E-way Bill number"
+                            style={{ width: '250px', border: 'none', borderBottom: '1px solid #000' }}
+                          />
+                        </td>
+                      </tr>
                     </tbody>
                   </table>                  </td>
                 </tr>
@@ -1969,7 +2170,7 @@ const LorryReceiptFormPage = () => {
             <table>
               <tbody>
                 <tr style={{ height: '30px' }}>
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
+                  <td colSpan='3' style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ width: '90px' }}>Delivery At: <span className="text-red-500">*</span></span>
                       <div className="input-container flex-grow" onClick={handleDivClick}>
@@ -1984,7 +2185,7 @@ const LorryReceiptFormPage = () => {
                       </div>
                     </div>
                   </td>
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                  {/* <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ width: '90px' }}>E-way Bill:</span>
                       <div className="input-container flex-grow" onClick={handleDivClick}>
@@ -1999,7 +2200,7 @@ const LorryReceiptFormPage = () => {
                         />
                       </div>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
                 <tr style={{ height: '40px' }}>
                   <td colSpan="3" style={{ verticalAlign: 'top' }}>
@@ -2289,3 +2490,9 @@ const LorryReceiptFormPage = () => {
 };
 
 export default LorryReceiptFormPage;
+
+
+
+//1 eway bill store
+//2 from location other option
+//3 dropdown for particluars selection

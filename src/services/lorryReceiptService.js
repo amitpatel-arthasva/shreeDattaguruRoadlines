@@ -32,7 +32,7 @@ class LorryReceiptService {
         LEFT JOIN drivers d ON lr.driver_id = d.id
         WHERE 1=1
       `;
-      
+
       const queryParams = [];      // Add search filters
       if (search) {
         sql += ` AND (
@@ -45,9 +45,9 @@ class LorryReceiptService {
         const searchTerm = `%${search}%`;
         queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
       }
-      
+
       sql += ` ORDER BY lr.lr_date DESC, lr.created_at DESC`;
-      
+
       // Add pagination
       const offset = (page - 1) * limit;
       sql += ` LIMIT ? OFFSET ?`;
@@ -62,7 +62,7 @@ class LorryReceiptService {
         LEFT JOIN trucks t ON lr.truck_id = t.id
         WHERE 1=1
       `;
-        const countParams = [];
+      const countParams = [];
       if (search) {
         countSql += ` AND (
           cons_or.name LIKE ? OR 
@@ -74,7 +74,7 @@ class LorryReceiptService {
         const searchTerm = `%${search}%`;
         countParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
       }
-      
+
       const lorryReceipts = await apiService.query(sql, queryParams);
       const countResult = await apiService.query(countSql, countParams);
       const total = countResult[0]?.total || 0;
@@ -83,7 +83,7 @@ class LorryReceiptService {
         // Parse JSON fields safely
         let nosArray = [];
         let particularsArray = [];
-        
+
         try {
           if (lr.nos && lr.nos !== 'null' && lr.nos.trim() !== '') {
             nosArray = JSON.parse(lr.nos);
@@ -92,7 +92,7 @@ class LorryReceiptService {
           console.warn('Failed to parse nos JSON:', lr.nos, error);
           nosArray = [];
         }
-        
+
         try {
           if (lr.particulars && lr.particulars !== 'null' && lr.particulars.trim() !== '') {
             particularsArray = JSON.parse(lr.particulars);
@@ -139,7 +139,7 @@ class LorryReceiptService {
           particulars: particularsArray
         };
       });
-      
+
       return {
         success: true,
         data: {
@@ -156,7 +156,7 @@ class LorryReceiptService {
   }  // Get lorry receipt by ID
   async getLorryReceiptById(id) {
     try {
-      
+
       const sql = `
         SELECT lr.*, 
                cons_or.name as consignor_name, 
@@ -183,18 +183,18 @@ class LorryReceiptService {
         LEFT JOIN drivers d ON lr.driver_id = d.id
         WHERE lr.id = ?
       `;
-      
+
       const result = await apiService.query(sql, [id]);
-      
+
       const lr = result[0];
-      
+
       if (!lr) {
         throw new Error('Lorry receipt not found');
       }
 
       let nosArray = [];
       let particularsArray = [];
-      
+
       try {
         if (lr.nos && lr.nos !== 'null' && lr.nos.trim() !== '') {
           nosArray = JSON.parse(lr.nos);
@@ -203,7 +203,7 @@ class LorryReceiptService {
         console.warn('Failed to parse nos JSON:', lr.nos, error);
         nosArray = [];
       }
-      
+
       try {
         if (lr.particulars && lr.particulars !== 'null' && lr.particulars.trim() !== '') {
           particularsArray = JSON.parse(lr.particulars);
@@ -252,7 +252,7 @@ class LorryReceiptService {
           contactNumber: null, // Not available in current schema
           email: null // Not available in current schema
         },
-        
+
         truckDetails: {
           truckNumber: lr.truck_number || lr.truck_reg_number,
           vehicleType: lr.truck_type,
@@ -266,7 +266,7 @@ class LorryReceiptService {
           driverAddress: lr.driver_address,
           licenseNumber: lr.license_number
         },
-        
+
         // Material details from JSON arrays
         materialDetails: nosArray.map((nos, index) => ({
           nos: nos,
@@ -274,7 +274,7 @@ class LorryReceiptService {
           actualWeight: lr.actual_weight ? { value: lr.actual_weight, unit: 'Tons' } : null,
           chargedWeight: lr.chargeable_weight ? { value: lr.chargeable_weight, unit: 'Tons' } : null
         })),
-        
+
         freightDetails: {
           freight: lr.freight || 0,
           hamali: lr.hamali || 0,
@@ -287,7 +287,7 @@ class LorryReceiptService {
           total: lr.total || 0,
           paymentType: lr.payment_type
         },
-        
+
         // Additional fields from database
         actualWeight: lr.actual_weight,
         chargeableWeight: lr.chargeable_weight,
@@ -297,8 +297,8 @@ class LorryReceiptService {
         notes: lr.remarks, // Using remarks as notes for compatibility
         paymentType: lr.payment_type
       };
-      
-      
+
+
       return {
         success: true,
         data: transformedReceipt
@@ -306,59 +306,60 @@ class LorryReceiptService {
     } catch (error) {
       console.error('Error in getLorryReceiptById:', error);
       throw error;
-    }  }
+    }
+  }
 
   // Create new lorry receipt
-  async createLorryReceipt(lrData) {    try {
-      
-      // Generate CN number based on from location
+  async createLorryReceipt(lrData) {
+    try {
       let cnPrefix = '';
+
       if (lrData.from_location) {
         const fromLocation = lrData.from_location.toLowerCase();
+
         if (fromLocation.includes('tarapur')) {
           cnPrefix = 'TPR';
         } else if (fromLocation.includes('bhiwandi')) {
           cnPrefix = 'BWD';
         } else {
-          // Default prefix for other locations
-          cnPrefix = 'LR';
+          cnPrefix = 'OTH'; // single prefix for all other locations
         }
       } else {
-        cnPrefix = 'LR';
+        cnPrefix = 'OTH';
       }
-      
-      // Get next CN number
+
+      // Get next CN number for this prefix
       const cnResult = await this.getNextCnNumber(cnPrefix);
       if (!cnResult.success) {
         throw new Error('Failed to generate CN number');
       }
-      
+
       const cnNumber = `${cnPrefix}-${String(cnResult.data.nextNumber).padStart(3, '0')}`;
-      
-        const sql = `
-        INSERT INTO lorry_receipts (
-          cn_number, truck_number, lr_date, to_location, from_location,
-          company_id, consignor_id, consignee_id, truck_id, driver_id,
-          nos, particulars,
-          freight, hamali, aoc, door_delivery, detention, collection, st_charge, extra_loading,
-          actual_weight, chargeable_weight,
-          payment_type, delivery_at, eway_bill, total, remarks
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+
+      const sql = `
+      INSERT INTO lorry_receipts (
+        cn_number, truck_number, lr_date, to_location, from_location,
+        company_id, consignor_id, consignee_id, truck_id, driver_id,
+        nos, particulars,
+        freight, hamali, aoc, door_delivery, detention, collection, st_charge, extra_loading,
+        actual_weight, chargeable_weight,
+        payment_type, delivery_at, eway_bill, total, remarks
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
       const params = [
-        cnNumber, // Auto-generated CN number
+        cnNumber,
         lrData.truck_number,
         lrData.lr_date,
         lrData.to_location,
         lrData.from_location,
-        lrData.company_id || null, // Add company_id parameter
+        lrData.company_id || null,
         lrData.consignor_id,
         lrData.consignee_id,
         lrData.truck_id || null,
         lrData.driver_id || null,
-        lrData.nos, // Already JSON string
-        lrData.particulars, // Already JSON string
+        lrData.nos,
+        lrData.particulars,
         lrData.freight || 0,
         lrData.hamali || 0,
         lrData.aoc || 0,
@@ -377,9 +378,8 @@ class LorryReceiptService {
       ];
 
       const result = await apiService.query(sql, params);
-      
+
       if (result && result.changes > 0) {
-        // Get the created lorry receipt with company details
         const newLR = await this.getLorryReceiptById(result.lastInsertRowid);
         return {
           success: true,
@@ -461,7 +461,7 @@ class LorryReceiptService {
       ];
 
       const result = await apiService.query(sql, params);
-      
+
       if (result && result.changes > 0) {
         // Get the updated lorry receipt with company details
         const updatedLR = await this.getLorryReceiptById(id);
@@ -487,7 +487,7 @@ class LorryReceiptService {
     try {
       const sql = 'DELETE FROM lorry_receipts WHERE id = ?';
       await apiService.query(sql, [id]);
-      
+
       return {
         success: true,
         message: 'Lorry receipt deleted successfully'
@@ -519,15 +519,15 @@ class LorryReceiptService {
     try {
       const sql = 'SELECT lr_number FROM lorry_receipts ORDER BY id DESC LIMIT 1';
       const result = await apiService.query(sql);
-      
+
       if (result.length === 0) {
         return 'LR001';
       }
-      
+
       const lastLRNumber = result[0].lr_number;
       const numberPart = parseInt(lastLRNumber.replace(/[^\d]/g, ''));
       const nextNumber = numberPart + 1;
-      
+
       return `LR${nextNumber.toString().padStart(3, '0')}`;
     } catch (error) {
       console.error('Error generating LR number:', error);
@@ -538,23 +538,73 @@ class LorryReceiptService {
   // Generate next CN number based on prefix (TPR or BWD)
   async getNextCnNumber(prefix) {
     try {
-      const sql = 'SELECT cn_number FROM lorry_receipts WHERE cn_number LIKE ? ORDER BY id DESC LIMIT 1';
+      const sql = `
+      SELECT cn_number 
+      FROM lorry_receipts 
+      WHERE cn_number LIKE ? 
+      ORDER BY id DESC 
+      LIMIT 1
+    `;
       const result = await apiService.query(sql, [`${prefix}-%`]);
-      
-      if (result.length === 0) {
+
+      // Ensure we have rows
+      const rows = Array.isArray(result) ? result : result?.rows || [];
+
+      if (rows.length === 0) {
         return { success: true, data: { nextNumber: 1 } };
       }
-      
-      const lastCnNumber = result[0].cn_number;
-      const numberPart = parseInt(lastCnNumber.split('-')[1]);
-      const nextNumber = numberPart + 1;
-      
+
+      const lastCnNumber = rows[0].cn_number; // e.g. "OTH-005"
+      const parts = lastCnNumber.split('-');
+      const numberPart = parts.length > 1 ? parseInt(parts[1], 10) : NaN;
+
+      const nextNumber = !isNaN(numberPart) ? numberPart + 1 : 1;
+
       return { success: true, data: { nextNumber } };
     } catch (error) {
       console.error('Error generating CN number:', error);
       return { success: false, error: 'Failed to generate CN number' };
     }
   }
+
+  async getLocations() {
+    const sql = 'SELECT name FROM locations ORDER BY name ASC';
+    const result = await apiService.query(sql);
+    return result.map(row => row.name);
+  }
+
+
+  async addLocation(name) {
+    if (!name) return;
+    const sql = 'INSERT OR IGNORE INTO locations (name) VALUES (?)';
+    await apiService.query(sql, [name]);
+  }
+
+  // Fetch all particulars
+  async getParticulars() {
+    const sql = 'SELECT name FROM particulars ORDER BY name ASC';
+    const result = await apiService.query(sql);
+    return result.map(row => row.name);
+  }
+
+  // Add a new particular
+  async addParticular(name) {
+    if (!name) return { success: false, error: 'Name is empty' };
+
+    try {
+      const sql = `INSERT INTO particulars (name) VALUES (?)`;
+      const result = await apiService.query(sql, [name]);
+      return { success: true, lastInsertRowid: result.lastInsertRowid };
+    } catch (err) {
+      console.error('Failed to insert particular:', err);
+      return { success: false, error: err.message };
+    }
+  }
+
+
+
 }
+
+
 
 export default new LorryReceiptService();

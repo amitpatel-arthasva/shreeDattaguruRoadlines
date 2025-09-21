@@ -12,13 +12,14 @@ const LorryReceiptEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const toast = useToast();
-  
+
   // Company autocomplete state
   const [companies, setCompanies] = useState([]);
   const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);
   const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showTruckDropdown, setShowTruckDropdown] = useState(false);
+  const [locations, setLocations] = useState([]);
   const [trucks, setTrucks] = useState([]);
   const [filteredConsignorCompanies, setFilteredConsignorCompanies] = useState([]);
   const [filteredConsigneeCompanies, setFilteredConsigneeCompanies] = useState([]);
@@ -31,13 +32,22 @@ const LorryReceiptEditPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
-  
+
   const consignorDropdownRef = useRef(null);
   const consigneeDropdownRef = useRef(null);
   const fromDropdownRef = useRef(null);
   const truckDropdownRef = useRef(null);
   const consignorInputRef = useRef(null);
   const consigneeInputRef = useRef(null);
+
+    const toTitleCase = (str) => {
+  if (!str) return '';
+  return str
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 
   const [formData, setFormData] = useState({
     consignorName: '',
@@ -67,7 +77,7 @@ const LorryReceiptEditPage = () => {
     doorDelivery: '',
     detention: '',
     collection: '',
-    stCharge: '20',
+    stCharge: '',
     extraLoading: '',
     actualWeight: '',
     chargeableWeight: '',
@@ -86,6 +96,90 @@ const LorryReceiptEditPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+
+
+  // adding fields for particulars
+  const [particularsList, setParticularsList] = useState([]); // default
+  const [showParticularsDropdown, setShowParticularsDropdown] = useState([false]); // one per input
+
+
+useEffect(() => {
+  const fetchParticulars = async () => {
+    try {
+      const allParticulars = await lorryReceiptService.getParticulars();
+      setParticularsList(allParticulars.length ? allParticulars : ['JUTE', 'COTTON']);
+    } catch (err) {
+      setParticularsList(['JUTE', 'COTTON']);
+      console.error('Failed to fetch particulars', err);
+    }
+  };
+  fetchParticulars();
+}, []);
+
+const handleParticularInputChange = (index, value) => {
+  const formattedValue = toTitleCase(value); // convert to Title Case
+
+  setFormData(prev => {
+    const newArr = [...prev.particulars];
+    newArr[index] = formattedValue;
+    return { ...prev, particulars: newArr };
+  });
+
+  setShowParticularsDropdown(prev => {
+    const newArr = [...prev];
+    newArr[index] = true; // show dropdown
+    return newArr;
+  });
+};
+
+
+const handleSelectParticular = async (value, index) => {
+  const formattedValue = toTitleCase(value);
+
+  // save new item to DB if not exists
+  if (!particularsList.includes(formattedValue)) {
+    const res = await lorryReceiptService.addParticular(formattedValue);
+    if (res.success) setParticularsList(prev => [...prev, formattedValue]);
+    else return alert('Failed to save particular');
+  }
+
+  // update form and hide dropdown
+  setFormData(prev => {
+    const newArr = [...prev.particulars];
+    newArr[index] = formattedValue;
+    return { ...prev, particulars: newArr };
+  });
+
+  setShowParticularsDropdown(prev => {
+    const newArr = [...prev];
+    newArr[index] = false;
+    return newArr;
+  });
+};
+
+const handleCustomParticular = async (index) => {
+  const value = formData.particulars[index].trim();
+  if (!value) return;
+  await handleSelectParticular(value, index);
+};
+
+const addParticularField = () => {
+  setFormData(prev => ({
+    ...prev,
+    particulars: [...prev.particulars, ''],
+  }));
+  setShowParticularsDropdown(prev => [...prev, false]);
+};
+
+const removeParticularField = (index) => {
+  setFormData(prev => ({
+    ...prev,
+    particulars: prev.particulars.filter((_, i) => i !== index),
+  }));
+  setShowParticularsDropdown(prev => prev.filter((_, i) => i !== index));
+};
+
 
   // Load existing lorry receipt data
   useEffect(() => {
@@ -106,23 +200,23 @@ const LorryReceiptEditPage = () => {
       console.log('Loading lorry receipt data for ID:', id);
       const response = await lorryReceiptService.getLorryReceiptById(id);
       console.log('API Response:', response);
-      
+
       if (response.success && response.data) {
         const lr = response.data;
         console.log('Transformed lorry receipt data:', lr);
-        
+
         // Parse JSON strings for arrays
         let nosArray = [''];
         let particularsArray = [''];
-        
+
         // Get material details from the transformed structure
         if (lr.materialDetails && Array.isArray(lr.materialDetails)) {
           nosArray = lr.materialDetails.map(item => item.nos || '');
           particularsArray = lr.materialDetails.map(item => item.particulars || '');
         }
-        
+
         console.log('Parsed arrays - nos:', nosArray, 'particulars:', particularsArray);
-        
+
         // Transform the data to match form structure
         const formDataToSet = {
           consignorName: lr.consignor?.consignorName || '',
@@ -169,7 +263,7 @@ const LorryReceiptEditPage = () => {
           truck_id: lr.truck_id || '',
           driver_id: lr.driver_id || ''
         };
-        
+
         console.log('Setting form data:', formDataToSet);
         setFormData(formDataToSet);
       } else {
@@ -211,7 +305,7 @@ const LorryReceiptEditPage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -222,13 +316,15 @@ const LorryReceiptEditPage = () => {
     // Delay hiding dropdown to allow for selection
     setTimeout(() => {
       setShowTruckDropdown(false);
-    }, 200);  };
+    }, 200);
+  };
 
   const handleDivClick = (e) => {
     const input = e.currentTarget.querySelector('input');
     if (input) {
       input.focus();
-    }  };
+    }
+  };
 
   const handleArrayInputChange = (index, field, value) => {
     setFormData(prev => ({
@@ -238,13 +334,13 @@ const LorryReceiptEditPage = () => {
   };
   const handleTruckInputChange = (e) => {
     const { value } = e.target;
-    
+
     // Auto-capitalize truck number
     const capitalizedValue = value.toUpperCase();
-    
+
     // Validate truck number
     validateField('truckNumber', capitalizedValue);
-    
+
     setFormData(prev => ({ ...prev, truckNumber: capitalizedValue }));
     setShowTruckDropdown(true);
   };
@@ -274,35 +370,35 @@ const LorryReceiptEditPage = () => {
     const collection = parseFloat(formData.collection) || 0;
     const stCharge = parseFloat(formData.stCharge) || 0;
     const extraLoading = parseFloat(formData.extraLoading) || 0;
-    
-    const total = freight + hamali + aoc + doorDelivery +  detention + collection + stCharge + extraLoading;
+
+    const total = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
     const totalValue = total.toFixed(2);
-    
+
     // Update the total in form data
     setFormData(prev => ({ ...prev, total: totalValue }));
-    
+
     return totalValue;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Calculate total
       const total = calculateTotal();
-      
+
       console.log('Current formData:', formData);
       console.log('consignor_id:', formData.consignor_id);
       console.log('consignee_id:', formData.consignee_id);
-      
+
       // Prepare data for update - match the service method expectations
       const updateData = {
         truck_number: formData.truckNumber,
@@ -331,11 +427,11 @@ const LorryReceiptEditPage = () => {
         truck_id: formData.truck_id,
         driver_id: formData.driver_id
       };
-      
+
       console.log('Sending update data:', updateData);
-      
+
       const response = await lorryReceiptService.updateLorryReceipt(id, updateData);
-      
+
       if (response.success) {
         toast.success('Lorry receipt updated successfully');
         navigate('/lorry-receipts');
@@ -381,7 +477,7 @@ const LorryReceiptEditPage = () => {
 
   const validateField = (name, value) => {
     let error = '';
-    
+
     switch (name) {
       case 'consignorGstin':
       case 'consigneeGstin':
@@ -409,7 +505,7 @@ const LorryReceiptEditPage = () => {
       default:
         break;
     }
-    
+
     setValidationErrors(prev => ({ ...prev, [name]: error }));
     return error;
   };
@@ -463,7 +559,7 @@ const LorryReceiptEditPage = () => {
 
   const handleCompanyNameChange = (e, type) => {
     const { value } = e.target;
-    
+
     if (type === 'consignor') {
       setFormData(prev => ({ ...prev, consignorName: value }));
       filterCompanies(value, 'consignor');
@@ -547,12 +643,12 @@ const LorryReceiptEditPage = () => {
     setTimeout(() => {
       const companyName = type === 'consignor' ? formData.consignorName : formData.consigneeName;
       const isDropdownOpen = type === 'consignor' ? showConsignorDropdown : showConsigneeDropdown;
-      
+
       if (!isDropdownOpen && companyName && companyName.trim() !== '') {
-        const existingCompany = companies.find(c => 
+        const existingCompany = companies.find(c =>
           c.name.toLowerCase() === companyName.toLowerCase()
         );
-        
+
         if (!existingCompany) {
           if (type === 'consignor') {
             setAddConsignorCompany(true);
@@ -665,7 +761,7 @@ const LorryReceiptEditPage = () => {
     try {
       const prefix = location === 'Tarapur' ? 'TPR' : 'BWD';
       const response = await lorryReceiptService.getNextCnNumber(prefix);
-      
+
       if (response.success) {
         return `${prefix}-${response.data.nextNumber.toString().padStart(3, '0')}`;
       } else {
@@ -680,19 +776,51 @@ const LorryReceiptEditPage = () => {
 
   const selectFromLocation = async (location) => {
     const cnNumber = await generateCnNumber(location);
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       from: location,
       cnNumber: cnNumber
     }));
     setShowFromDropdown(false);
   };
 
+  const handleCustomLocation = async () => {
+    const newLocation = formData.from.trim();
+    if (!newLocation) return;
+
+    // Add to DB
+    const res = await lorryReceiptService.addLocation(newLocation);
+    if (res.success) {
+      setLocations(prev => [...prev, newLocation]);
+      await selectFromLocation(newLocation);
+    } else {
+      alert('Failed to save new location. Try again.');
+    }
+
+    setShowFromDropdown(false);
+  };
+
+
   const handleFromInputBlur = () => {
     setTimeout(() => {
       setShowFromDropdown(false);
     }, 200);
   };
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const allLocations = await lorryReceiptService.getLocations();
+        setLocations(allLocations.length ? allLocations : ['Tarapur', 'Bhiwandi']);
+      } catch (error) {
+        console.error('Failed to load locations:', error);
+        setLocations(['Tarapur', 'Bhiwandi']);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
 
   const selectTruck = (truck) => {
     validateField('truckNumber', truck.truck_number);
@@ -706,11 +834,11 @@ const LorryReceiptEditPage = () => {
       if (!companyName || companyName.trim() === '') {
         return;
       }
-      
-      const existingCompany = companies.find(c => 
+
+      const existingCompany = companies.find(c =>
         c.name.toLowerCase() === companyName.toLowerCase()
       );
-      
+
       if (!existingCompany) {
         if (type === 'consignor') {
           setAddConsignorCompany(true);
@@ -753,7 +881,7 @@ const LorryReceiptEditPage = () => {
   // Calculate total automatically when charge fields change
   useEffect(() => {
     calculateTotal();
-  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery,formData.detention, formData.collection, formData.stCharge, formData.extraLoading]);
+  }, [formData.freight, formData.hamali, formData.aoc, formData.doorDelivery, formData.detention, formData.collection, formData.stCharge, formData.extraLoading]);
 
   if (loading) {
     return (
@@ -786,21 +914,21 @@ const LorryReceiptEditPage = () => {
             </div>
           </div>
           <div className="w-[90%] mx-auto -mt-8 mb-6 ml-65">
-              <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
-                <div>
-                  <span className="text-red-600 font-bold">TARAPUR:</span>
-                  Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
-                  M.: 9823364283 / 8446665945
-                </div>
-                <div>
-                  <span className="text-red-600 font-bold">BHIWANDI:</span>
-                  Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
-                  <div className="ml-20">
-                    Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
-                  </div>
+            <div className="text-xs font-medium text-gray-500 leading-snug space-y-2">
+              <div>
+                <span className="text-red-600 font-bold">TARAPUR:</span>
+                Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
+                M.: 9823364283 / 8446665945
+              </div>
+              <div>
+                <span className="text-red-600 font-bold">BHIWANDI:</span>
+                Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
+                <div className="ml-20">
+                  Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
                 </div>
               </div>
             </div>
+          </div>
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Edit Lorry Receipt</h1>
@@ -1111,7 +1239,7 @@ const LorryReceiptEditPage = () => {
                           value={formData.cnNumber}
                           className="form-input-small bg-gray-100"
                           readOnly
-                          placeholder="Select location first"                        />
+                          placeholder="Select location first" />
                       </div>
                     </td>
                   </tr>
@@ -1136,7 +1264,7 @@ const LorryReceiptEditPage = () => {
                           )}
                         </div>
                         {showTruckDropdown && (
-                          <div 
+                          <div
                             ref={truckDropdownRef}
                             className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
                             style={{ minWidth: '200px' }}
@@ -1170,7 +1298,7 @@ const LorryReceiptEditPage = () => {
                           name="date"
                           value={formData.date}
                           onChange={handleInputChange}
-                          className="form-input-small"                        />
+                          className="form-input-small" />
                       </div>
                     </td>
                   </tr>
@@ -1178,38 +1306,63 @@ const LorryReceiptEditPage = () => {
                     <td>
                       <strong>From - <span className="text-red-500">*</span></strong>
                       <div className="relative inline-block">
-                        <div className="input-container inline-block" onClick={handleDivClick}>
+                        <div
+                          className="input-container inline-block"
+                          onClick={() => setShowFromDropdown(true)}
+                        >
                           <input
                             type="text"
                             name="from"
-                            value={formData.from}
-                            onChange={handleFromInputChange}
+                            value={formData.from || ''} // pre-fill existing value
+                            onChange={(e) => {
+                              setFormData({ ...formData, from: e.target.value });
+                              setShowFromDropdown(true);
+                            }}
                             onFocus={() => setShowFromDropdown(true)}
                             onBlur={handleFromInputBlur}
                             className="form-input-small"
                             placeholder="From Location"
                             autoComplete="off"
                           />
-                        </div>                        {showFromDropdown && (
-                          <div 
+                        </div>
+
+                        {showFromDropdown && (
+                          <div
                             ref={fromDropdownRef}
                             className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
                             style={{ minWidth: '150px' }}
                           >
-                            {['Tarapur', 'Bhiwandi'].map((location) => (
+                            {(locations.length ? locations : ['Tarapur', 'Bhiwandi'])
+                              .filter(loc =>
+                                formData.from.trim() === ''
+                                  ? true
+                                  : loc.toLowerCase().includes(formData.from.toLowerCase())
+                              )
+                              .map((location) => (
+                                <div
+                                  key={location}
+                                  className="px-3 py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-100"
+                                  onClick={() => selectFromLocation(location)}
+                                >
+                                  <div className="font-medium text-sm">{location}</div>
+                                </div>
+                              ))}
+
+                            {/* Add new location option if typed value is not in list */}
+                            {!locations.includes(formData.from.trim()) && formData.from.trim() !== '' && (
                               <div
-                                key={location}
-                                className="px-3 py-2 cursor-pointer border-b border-gray-100 hover:bg-gray-100"
-                                onClick={() => selectFromLocation(location)}
+                                className="px-3 py-2 cursor-pointer font-bold hover:bg-gray-100"
+                                onClick={handleCustomLocation}
                               >
-                                <div className="font-medium text-sm">{location}</div>
+                                Add "{formData.from}"
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
                       </div>
                     </td>
                   </tr>
+
                   <tr>
                     <td>
                       <strong>To - <span className="text-red-500">*</span></strong>
@@ -1251,350 +1404,389 @@ const LorryReceiptEditPage = () => {
                     Purna Village, Bhiwandi.<br />
                     M.: 7507844317 /<br />
                     9168027868<br />
-					<hr />
-					<br />
+                    <hr />
+                    <br />
                     <b>PAN: AGTPV0112D<br />
-                    GSTIN: 27AGTPV0112D1ZG</b>
-					</td>
+                      GSTIN: 27AGTPV0112D1ZG</b>
+                  </td>
                   {/* Freight Table */}
                   <td colSpan="3">                    <table style={{ height: '330px', borderCollapse: 'collapse', width: '100%' }}>
-                      <tbody>
-                        <tr className="bold center">
-                          <td width="10%">Nos. <span className="text-red-500">*</span></td>
-                          <td width="60%">Particulars <span className="text-red-500">*</span></td>
-                          <td width="18%" colSpan="2">Rate Rs.</td>
-                          <td width="12%">Weight</td>
-                        </tr>
-                        <tr>{/* Nos. */}
-                          <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
-                            {formData.nos.map((nos, index) => (
-                              <div key={index} className="flex items-center mb-2">
-                                <div className="input-container flex-1" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    value={nos}
-                                    onChange={(e) => handleArrayInputChange(index, 'nos', e.target.value)}
-                                    className="form-input-nos"
-                                    placeholder={`Nos ${index + 1}`}
-                                  />
-                                </div>
-                                {formData.nos.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeArrayField(index, 'nos')}
-                                    className="ml-1 text-red-500 hover:text-red-700 text-xs"
-                                  >
-                                    ×
-                                  </button>
-                                )}
+                    <tbody>
+                      <tr className="bold center">
+                        <td width="10%">Nos. <span className="text-red-500">*</span></td>
+                        <td width="60%">Particulars <span className="text-red-500">*</span></td>
+                        <td width="18%" colSpan="2">Rate Rs.</td>
+                        <td width="12%">Weight</td>
+                      </tr>
+                      <tr>{/* Nos. */}
+                        <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
+                          {formData.nos.map((nos, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <div className="input-container flex-1" onClick={handleDivClick}>
+                                <input
+                                  type="text"
+                                  value={nos}
+                                  onChange={(e) => handleArrayInputChange(index, 'nos', e.target.value)}
+                                  className="form-input-nos"
+                                  placeholder={`Nos ${index + 1}`}
+                                />
                               </div>
-                            ))}
-                            <button
-                              type="button"
-                              onClick={() => addArrayField('nos')}
-                              className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                            >
-                              + Add More
-                            </button>
-                          </td>
-
-                          {/* Particulars */}
-                          <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
-                            {formData.particulars.map((particular, index) => (
-                              <div key={index} className="flex items-center mb-2">
-                                <div className="input-container flex-1" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    value={particular}
-                                    onChange={(e) => handleArrayInputChange(index, 'particulars', e.target.value)}
-                                    className="form-input-particulars"
-                                    placeholder={`Particulars ${index + 1}`}
-                                  />
-                                </div>
-                                {formData.particulars.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => removeArrayField(index, 'particulars')}
-                                    className="ml-1 text-red-500 hover:text-red-700 text-xs"
-                                  >
-                                    ×
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                            <button
-                              type="button"
-                              onClick={() => addArrayField('particulars')}
-                              className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
-                            >
-                              + Add More
-                            </button>
-                          </td>                          
-						  {/* Left Rate Rs. subcolumn */}
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Freight
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Hamali
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                A.O.C
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Door Dely
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Detention
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Collection
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                St.Charge
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Extra Loading <br /> paid by us
-                              </div>
-                              <div style={{flex: '1',  padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                Total
-                              </div>
+                              {formData.nos.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeArrayField(index, 'nos')}
+                                  className="ml-1 text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  ×
+                                </button>
+                              )}
                             </div>
-                          </td>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => addArrayField('nos')}
+                            className="text-blue-500 hover:text-blue-700 text-xs font-semibold"
+                          >
+                            + Add More
+                          </button>
+                        </td>
 
-                          {/* Right Rate Rs. subcolumn */}
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '15%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="freight"
-                                    value={formData.freight}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="hamali"
-                                    value={formData.hamali}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="aoc"
-                                    value={formData.aoc}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="doorDelivery"
-                                    value={formData.doorDelivery}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="detention"
-                                    value={formData.detention}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="collection"
-                                    value={formData.collection}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="stCharge"
-                                    value={formData.stCharge}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{  flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
-                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-                                    type="text"
-                                    name="extraLoading"
-                                    value={formData.extraLoading}
-                                    onChange={handleInputChange}
-                                    className="form-input-rate"
-                                  />
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
-                                  <input
-									type="text"
-									name="total"
-									value={formData.total}
-									readOnly
-									className="form-input-total"
-									style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
-								  />
-                                </div>
-                              </div>
-                            </div>
-                          </td>
+                        {/* Particulars */}
+                        <td style={{ borderRight: '1px solid #000', padding: '4px' }}>
+                          {formData.particulars.map((particular, index) => (
+                            <div key={index} className="relative flex items-center mb-2">
+                              <input
+                                type="text"
+                                value={particular}
+                                onChange={(e) => handleParticularInputChange(index, e.target.value)}
+                                placeholder={`Particulars ${index + 1}`}
+                                className="form-input-particulars"
+                              />
 
-                          <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
-                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    name="actualWeight"
-                                    value={formData.actualWeight}
-                                    onChange={handleInputChange}
-                                    className={`form-input-weight ${validationErrors.actualWeight ? 'border-red-500' : ''}`}
-                                  />
-                                  {validationErrors.actualWeight && (
-                                    <div className="text-red-500 text-xs mt-1">{validationErrors.actualWeight}</div>
+                              {showParticularsDropdown[index] && (
+                                <div className="absolute top-full left-0 right-0 bg-white border rounded shadow max-h-48 overflow-y-auto z-50">
+                                  {particularsList
+                                    .filter(item => item.toLowerCase().includes(particular.toLowerCase()))
+                                    .map(item => (
+                                      <div
+                                        key={item}
+                                        className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                        onClick={() => handleSelectParticular(item, index)}
+                                      >
+                                        {item}
+                                      </div>
+                                    ))}
+
+                                  {!particularsList.includes(particular) && particular.trim() !== '' && (
+                                    <div
+                                      className="px-3 py-2 cursor-pointer font-bold hover:bg-gray-100"
+                                      onClick={() => handleCustomParticular(index)}
+                                    >
+                                      Add "{particular}"
+                                    </div>
                                   )}
                                 </div>
-                                &nbsp;Kg.
-                              </div>
-                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>                                <div className="input-container inline-block" onClick={handleDivClick}>
-                                  <input
-                                    type="text"
-                                    name="chargeableWeight"
-                                    value={formData.chargeableWeight}
-                                    onChange={handleInputChange}
-                                    className={`form-input-weight ${validationErrors.chargeableWeight ? 'border-red-500' : ''}`}
-                                  />
-                                  {validationErrors.chargeableWeight && (
-                                    <div className="text-red-500 text-xs mt-1">{validationErrors.chargeableWeight}</div>
-                                  )}
-                                </div>
-                                &nbsp;Chargeable <span className="text-red-500">*</span>
-                              </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-paid"
-                                    name="paymentType"
-                                    value="paid"
-                                    checked={formData.paymentType === 'paid'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-paid">Paid</label>
-                                </div>
-                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-toBeBill"
-                                    name="paymentType"
-                                    value="toBeBill"
-                                    checked={formData.paymentType === 'toBeBill'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-toBeBill">To be Bill</label>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  <input
-                                    type="radio"
-                                    id="payment-toPay"
-                                    name="paymentType"
-                                    value="toPay"
-                                    checked={formData.paymentType === 'toPay'}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
-                                    style={{ marginRight: '4px' }}
-                                  />
-                                  <label htmlFor="payment-toPay">To Pay</label>
-                                </div>
-                              </div>
-                              <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
-                                Goods entirely<br />booked at <br/><b>OWNER'S RISK</b>
+                              )}
+
+                              {formData.particulars.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeParticularField(index)}
+                                  className="ml-1 text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={addParticularField}
+                            className="text-blue-500 hover:text-blue-700 text-xs font-semibold mt-1"
+                          >
+                            + Add More
+                          </button>
+                        </td>
+
+                        {/* Left Rate Rs. subcolumn */}
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Freight
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Hamali
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              A.O.C
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Door Dely
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Detention
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Collection
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              St.Charge
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Extra Loading <br /> paid by us
+                            </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              Total
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Right Rate Rs. subcolumn */}
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '15%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="freight"
+                                  value={formData.freight}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
                               </div>
                             </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>                  </td>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="hamali"
+                                  value={formData.hamali}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="aoc"
+                                  value={formData.aoc}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="doorDelivery"
+                                  value={formData.doorDelivery}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="detention"
+                                  value={formData.detention}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="collection"
+                                  value={formData.collection}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="stCharge"
+                                  value={formData.stCharge}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center' }}>
+                              <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                                <input
+                                  type="text"
+                                  name="extraLoading"
+                                  value={formData.extraLoading}
+                                  onChange={handleInputChange}
+                                  className="form-input-rate"
+                                />
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', alignItems: 'center' }}>                                <div className="input-container" onClick={handleDivClick} style={{ width: '100%' }}>
+                              <input
+                                type="text"
+                                name="total"
+                                value={formData.total}
+                                readOnly
+                                className="form-input-total"
+                                style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                              />
+                            </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td style={{ padding: 0, verticalAlign: 'top', borderBottom: '1px solid #000', width: '17%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '300px' }}>
+                            <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              Actual&nbsp;&nbsp;<span className="text-red-500">*</span>                                <div className="input-container inline-block" onClick={handleDivClick}>
+                                <input
+                                  type="text"
+                                  name="actualWeight"
+                                  value={formData.actualWeight}
+                                  onChange={handleInputChange}
+                                  className={`form-input-weight ${validationErrors.actualWeight ? 'border-red-500' : ''}`}
+                                />
+                                {validationErrors.actualWeight && (
+                                  <div className="text-red-500 text-xs mt-1">{validationErrors.actualWeight}</div>
+                                )}
+                              </div>
+                              &nbsp;Kg.
+                            </div>
+                            <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>                                <div className="input-container inline-block" onClick={handleDivClick}>
+                              <input
+                                type="text"
+                                name="chargeableWeight"
+                                value={formData.chargeableWeight}
+                                onChange={handleInputChange}
+                                className={`form-input-weight ${validationErrors.chargeableWeight ? 'border-red-500' : ''}`}
+                              />
+                              {validationErrors.chargeableWeight && (
+                                <div className="text-red-500 text-xs mt-1">{validationErrors.chargeableWeight}</div>
+                              )}
+                            </div>
+                              &nbsp;Chargeable <span className="text-red-500">*</span>
+                            </div>                              <div style={{ flex: '2', borderBottom: '1px solid #000', padding: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px' }}>                                <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                              <input
+                                type="radio"
+                                id="payment-paid"
+                                name="paymentType"
+                                value="paid"
+                                checked={formData.paymentType === 'paid'}
+                                onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                style={{ marginRight: '4px' }}
+                              />
+                              <label htmlFor="payment-paid">Paid</label>
+                            </div>
+                              <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                                <input
+                                  type="radio"
+                                  id="payment-toBeBill"
+                                  name="paymentType"
+                                  value="toBeBill"
+                                  checked={formData.paymentType === 'toBeBill'}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                  style={{ marginRight: '4px' }}
+                                />
+                                <label htmlFor="payment-toBeBill">To be Bill</label>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <input
+                                  type="radio"
+                                  id="payment-toPay"
+                                  name="paymentType"
+                                  value="toPay"
+                                  checked={formData.paymentType === 'toPay'}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, paymentType: e.target.value }))}
+                                  style={{ marginRight: '4px' }}
+                                />
+                                <label htmlFor="payment-toPay">To Pay</label>
+                              </div>
+                            </div>
+                            <div style={{ flex: '1', padding: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', fontSize: '11px' }}>
+                              Goods entirely<br />booked at <br /><b>OWNER'S RISK</b>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="5" style={{
+                          border: '1px solid #000',
+                          padding: '6px',
+                          fontSize: '13px'
+                        }}>
+                          <strong>E-way Bill:</strong>&nbsp;
+                          <input
+                            type="text"
+                            name="ewayBill"
+                            value={formData.ewayBill || ''}
+                            onChange={handleInputChange}
+                            className="form-input-delivery"
+                            placeholder="Enter E-way Bill number"
+                            style={{ width: '250px', border: 'none', borderBottom: '1px solid #000' }}
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>                  </td>
                 </tr>
               </tbody>
             </table>
             {/* Footer */}
             <table>
               <tbody>
-                <tr style={{ height: '50px' }}>
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingRight: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>Delivery At:</span>
-                      <span className="text-red-500" style={{ marginRight: '4px' }}>*</span>
+                <tr style={{ height: '30px' }}>
+                  <td colSpan="3" style={{ verticalAlign: 'top' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <span style={{ marginRight: '6px' }}>
+                        Delivery At: <span className="text-red-500">*</span>
+                      </span>
                       <div className="input-container flex-grow">
                         <input
                           type="text"
                           name="deliveryAt"
                           value={formData.deliveryAt}
                           onChange={handleInputChange}
-                          className="form-input"
+                          className="form-input-delivery"
                           style={{
                             width: '100%',
                             border: '1px solid #000',
-                            borderRadius: '0',
-                            padding: '4px 8px',
-                            minWidth: '250px'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ width: '80px' }}>E-way Bill:</span>
-                      <div className="input-container flex-grow">
-                        <input
-                          type="text"
-                          name="ewayBill"
-                          placeholder="Enter E-way Bill number"
-                          value={formData.ewayBill}
-                          onChange={handleInputChange}
-                          className="form-input"
-                          style={{
-                            width: '100%',
-                            border: '1px solid #000',
-                            borderRadius: '0',
-                            padding: '4px 8px',
-                            minWidth: '250px'
+                            padding: '4px 8px'
                           }}
                         />
                       </div>
                     </div>
                   </td>
                 </tr>
+
+                {/* <td style={{ verticalAlign: 'top', width: '50%', paddingLeft: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: '90px' }}>E-way Bill:</span>
+                      <div className="input-container flex-grow" onClick={handleDivClick}>
+                        <input
+                          type="text"
+                          name="ewayBill"
+                          value={formData.ewayBill || ''}
+                          onChange={handleInputChange}
+                          className="form-input-delivery"
+                          placeholder="Enter E-way Bill number"
+                          style={{ width: '100%', minWidth: '180px' }}
+                        />
+                      </div>
+                    </div>
+                  </td> */}
+                {/* </tr> */}
                 <tr style={{ height: '40px' }}>
                   <td colSpan="3" style={{ verticalAlign: 'top' }}>
                     Remarks: <div className="input-container inline-block" onClick={handleDivClick}>

@@ -254,22 +254,22 @@ const MemoFormPage = () => {
 
   // Handle input changes
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "ac_no") {
-    if (/^\d{0,10}$/.test(value)) {
+    if (name === "ac_no") {
+      if (/^\d{0,10}$/.test(value)) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    } else if (name === "lorry_no") {
+      // Progressive typing regex: allows partial input but max 4 digits at the end
+      const regex = /^[A-Z]{0,2}\s?\d{0,2}\s?[A-Z]{0,2}\s?\d{0,4}$/i;
+      if (regex.test(value)) {
+        setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+      }
+    } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-  } else if (name === "lorry_no") {
-    // Progressive typing regex: allows partial input but max 4 digits at the end
-    const regex = /^[A-Z]{0,2}\s?\d{0,2}\s?[A-Z]{0,2}\s?\d{0,4}$/i;
-    if (regex.test(value)) {
-      setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
-    }
-  } else {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }
-};
+  };
 
   // Add new table row
   const addTableRow = () => {
@@ -441,13 +441,13 @@ const MemoFormPage = () => {
             Back
           </button>
           <div className="flex gap-2">
-            <button
+            {/* <button
               type="button"
               onClick={fillDummyData}
               className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
             >
               Fill Dummy Data
-            </button>
+            </button> */}
             <button
               onClick={handlePrint}
               className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
@@ -469,22 +469,28 @@ const MemoFormPage = () => {
           <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
             <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
               <div className='w-full flex flex-col items-center justify-center py-2'>
-                <div className='w-full flex flex-row items-start justify-between py-2'>
-                  <div className='flex-shrink-0 flex items-center w-2/3'>
-                    <img src={BillHeader} alt="BillLogo" className="w-full h-auto" />
+                <div className="w-full flex flex-row items-center justify-between py-2 gap-8">
+                  {/* Left side (truck + name) */}
+                  <div className="flex-shrink-0 flex items-center min-w-[600px] gap-6">
+                    <img src={BillHeader} alt="BillLogo" className="h-40 object-contain" />
                   </div>
-                  <div className='flex flex-col items-end text-xs font-medium text-gray-700 leading-tight min-w-[320px] w-1/3'>
-                    <div className='mb-2 font-bold text-base'>SUBJECT TO PALGHAR JURISDICTION</div>
-                    <div className='mb-2 text-right text-xs'>
-                      <div className='font-semibold'>Daily Part Load Service to -</div>
+
+                  {/* Right side (jurisdiction + drivers copy) */}
+                  <div className="flex flex-col items-end text-base font-medium text-gray-700 leading-tight min-w-[360px] w-[40%]">
+                    <div className="mb-2 font-bold text-lg">
+                      SUBJECT TO PALGHAR JURISDICTION
+                    </div>
+                    <div className="mb-2 text-right text-base">
+                      <div className="font-semibold">Daily Part Load Service to -</div>
                       <div>Tarapur, Bhiwandi, Palghar,</div>
                       <div>Vashi, Taloja, Kolgoan Genises</div>
                     </div>
-                    <div className='font-bold text-red-600 border border-red-600 px-2 py-1 inline-block text-xs mt-2'>
+                    <div className="font-bold text-red-600 border border-red-600 px-3 py-1 inline-block text-base mt-2">
                       MEMO COPY
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

@@ -51,74 +51,74 @@
 import { getBillHeaderAsBase64, getImageAsBase64 } from './imageUtils.js';
 
 const lorryReceiptPrintTemplate = (data) => {
-  // Helper function to format currency
-  const formatCurrency = (amount) => {
-    if (!amount && amount !== 0) return '';
-    return parseFloat(amount);
-  };
+    // Helper function to format currency
+    const formatCurrency = (amount) => {
+        if (!amount && amount !== 0) return '';
+        return parseFloat(amount);
+    };
 
 
-  // Helper function to safely get values
-  const getValue = (value, defaultValue = '') => {
-    return value || defaultValue;
-  };
-  // Parse JSON arrays for nos and particulars
-  let nosArray = [];
-  let particularsArray = [];
-  
-  // Handle different data structures returned by the service
-  if (data.materialDetails && Array.isArray(data.materialDetails)) {
-    // From the detailed view structure
-    nosArray = data.materialDetails.map(item => item.nos);
-    particularsArray = data.materialDetails.map(item => item.particulars);
-  } else if (data.nos && data.particulars) {
-    // Direct arrays from service
-    nosArray = Array.isArray(data.nos) ? data.nos : (typeof data.nos === 'string' ? JSON.parse(data.nos) : ['']);
-    particularsArray = Array.isArray(data.particulars) ? data.particulars : (typeof data.particulars === 'string' ? JSON.parse(data.particulars) : ['']);
-  } else {
-    // Try to parse from string
-    try {
-      nosArray = typeof data.nos === 'string' ? JSON.parse(data.nos) : (Array.isArray(data.nos) ? data.nos : ['']);
-    } catch (e) {
-      nosArray = [''];
+    // Helper function to safely get values
+    const getValue = (value, defaultValue = '') => {
+        return value || defaultValue;
+    };
+    // Parse JSON arrays for nos and particulars
+    let nosArray = [];
+    let particularsArray = [];
+
+    // Handle different data structures returned by the service
+    if (data.materialDetails && Array.isArray(data.materialDetails)) {
+        // From the detailed view structure
+        nosArray = data.materialDetails.map(item => item.nos);
+        particularsArray = data.materialDetails.map(item => item.particulars);
+    } else if (data.nos && data.particulars) {
+        // Direct arrays from service
+        nosArray = Array.isArray(data.nos) ? data.nos : (typeof data.nos === 'string' ? JSON.parse(data.nos) : ['']);
+        particularsArray = Array.isArray(data.particulars) ? data.particulars : (typeof data.particulars === 'string' ? JSON.parse(data.particulars) : ['']);
+    } else {
+        // Try to parse from string
+        try {
+            nosArray = typeof data.nos === 'string' ? JSON.parse(data.nos) : (Array.isArray(data.nos) ? data.nos : ['']);
+        } catch (e) {
+            nosArray = [''];
+        }
+
+        try {
+            particularsArray = typeof data.particulars === 'string' ? JSON.parse(data.particulars) : (Array.isArray(data.particulars) ? data.particulars : ['']);
+        } catch (e) {
+            particularsArray = [''];
+        }
     }
-    
-    try {
-      particularsArray = typeof data.particulars === 'string' ? JSON.parse(data.particulars) : (Array.isArray(data.particulars) ? data.particulars : ['']);
-    } catch (e) {
-      particularsArray = [''];
+
+    // Calculate total - handle both flat structure and nested freightDetails
+    const freight = parseFloat(data.freightDetails?.freight || data.freight || 0);
+    const hamali = parseFloat(data.freightDetails?.hamali || data.hamali || 0);
+    const aoc = parseFloat(data.freightDetails?.aoc || data.aoc || 0);
+    const doorDelivery = parseFloat(data.freightDetails?.doorDelivery || data.door_delivery || 0);
+    const detention = parseFloat(data.freightDetails?.detention || data.detention || 0);
+    const collection = parseFloat(data.freightDetails?.collection || data.collection || 0);
+    const stCharge = parseFloat(data.freightDetails?.stCharge || data.st_charge || data.service_charge || 20);
+    const extraLoading = parseFloat(data.freightDetails?.extraLoading || data.extra_loading || 0);
+
+    const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
+
+    // Get the actual company header image as base64
+    const billHeaderBase64 = getBillHeaderAsBase64();
+    const billheader5Base64 = getImageAsBase64('shree-datta-guru.png');
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        if (isNaN(date)) return dateStr; // fallback if invalid
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`; // ddmmyyyy format
     }
-  }
-  
-  // Calculate total - handle both flat structure and nested freightDetails
-  const freight = parseFloat(data.freightDetails?.freight || data.freight || 0);
-  const hamali = parseFloat(data.freightDetails?.hamali || data.hamali || 0);
-  const aoc = parseFloat(data.freightDetails?.aoc || data.aoc || 0);
-  const doorDelivery = parseFloat(data.freightDetails?.doorDelivery || data.door_delivery || 0);
-  const detention = parseFloat(data.freightDetails?.detention || data.detention || 0);
-  const collection = parseFloat(data.freightDetails?.collection || data.collection || 0);
-  const stCharge = parseFloat(data.freightDetails?.stCharge || data.st_charge || data.service_charge || 20);
-  const extraLoading = parseFloat(data.freightDetails?.extraLoading || data.extra_loading || 0);
-  
-  const totalAmount = freight + hamali + aoc + doorDelivery + detention + collection + stCharge + extraLoading;
-
-  // Get the actual company header image as base64
-  const billHeaderBase64 = getBillHeaderAsBase64();
-  const billheader5Base64 = getImageAsBase64('shree-datta-guru.png');
-  
-  function formatDate(dateStr) {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr; // fallback if invalid
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`; // ddmmyyyy format
-  }
 
 
-  // Fallback SVG if billHeader.png is not found - stretched to full width
-  const fallbackLogoSvg = `
+    // Fallback SVG if billHeader.png is not found - stretched to full width
+    const fallbackLogoSvg = `
     <svg width="100%" height="80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 80" preserveAspectRatio="none">
       <rect width="100%" height="80" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
       <text x="20" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#c5677b">
@@ -132,28 +132,28 @@ const lorryReceiptPrintTemplate = (data) => {
       </text>
     </svg>
   `;
-  
-  // Use the actual bill header image or fallback to SVG
-  let headerImage;
-  if (billHeaderBase64) {
-    headerImage = billHeaderBase64;
-  } else {
-    // Handle btoa for Node.js vs Browser environments for fallback
-    try {
-      if (typeof btoa !== 'undefined') {
+
+    // Use the actual bill header image or fallback to SVG
+    let headerImage;
+    if (billHeaderBase64) {
+        headerImage = billHeaderBase64;
+    } else {
+        // Handle btoa for Node.js vs Browser environments for fallback
+        try {
+            if (typeof btoa !== 'undefined') {
                 headerImage = `data:image/svg+xml;base64,${btoa(fallbackLogoSvg)}`;
             } else if (typeof Buffer !== 'undefined') {
                 headerImage = `data:image/svg+xml;base64,${Buffer.from(fallbackLogoSvg).toString('base64')}`;
             } else {
                 headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
             }
-    } catch (e) {
-      // Final fallback to encoded SVG
-      headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
+        } catch (e) {
+            // Final fallback to encoded SVG
+            headerImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(fallbackLogoSvg)}`;
+        }
     }
-  }
 
-  const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -750,16 +750,16 @@ const lorryReceiptPrintTemplate = (data) => {
                                         <tr>
                                             <!-- Nos Column -->
                                             <td class="nos-column">
-                                                ${nosArray.map(nos => 
-                                                    `<div class="nos-item">${getValue(nos)}</div>`
-                                                ).join('')}
+                                                ${nosArray.map(nos =>
+        `<div class="nos-item">${getValue(nos)}</div>`
+    ).join('')}
                                             </td>
 
                                             <!-- Particulars Column -->
                                             <td class="particulars-column">
-                                                ${particularsArray.map(particular => 
-                                                    `<div class="particulars-item">${getValue(particular)}</div>`
-                                                ).join('')}
+                                                ${particularsArray.map(particular =>
+        `<div class="particulars-item">${getValue(particular)}</div>`
+    ).join('')}
                                             </td>
 
                                             <!-- Rate Columns as Single Table -->
@@ -834,10 +834,11 @@ const lorryReceiptPrintTemplate = (data) => {
                                         </tr>
                                         <!-- E-way Bill row moved up within freight table -->
                                         <tr>
-                                            <td colspan="4" style="padding: 3px;  font-size: 12px; font-weight: bold; text-align: left; ">
+                                            <td colspan="5" 
+                                                style="padding: 3px; font-size: 12px; font-weight: bold; text-align: left; border: 1px solid #000;">
                                                 E-way Bill: ${getValue(data.ewayBill || data.eway_bill || data.ewaybill)}
                                             </td>
-                                        </tr>
+                                            </tr>
                                     </tbody>
                                 </table>
                             </td>
@@ -887,7 +888,7 @@ const lorryReceiptPrintTemplate = (data) => {
 </html>
 `;
 
-  return html;
+    return html;
 };
 
 export default lorryReceiptPrintTemplate;

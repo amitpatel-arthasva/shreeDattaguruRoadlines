@@ -423,7 +423,7 @@ const QuotationForm = () => {
 
           {/* Form Actions */}
           <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 print:hidden">
-            <button
+            {/* <button
               type="button"
               onClick={async () => {
                 const result = await quotationService.fillDummyQuotation();
@@ -437,7 +437,7 @@ const QuotationForm = () => {
               className="px-6 py-3 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
             >
               Fill Dummy Data
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={resetForm}

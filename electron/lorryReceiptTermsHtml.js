@@ -13,10 +13,11 @@ const lorryReceiptTermsHtml = () => `
   h2 { text-align: center; font-size: 16px; margin-top: 8px; margin-bottom: 10px; color: #0d47a1; }
     ol { margin-left: 18px; margin-bottom: 18px; }
     li { margin-bottom: 4px; line-height: 1.5; }
-    .footer-row { display: flex; justify-content: space-between; margin-top: 80px; font-size: 11px; }
+    .footer-row {margin-left: 18px; display: flex; justify-content: space-between; margin-top: 80px; font-size: 11px; }
     .footer-label { font-weight: bold; }
-  .marathi { margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left;padding-left: 5px }
-  .received { margin-top: 10px; font-size: 13px; text-align: left;padding-left: 5px }
+    .footer-sign { font-weight: bold;margin-right: 18px; }
+  .marathi {margin-left: 22px; margin-top: 18px; font-size: 13px; color: #b71c1c; text-align: left;padding-left: 5px }
+  .received {margin-left: 22px; margin-top: 10px; font-size: 13px; text-align: left;padding-left: 5px }
   </style>
 </head>
 <body>
@@ -41,7 +42,7 @@ const lorryReceiptTermsHtml = () => `
     <div class="footer-row">
       <div style="padding-left: 5px">Date :</div>
       <div class="footer-label">Rubber Stamp</div>
-      <div class="footer-label">Consignee's Sign.</div>
+      <div class="footer-sign">Consignee's Sign.</div>
     </div>
   </div>
 </body>
