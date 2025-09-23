@@ -35,10 +35,8 @@ class QuotationService {
       };
       const result = await this.createQuotation(dummyData);
       if (result.success) {
-        console.log('Dummy quotation created:', result.data);
         return { success: true, message: 'Dummy quotation created', data: result.data };
       } else {
-        console.error('Failed to create dummy quotation:', result.error);
         return { success: false, error: result.error };
       }
     } catch (err) {
@@ -231,7 +229,6 @@ class QuotationService {
   // Create new quotation
   async createQuotation(quotationData) {
     try {
-      console.log('[createQuotation] Received data:', JSON.stringify(quotationData, null, 2));
       // Use provided quotation number or generate one
       let quotationNumber = (quotationData.quotationNumber && quotationData.quotationNumber.trim()) ? quotationData.quotationNumber.trim() : await this.generateQuotationNumber();
 
@@ -288,9 +285,6 @@ class QuotationService {
 
       const result = await apiService.query(sql, params);
 
-      console.log('[createQuotation] SQL:', sql);
-      console.log('[createQuotation] Params:', params);
-      console.log('[createQuotation] SQL result:', result);
       if (result && result.changes > 0) {
         // Get the created quotation with full details
         const newQuotation = await this.getQuotationById(result.lastInsertRowid);

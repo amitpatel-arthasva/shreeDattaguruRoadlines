@@ -98,7 +98,6 @@ const Register = () => {
         password: formData.password
       };
 
-      console.log('Attempting registration with:', { ...registrationData, password: '[REDACTED]' });
 
       await register(registrationData);
       success('Registration successful! Welcome aboard.');

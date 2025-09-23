@@ -12,7 +12,7 @@ const LorryReceiptFormPage = () => {
   const toast = useToast();
   const navigate = useNavigate();    // Company autocomplete state
   const [companies, setCompanies] = useState([]);
-  const [locations, setLocations] = useState(['Tarapur', 'Bhiwandi']);
+  const [locations, setLocations] = useState([]);
   const [showConsignorDropdown, setShowConsignorDropdown] = useState(false);
   const [showConsigneeDropdown, setShowConsigneeDropdown] = useState(false);
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -24,7 +24,6 @@ const LorryReceiptFormPage = () => {
   const [addConsigneeCompany, setAddConsigneeCompany] = useState(false);
   const [consignorSelectedFromDropdown, setConsignorSelectedFromDropdown] = useState(false);
   const [consigneeSelectedFromDropdown, setConsigneeSelectedFromDropdown] = useState(false);
-  const [dummyDataIndex, setDummyDataIndex] = useState(0);
   const [focusedConsignorIndex, setFocusedConsignorIndex] = useState(-1); // -1 means input focused, 0+ means dropdown item focused
   const [focusedConsigneeIndex, setFocusedConsigneeIndex] = useState(-1); const consignorDropdownRef = useRef(null); const consigneeDropdownRef = useRef(null);
   const fromDropdownRef = useRef(null);
@@ -32,156 +31,6 @@ const LorryReceiptFormPage = () => {
   const consignorInputRef = useRef(null);
   const consigneeInputRef = useRef(null);
 
-  // Dummy data for development
-  const dummyData = [
-    {
-      consignorName: 'ABC Industries Ltd.',
-      consignorAddress1: '123 Industrial Area, Phase 1',
-      consignorCity: 'Mumbai',
-      consignorState: 'Maharashtra',
-      consignorPincode: '400001',
-      consignorGstin: '27ABCIN1234F1Z5',
-      consignorPan: 'ABCIN1234F',
-      consigneeName: 'XYZ Manufacturing Pvt. Ltd.',
-      consigneeAddress1: '456 Manufacturing Hub, Sector 10',
-      consigneeCity: 'Delhi',
-      consigneeState: 'Delhi',
-      consigneePincode: '110001',
-      consigneeGstin: '07XYZMA1234C1Z8',
-      consigneePan: 'XYZMA1234C',
-      truckNumber: 'MH 12 AB 1234',
-      date: '2025-01-15',
-      to: 'Delhi',
-      from: 'Tarapur',
-      nos: ['50', '25'],
-      particulars: ['Cotton Bales', 'Textile Materials'],
-      freight: '15000', hamali: '500',
-      aoc: '200',
-      doorDelivery: '300',
-      detention: '100',
-      collection: '100',
-      stCharge: '20',
-      extraLoading: '0',
-      actualWeight: '2500',
-      chargeableWeight: '2500', paid: '16120',
-      toBeBill: '0',
-      toPay: '0',
-      paymentType: 'paid',
-      deliveryAt: 'Delhi Warehouse',
-      ewayBill: 'MH27EWB012345678',
-      total: '16120',
-      remarks: 'Handle with care'
-    },
-    {
-      consignorName: 'PQR Traders',
-      consignorAddress1: '789 Trade Center, Main Road',
-      consignorCity: 'Ahmedabad',
-      consignorState: 'Gujarat',
-      consignorPincode: '380001',
-      consignorGstin: '24PQRTR1234G1Z9',
-      consignorPan: 'PQRTR1234G',
-      consigneeName: 'RST Corporation',
-      consigneeAddress1: '654 Corporate Plaza',
-      consigneeCity: 'Bangalore',
-      consigneeState: 'Karnataka',
-      consigneePincode: '560001', consigneeGstin: '29RSTCO1234K1Z3',
-      consigneePan: 'RSTCO1234K',
-      truckNumber: 'GJ 01 AA 5678',
-      date: '2025-01-16',
-      to: 'Bangalore',
-      from: 'Bhiwandi',
-      nos: ['100'],
-      particulars: ['Electronic Components'],
-      freight: '12000', hamali: '400',
-      aoc: '150',
-      doorDelivery: '250',
-      detention: '0',
-      collection: '0',
-      stCharge: '20',
-      extraLoading: '200',
-      actualWeight: '1800',
-      chargeableWeight: '2000', paid: '0',
-      toBeBill: '13020',
-      toPay: '0',
-      paymentType: 'toBeBill',
-      deliveryAt: 'RST Warehouse',
-      ewayBill: 'KA29EWB987654321',
-      total: '13020',
-      remarks: 'Fragile items'
-    },
-    {
-      consignorName: 'LMN Enterprises',
-      consignorAddress1: '321 Business Park',
-      consignorCity: 'Pune',
-      consignorState: 'Maharashtra',
-      consignorPincode: '411001',
-      consignorGstin: '27LMNEN1234H1Z7',
-      consignorPan: 'LMNEN1234H',
-      consigneeName: 'Global Textiles Inc.',
-      consigneeAddress1: '987 Textile Zone',
-      consigneeCity: 'Surat',
-      consigneeState: 'Gujarat',
-      consigneePincode: '395001', consigneeGstin: '24GLTEX1234M1Z1',
-      consigneePan: 'GLTEX1234M',
-      truckNumber: 'KA 05 BC 3456',
-      date: '2025-01-17',
-      to: 'Surat',
-      from: 'Tarapur',
-      nos: ['75', '25', '10'],
-      particulars: ['Raw Materials', 'Chemicals', 'Dyes'],
-      freight: '18000', hamali: '600',
-      aoc: '300',
-      doorDelivery: '400',
-      detention: '150',
-      collection: '150',
-      stCharge: '20',
-      extraLoading: '500',
-      actualWeight: '3200',
-      chargeableWeight: '3500', paid: '0',
-      toBeBill: '0',
-      toPay: '19470',
-      paymentType: 'toPay',
-      deliveryAt: 'Global Textiles Factory',
-      total: '19470',
-      remarks: 'Chemical items - handle carefully'
-    },
-    {
-      consignorName: 'Tech Solutions Pvt. Ltd.',
-      consignorAddress1: '555 IT Park, Block A',
-      consignorCity: 'Hyderabad',
-      consignorState: 'Telangana',
-      consignorPincode: '500001',
-      consignorGstin: '36TECHS1234T1Z4',
-      consignorPan: 'TECHS1234T',
-      consigneeName: 'Innovation Hub Ltd.',
-      consigneeAddress1: '777 Tech Valley, Phase 2',
-      consigneeCity: 'Chennai',
-      consigneeState: 'Tamil Nadu',
-      consigneePincode: '600001', consigneeGstin: '33INNOV1234C1Z8',
-      consigneePan: 'INNOV1234C',
-      truckNumber: 'DL 8C AA 9012',
-      date: '2025-01-18',
-      to: 'Chennai',
-      from: 'Bhiwandi',
-      nos: ['20', '15'],
-      particulars: ['Servers', 'Networking Equipment'],
-      freight: '25000', hamali: '800',
-      aoc: '400',
-      doorDelivery: '500',
-      detention: '200',
-      collection: '200',
-      stCharge: '20',
-      extraLoading: '300',
-      actualWeight: '1500',
-      chargeableWeight: '1500', paid: '26220',
-      toBeBill: '0',
-      toPay: '0',
-      paymentType: 'paid',
-      deliveryAt: 'Innovation Hub Data Center',
-      total: '26220',
-      remarks: 'High-value electronic equipment'
-    }
-  ];
   const [formData, setFormData] = useState({
     consignorName: '',
     consignorAddress1: '',
@@ -210,14 +59,14 @@ const LorryReceiptFormPage = () => {
     doorDelivery: '',
     detention: '',
     collection: '',
-    stCharge: '', // Default value is 20
+    stCharge: '',
     extraLoading: '',
     actualWeight: '',
     chargeableWeight: '',
-    paid: '20', // Default to 20 if paid is selected
+    paid: '',
     toBeBill: '',
     toPay: '',
-    paymentType: 'paid', // 'paid', 'toBeBill', or 'toPay'
+    paymentType: '',
     deliveryAt: '',
     ewayBill: '',
     total: '',
@@ -338,7 +187,6 @@ const LorryReceiptFormPage = () => {
   };
 
   const handleSelectParticular = async (value, index) => {
-    console.log('Adding particular:', value)
     // Save new value to DB if needed
     if (!particularsList.includes(value)) {
       const res = await lorryReceiptService.addParticular(value);
@@ -430,16 +278,10 @@ const LorryReceiptFormPage = () => {
         if (!value.length || value.every(item => !item || item.trim() === '')) {
           errors[field] = requiredFields[field];
           hasErrors = true;
-          console.log('Validation failed (array):', field, 'Value:', value);
-        } else {
-          console.log('Validation passed (array):', field, 'Value:', value);
         }
       } else if (value === undefined || value === null || value === '') {
         errors[field] = requiredFields[field];
         hasErrors = true;
-        console.log('Validation failed:', field, 'Value:', value);
-      } else {
-        console.log('Validation passed:', field, 'Value:', value);
       }
     });
 
@@ -447,38 +289,25 @@ const LorryReceiptFormPage = () => {
     if (!formData.nos || formData.nos.filter(item => item && item.trim() !== '').length === 0) {
       errors.nos = 'At least one item quantity is required';
       hasErrors = true;
-      console.log('Validation failed (array): nos', formData.nos);
     } else {
-      console.log('Validation passed (array): nos', formData.nos);
     }
 
     if (!formData.particulars || formData.particulars.filter(item => item && item.trim() !== '').length === 0) {
       errors.particulars = 'At least one item description is required';
       hasErrors = true;
-      console.log('Validation failed (array): particulars', formData.particulars);
-    } else {
-      console.log('Validation passed (array): particulars', formData.particulars);
     }
 
     // Validate payment type selection
     if (!formData.paymentType || formData.paymentType.trim() === '') {
       errors.paymentType = 'Please select a payment type';
       hasErrors = true;
-      console.log('Validation failed (payment): paymentType', formData.paymentType);
-    } else {
-      console.log('Validation passed (payment): paymentType', formData.paymentType);
     }
 
     setValidationErrors(prev => ({
       ...prev,
       ...errors
     }));
-    // Log summary of errors before returning
-    if (hasErrors) {
-      console.log('Validation failed. Errors:', errors);
-    } else {
-      console.log('Validation passed. No errors.');
-    }
+    
     return !hasErrors;
   };
 
@@ -663,7 +492,6 @@ const LorryReceiptFormPage = () => {
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
-      console.log("error", error);
       return;
     }
 
@@ -686,13 +514,11 @@ const LorryReceiptFormPage = () => {
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
           consignorId = existingConsignor.id;
-          console.log('Using existing consignor company:', existingConsignor.name);
         } else {
           // Create new company only if it doesn't exist
           const consignorResponse = await companyService.createCompany(consignorData);
           if (consignorResponse.success) {
             consignorId = consignorResponse.data.id;
-            console.log('Created new consignor company:', consignorData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
@@ -722,13 +548,11 @@ const LorryReceiptFormPage = () => {
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
           consigneeId = existingConsignee.id;
-          console.log('Using existing consignee company:', existingConsignee.name);
         } else {
           // Create new company only if it doesn't exist
           const consigneeResponse = await companyService.createCompany(consigneeData);
           if (consigneeResponse.success) {
             consigneeId = consigneeResponse.data.id;
-            console.log('Created new consignee company:', consigneeData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
@@ -794,7 +618,6 @@ const LorryReceiptFormPage = () => {
     // Validate required fields first
     if (!validateRequiredFields()) {
       toast.error('Please fill in all required fields before submitting.');
-      console.log("error", error);
       return;
     }
 
@@ -819,13 +642,11 @@ const LorryReceiptFormPage = () => {
         const existingConsignor = findExistingCompany(consignorData);
         if (existingConsignor) {
           consignorId = existingConsignor.id;
-          console.log('Using existing consignor company:', existingConsignor.name);
         } else {
           // Create new company only if it doesn't exist
           const consignorResponse = await companyService.createCompany(consignorData);
           if (consignorResponse.success) {
             consignorId = consignorResponse.data.id;
-            console.log('Created new consignor company:', consignorData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
@@ -858,13 +679,11 @@ const LorryReceiptFormPage = () => {
         const existingConsignee = findExistingCompany(consigneeData);
         if (existingConsignee) {
           consigneeId = existingConsignee.id;
-          console.log('Using existing consignee company:', existingConsignee.name);
         } else {
           // Create new company only if it doesn't exist
           const consigneeResponse = await companyService.createCompany(consigneeData);
           if (consigneeResponse.success) {
             consigneeId = consigneeResponse.data.id;
-            console.log('Created new consignee company:', consigneeData.name);
             // Refresh companies list to include the new company
             await loadCompanies();
           } else {
@@ -967,22 +786,7 @@ const LorryReceiptFormPage = () => {
       console.error('Error in create and download:', error);
       alert('Error creating lorry receipt and downloading PDF');
     }
-  };  // Fill dummy data function
-  const fillDummyData = () => {
-    const currentDummy = dummyData[dummyDataIndex];    // Exclude cnNumber from dummy data since it should be auto-generated
-    const { cnNumber: _cnNumber, ...dummyDataWithoutCN } = currentDummy;
-    setFormData(prev => ({
-      ...prev,
-      ...dummyDataWithoutCN
-    }));
-    setDummyDataIndex((prev) => (prev + 1) % dummyData.length);
-
-    // Reset company creation flags
-    setAddConsignorCompany(false);
-    setAddConsigneeCompany(false);
-    setConsignorSelectedFromDropdown(false);
-    setConsigneeSelectedFromDropdown(false);
-  };// Handle input blur - check if should set add company state
+  };  // Handle input blur - check if should set add company state
   const handleCompanyInputBlur = (type) => {
     // Use setTimeout to allow for click on dropdown items
     setTimeout(() => {
@@ -1281,13 +1085,6 @@ const LorryReceiptFormPage = () => {
             Back
           </button>
           <div className="flex gap-2">
-            {/* <button
-              type="button"
-              onClick={fillDummyData}
-              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-            >
-              Fill Dummy Data
-            </button> */}
             <button
               type="submit"
               onClick={handleSubmit}

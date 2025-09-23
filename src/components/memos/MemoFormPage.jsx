@@ -5,157 +5,11 @@ import BillHeader from '../../assets/images/billHeader.png';
 import memoService from '../../services/memoService';
 import lorryReceiptService from '../../services/lorryReceiptService';
 
-// Mock LR data (replace with actual API call)
-const mockLRData = [
-  {
-    id: 1,
-    cn_number: 'TPR-001',
-    lr_date: '2025-01-15',
-    consignor_name: 'ABC Industries Ltd.',
-    consignee_name: 'XYZ Manufacturing Pvt. Ltd.',
-    from_location: 'Tarapur',
-    to_location: 'Delhi'
-  },
-  {
-    id: 2,
-    cn_number: 'BWD-002',
-    lr_date: '2025-01-16',
-    consignor_name: 'PQR Traders',
-    consignee_name: 'RST Corporation',
-    from_location: 'Bhiwandi',
-    to_location: 'Bangalore'
-  },
-  {
-    id: 3,
-    cn_number: 'TPR-003',
-    lr_date: '2025-01-17',
-    consignor_name: 'LMN Enterprises',
-    consignee_name: 'Global Textiles Inc.',
-    from_location: 'Tarapur',
-    to_location: 'Surat'
-  }
-];
-
 const MemoFormPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // State for dummy data cycling
-  const [dummyDataIndex, setDummyDataIndex] = useState(0);
-
-  // Dummy data for development
-  const dummyData = [
-    {
-      lorry_hire: '15000',
-      lorry_no: 'MH 12 AB 1234',
-      driver_name: 'Rajesh Kumar',
-      ac_no: '9288273654',
-      address: 'Transport Nagar, Mumbai, Maharashtra',
-      from_location: 'Mumbai',
-      to_location: 'Pune',
-      advance_rs: '5000',
-      hamali: '500',
-      balance: '10500',
-      broker: 'ABC Brokers',
-      payable_at: 'Pune',
-      tableData: [
-        { id: 1, lr_no: 'BWD-002', articles: '10 bags cement', consignor: 'ABC Industries Ltd', consignee: 'XYZ Traders', kgs: '1000', freight: '5000' },
-        { id: 2, lr_no: 'TRP-003', articles: '5 boxes electronics', consignor: 'Tech Corp', consignee: 'Electronics Store', kgs: '500', freight: '3000' }
-      ]
-    },
-    {
-      lorry_hire: '12000',
-      lorry_no: 'GJ 05 CD 5678',
-      driver_name: 'Suresh Patel',
-      ac_no: '8737263829',
-      address: 'Industrial Area, Surat, Gujarat',
-      from_location: 'Surat',
-      to_location: 'Ahmedabad',
-      advance_rs: '4000',
-      hamali: '300',
-      balance: '8300',
-      broker: 'Gujarat Logistics',
-      payable_at: 'Ahmedabad',
-      tableData: [
-        { id: 1, lr_no: 'SUR-101', articles: '20 rolls fabric', consignor: 'Textile Mills Ltd', consignee: 'Fashion House', kgs: '2000', freight: '8000' },
-        { id: 2, lr_no: 'SUR-102', articles: '15 cartons chemicals', consignor: 'Chemical Co.', consignee: 'Processing Unit', kgs: '1500', freight: '4000' }
-      ]
-    },
-    {
-      lorry_hire: '18000',
-      lorry_no: 'UP 32 EF 9101',
-      driver_name: 'Ramesh Singh',
-      ac_no: '9494949393',
-      address: 'Transport Hub, Kanpur, Uttar Pradesh',
-      from_location: 'Kanpur',
-      to_location: 'Delhi',
-      advance_rs: '7000',
-      hamali: '800',
-      balance: '11800',
-      broker: 'North India Transport',
-      payable_at: 'Delhi',
-      tableData: [
-        { id: 1, lr_no: 'KNP-201', articles: '30 bags wheat', consignor: 'Grain Traders', consignee: 'Flour Mills', kgs: '3000', freight: '9000' },
-        { id: 2, lr_no: 'KNP-202', articles: '25 boxes machinery parts', consignor: 'Engineering Works', consignee: 'Auto Company', kgs: '2500', freight: '9000' }
-      ]
-    },
-    {
-      lorry_hire: '22000',
-      lorry_no: 'KA 03 GH 2468',
-      driver_name: 'Venkatesh Rao',
-      ac_no: '4564564564',
-      address: 'Logistics Park, Bangalore, Karnataka',
-      from_location: 'Bangalore',
-      to_location: 'Chennai',
-      advance_rs: '8000',
-      hamali: '1000',
-      balance: '14000',
-      broker: 'South Transport Hub',
-      payable_at: 'Chennai',
-      tableData: [
-        { id: 1, lr_no: 'BLR-301', articles: '40 cartons software', consignor: 'Tech Solutions', consignee: 'IT Company', kgs: '800', freight: '12000' },
-        { id: 2, lr_no: 'BLR-302', articles: '35 boxes pharmaceuticals', consignor: 'Pharma Corp', consignee: 'Medical Store', kgs: '1200', freight: '10000' }
-      ]
-    },
-    {
-      lorry_hire: '16500',
-      lorry_no: 'RJ 14 IJ 3579',
-      driver_name: 'Mohan Sharma',
-      ac_no: '8499294929',
-      address: 'Commercial Complex, Jaipur, Rajasthan',
-      from_location: 'Jaipur',
-      to_location: 'Jodhpur',
-      advance_rs: '6000',
-      hamali: '600',
-      balance: '10500',
-      broker: 'Rajasthan Carriers',
-      payable_at: 'Jodhpur',
-      tableData: [
-        { id: 1, lr_no: 'JPR-401', articles: '25 bags spices', consignor: 'Spice Traders', consignee: 'Food Processing', kgs: '2500', freight: '7500' },
-        { id: 2, lr_no: 'JPR-402', articles: '20 rolls carpets', consignor: 'Handicrafts Ltd', consignee: 'Export House', kgs: '1800', freight: '9000' }
-      ]
-    },
-    {
-      lorry_hire: '14000',
-      lorry_no: 'WB 22 KL 4680',
-      driver_name: 'Subrata Das',
-      ac_no: '9779796979',
-      address: 'Port Area, Kolkata, West Bengal',
-      from_location: 'Kolkata',
-      to_location: 'Bhubaneswar',
-      advance_rs: '5500',
-      hamali: '400',
-      balance: '8900',
-      broker: 'Eastern Logistics',
-      payable_at: 'Bhubaneswar',
-      tableData: [
-        { id: 1, lr_no: 'KOL-501', articles: '18 containers tea', consignor: 'Tea Gardens', consignee: 'Tea Board', kgs: '1800', freight: '6000' },
-        { id: 2, lr_no: 'KOL-502', articles: '22 bags jute products', consignor: 'Jute Mills', consignee: 'Export Agency', kgs: '2200', freight: '8000' }
-      ]
-    }
-  ];
-
-  // State for form data
+  // State for memo form data
   const [formData, setFormData] = useState({
     memo_number: '',
     memo_date: '',
@@ -197,42 +51,21 @@ const MemoFormPage = () => {
   const loadLorryReceipts = useCallback(async () => {
     setIsLoadingLRs(true);
     try {
-      console.log('🔄 Loading lorry receipts for memo form...');
-      console.log('🔧 Using lorryReceiptService:', lorryReceiptService);
-
       const response = await lorryReceiptService.getLorryReceipts({ limit: 1000 });
-      console.log('📦 Raw LR Service Response:', response);
-      console.log('📊 Response type:', typeof response);
-      console.log('📋 Response keys:', Object.keys(response || {}));
 
       if (response && response.success) {
-        console.log('✅ API call successful');
-        console.log('📦 Response.data:', response.data);
-        console.log('📋 Data keys:', Object.keys(response.data || {}));
-
         if (response.data && response.data.lorryReceipts) {
-          console.log(`✅ Found ${response.data.lorryReceipts.length} lorry receipts`);
-          console.log('📄 First 3 LR samples:', response.data.lorryReceipts.slice(0, 3));
           setLorryReceipts(response.data.lorryReceipts);
         } else {
-          console.warn('⚠️ No lorryReceipts array in response.data');
-          console.log('🔄 Falling back to mock data');
-          setLorryReceipts(mockLRData);
+          setLorryReceipts([]);
         }
       } else {
-        console.error('❌ API call failed or response.success is false');
-        console.log('🔍 Response details:', response);
-        console.log('🔄 Falling back to mock data');
-        setLorryReceipts(mockLRData);
+        setLorryReceipts([]);
       }
     } catch (error) {
-      console.error('💥 Exception during API call:', error);
-      console.log('🔍 Error details:', error.message, error.stack);
-      console.log('🔄 Falling back to mock data');
-      setLorryReceipts(mockLRData);
+      setLorryReceipts([]);
     } finally {
       setIsLoadingLRs(false);
-      console.log('🏁 Loading process completed');
     }
   }, []);
 
@@ -294,7 +127,6 @@ const MemoFormPage = () => {
 
   // Select LR for table row
   const selectLRForRow = (rowId, lr) => {
-    console.log('🎯 selectLRForRow called with:', { rowId, lr });
     setTableRows(prev => prev.map(row =>
       row.id === rowId ? {
         ...row,
@@ -333,24 +165,12 @@ const MemoFormPage = () => {
       if (value === undefined || value === null || value === '') {
         errors[field] = requiredFields[field];
         hasErrors = true;
-        console.log('Validation failed:', field, 'Value:', value);
-      } else {
-        console.log('Validation passed:', field, 'Value:', value);
       }
     });
 
     // Validate table data
-    console.log('Table rows:', tableRows);
     if (tableRows.length === 0 || tableRows.every(row => !row.lr_no && !row.articles)) {
-      console.log('No valid LR entries found');
       hasErrors = true;
-    }
-
-    // Log summary of errors before returning
-    if (hasErrors) {
-      console.log('Validation failed. Errors:', errors);
-    } else {
-      console.log('Validation passed. No errors.');
     }
 
     return !hasErrors;
@@ -359,9 +179,6 @@ const MemoFormPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log('Form submitted, validating fields...');
-    console.log('Form data:', formData);
 
     // Validate required fields first
     if (!validateRequiredFields()) {
@@ -388,7 +205,6 @@ const MemoFormPage = () => {
         table_data: tableRows
       };
 
-      console.log('Creating memo with data:', memoData);
       const response = await memoService.createMemo(memoData);
 
       if (response.success) {
@@ -409,26 +225,6 @@ const MemoFormPage = () => {
     window.print();
   };
 
-  // Fill dummy data function
-  const fillDummyData = () => {
-    const currentDummy = dummyData[dummyDataIndex];
-
-    // Exclude memo_number and memo_date since they should be auto-generated
-    const { tableData, ...dummyFormData } = currentDummy;
-
-    setFormData(prev => ({
-      ...prev,
-      ...dummyFormData
-    }));
-
-    // Set table data
-    setTableRows(tableData || [
-      { id: 1, lr_no: '', articles: '', consignor: '', consignee: '', kgs: '', freight: '' }
-    ]);
-
-    setDummyDataIndex((prev) => (prev + 1) % dummyData.length);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -441,13 +237,6 @@ const MemoFormPage = () => {
             Back
           </button>
           <div className="flex gap-2">
-            {/* <button
-              type="button"
-              onClick={fillDummyData}
-              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-            >
-              Fill Dummy Data
-            </button> */}
             <button
               onClick={handlePrint}
               className="bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-2 rounded hover:from-orange-500 hover:to-red-500"
@@ -464,55 +253,7 @@ const MemoFormPage = () => {
           </div>
         </div>
 
-        {/* Header Section - Consistent with Lorry Receipt */}
-        <div className='flex justify-center items-center relative'>
-          <div className='w-[90%] flex flex-row justify-between items-center mb-4 relative px-4'>
-            <div className='flex flex-row items-center justify-center w-full gap-8 py-2'>
-              <div className='w-full flex flex-col items-center justify-center py-2'>
-                <div className="w-full flex flex-row items-center justify-between py-2 gap-8">
-                  {/* Left side (truck + name) */}
-                  <div className="flex-shrink-0 flex items-center min-w-[600px] gap-6">
-                    <img src={BillHeader} alt="BillLogo" className="h-40 object-contain" />
-                  </div>
 
-                  {/* Right side (jurisdiction + drivers copy) */}
-                  <div className="flex flex-col items-end text-base font-medium text-gray-700 leading-tight min-w-[360px] w-[40%]">
-                    <div className="mb-2 font-bold text-lg">
-                      SUBJECT TO PALGHAR JURISDICTION
-                    </div>
-                    <div className="mb-2 text-right text-base">
-                      <div className="font-semibold">Daily Part Load Service to -</div>
-                      <div>Tarapur, Bhiwandi, Palghar,</div>
-                      <div>Vashi, Taloja, Kolgoan Genises</div>
-                    </div>
-                    <div className="font-bold text-red-600 border border-red-600 px-3 py-1 inline-block text-base mt-2">
-                      MEMO COPY
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 📌 Addresses */}
-        <div className="w-[90%] mx-auto -mt-2 mb-6 ml-60">
-          <div className="text-xs font-medium text-gray-700 leading-snug space-y-2">
-            <div>
-              <span className="text-red-600 font-bold">TARAPUR:</span>
-              Plot No. W - 4, Camlin Naka, MIDC, Tarapur.
-              M.: 9823364283 / 8446665945
-            </div>
-            <div>
-              <span className="text-red-600 font-bold">BHIWANDI:</span>
-              Godown No. A-2, Gali No 2, Opp Capital Roadlines, Khandagale Estate,<br />
-              <div className="ml-20">
-                Puma Village, Bhiwandi. M.: 9222161259 / 9168027868
-              </div>
-            </div>
-          </div>
-        </div>
 
 
         <form onSubmit={handleSubmit} className="memo-form">
@@ -1095,7 +836,6 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
   }, [searchTerm, lorryReceipts, showLRDropdown]);
 
   const selectLR = (lr) => {
-    console.log('🎯 Selecting LR:', lr);
     selectLRForRow(row.id, lr);
     setShowLRDropdown(false);
     setSearchTerm('');
@@ -1103,15 +843,10 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
 
   const openDropdown = () => {
     if (!isLoadingLRs) {
-      console.log('🔽 Opening dropdown for row:', row.id);
-      console.log('📊 Available lorryReceipts count:', lorryReceipts.length);
-      console.log('📋 Sample lorryReceipts data:', lorryReceipts.slice(0, 2));
-      console.log('🔍 First LR structure:', lorryReceipts[0]);
 
       setShowLRDropdown(true);
       setFilteredLRs(lorryReceipts.slice(0, 25)); // Show first 25 items initially
     } else {
-      console.log('⏳ Cannot open dropdown - still loading LRs');
     }
   };
 
@@ -1248,7 +983,6 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
                 }}>
                   <span style={{ marginRight: '8px' }}>⚠️</span>
                   No lorry receipts available
-                  {console.log('⚠️ No lorryReceipts available. Total count:', lorryReceipts.length)}
                 </div>
               )}
 
@@ -1263,13 +997,10 @@ const TableRow = ({ row, lorryReceipts, isLoadingLRs, updateTableRow, selectLRFo
                 }}>
                   <span style={{ marginRight: '8px' }}>🔍</span>
                   No results found for "{searchTerm}"
-                  {console.log('🔍 No filtered results. lorryReceipts:', lorryReceipts.length, 'filteredLRs:', filteredLRs.length, 'searchTerm:', searchTerm)}
                 </div>
               )}
 
               {/* Lorry Receipt Options */}
-              {console.log('🎯 About to render filteredLRs:', filteredLRs.length)}
-              {console.log('📋 First few LRs for rendering:', filteredLRs.slice(0, 3))}
               {filteredLRs.map((lr) => (
                 <div
                   key={lr.id}

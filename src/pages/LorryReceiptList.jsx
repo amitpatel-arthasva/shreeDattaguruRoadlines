@@ -159,11 +159,12 @@ const LorryReceiptList = () => {
     const hamali = parseFloat(receipt.hamali) || 0;
     const aoc = parseFloat(receipt.aoc) || 0;
     const doorDelivery = parseFloat(receipt.door_delivery) || 0;
+    const detention = parseFloat(receipt.detention) || 0;
     const collection = parseFloat(receipt.collection) || 0;
     const serviceCharge = parseFloat(receipt.service_charge) || 0;
     const extraLoading = parseFloat(receipt.extra_loading) || 0;
 
-    return freight + hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading;
+    return freight + hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading;
   };
 
   const viewDetails = (receipt) => {
@@ -526,6 +527,7 @@ const LorryReceiptList = () => {
                     <div>Hamali: {formatCurrency(selectedReceipt.hamali)}</div>
                     <div>AOC: {formatCurrency(selectedReceipt.aoc)}</div>
                     <div>Door Delivery: {formatCurrency(selectedReceipt.door_delivery)}</div>
+                    <div>Detention: {formatCurrency(selectedReceipt.detention)}</div>
                     <div>Collection: {formatCurrency(selectedReceipt.collection)}</div>
                     <div>Service Charge: {formatCurrency(selectedReceipt.service_charge)}</div>
                     <div>Extra Loading: {formatCurrency(selectedReceipt.extra_loading)}</div>

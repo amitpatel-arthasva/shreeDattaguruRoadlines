@@ -6,13 +6,6 @@ import Modal from '../common/Modal';
 const LorryReceiptViewModal = ({ isOpen, onClose, lorryReceipt }) => {
   const [zoomLevel, setZoomLevel] = React.useState(1);
 
-  // Debug logging
-  React.useEffect(() => {
-    if (isOpen && lorryReceipt) {
-      console.log('LorryReceiptViewModal received data:', lorryReceipt);
-    }
-  }, [isOpen, lorryReceipt]);
-
   if (!lorryReceipt) return null;
 
   const formatDate = (dateString) => {

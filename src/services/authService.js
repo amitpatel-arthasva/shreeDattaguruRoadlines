@@ -167,7 +167,6 @@ const authService = {
           transaction = false;
 
           newUser = newUserResult.data[0];
-          console.log('New user created:', newUser);
 
           // Store user data (no token needed for local SQLite)
           const userToStore = {

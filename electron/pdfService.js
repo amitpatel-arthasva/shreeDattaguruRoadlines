@@ -77,7 +77,6 @@ const getBrowserInstance = async () => {
       // Get puppeteer launch options from chrome manager
       const launchOptions = await chromeManager.getPuppeteerOptions();
       
-      console.log('Launching Chrome with options:', launchOptions);
       browserInstance = await puppeteerCore.launch(launchOptions);
       browserUseCount = 0;
     } catch (error) {
@@ -107,7 +106,6 @@ const closeBrowserInstance = async () => {
       await browserInstance.close();
       browserInstance = null;
       browserUseCount = 0;
-      console.log('Browser instance closed successfully');
     } catch (error) {
       console.warn('Error closing browser instance:', error);
       // Force set to null even if close fails
@@ -169,7 +167,6 @@ const generatePdfFromHtml = async (htmlContent, options = {}) => {
     if (outputPath) {
       const pdfPath = path.posix.join(outputPath, `${filename}.pdf`);
       await writeFileAsync(pdfPath, pdf);
-      console.log(`PDF saved to ${pdfPath}`);
     }
 
     return pdf;

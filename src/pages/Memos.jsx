@@ -69,12 +69,9 @@ const Memos = () => {
       const response = await (await import('../services/memoService')).default.getMemos({ page: currentPage, limit: 10, search: debouncedSearchTerm });
       let allMemos = (response && response.success && response.data && response.data.memos) ? response.data.memos : [];
       setMemos(allMemos);
-      console.log('Updated memos after fetch:', allMemos);
       setTotalPages(response?.data?.totalPages || 1);
       // Extra debug: log memos state after set
       setTimeout(() => {
-        console.log('Memos state after setMemos:', allMemos);
-        console.log('Current page:', currentPage, 'Total pages:', response?.data?.totalPages, 'Total records:', response?.data?.totalRecords);
       }, 100);
     } catch (error) {
       console.error('Error fetching memos:', error);
@@ -130,7 +127,6 @@ const Memos = () => {
   };
 
   const handleDeleteMemo = async (memoId) => {
-    console.log('Attempting to delete memo with id:', memoId);
     setConfirmDialog(prev => ({
       isOpen: true,
       title: 'Delete Memo',
@@ -140,7 +136,6 @@ const Memos = () => {
         try {
           const memoService = (await import('../services/memoService')).default;
           const result = await memoService.deleteMemo(memoId);
-          console.log('Delete result (raw):', result);
           if (!result || typeof result !== 'object') {
             toast.error('Delete failed: No response or invalid response from backend.');
             return;

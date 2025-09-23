@@ -44,12 +44,9 @@ class MemoService {
       serializedTableData,
       memoId
     ];
-    console.log('[updateMemo] SQL:', sql);
-    console.log('[updateMemo] Values:', values);
     try {
       // Use apiService for DB query, matching other methods
       const result = await apiService.query(sql, values);
-      console.log('[updateMemo] SQL result:', result);
       return result;
     } catch (error) {
       console.error('[updateMemo] SQL error:', error);
@@ -66,7 +63,6 @@ class MemoService {
       }
       // Attempt delete
       const result = await apiService.query('DELETE FROM memos WHERE id = ?', [id]);
-      console.log('[deleteMemo] Raw result:', result);
       if (!result || typeof result !== 'object') {
         return { success: false, error: 'No response or invalid response from backend' };
       }

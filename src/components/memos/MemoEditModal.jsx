@@ -34,23 +34,16 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
   const loadLorryReceipts = useCallback(async () => {
     setIsLoadingLRs(true);
     try {
-      console.log('🔄 Loading lorry receipts for memo edit modal...');
 
       const response = await lorryReceiptService.getLorryReceipts({ limit: 1000 });
-      console.log('📦 Raw LR Service Response:', response);
 
       if (response && response.success) {
-        console.log('✅ API call successful');
-
         if (response.data && response.data.lorryReceipts) {
-          console.log(`✅ Found ${response.data.lorryReceipts.length} lorry receipts`);
           setLorryReceipts(response.data.lorryReceipts);
         } else {
-          console.warn('⚠️ No lorryReceipts array in response.data');
           setLorryReceipts([]);
         }
       } else {
-        console.error('❌ API call failed or response.success is false');
         setLorryReceipts([]);
       }
     } catch (error) {
@@ -58,7 +51,6 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
       setLorryReceipts([]);
     } finally {
       setIsLoadingLRs(false);
-      console.log('🏁 Loading process completed');
     }
   }, []);
 
@@ -78,7 +70,6 @@ const MemoEditModal = ({ memo, onClose, onSave }) => {
 
   // Select LR for table row
   const selectLRForRow = (rowIdx, lr) => {
-    console.log('🎯 selectLRForRow called with:', { rowIdx, lr });
     setTableRows(prev => prev.map((row, i) =>
       i === rowIdx ? {
         ...row,
@@ -282,7 +273,6 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
   }, [searchTerm, lorryReceipts, showLRDropdown]);
 
   const selectLR = (lr) => {
-    console.log('🎯 Selecting LR for edit:', lr);
     selectLRForRow(index, lr);
     setShowLRDropdown(false);
     setSearchTerm('');
@@ -290,13 +280,10 @@ const TableRowEdit = ({ row, index, lorryReceipts, isLoadingLRs, handleTableRowC
 
   const openDropdown = () => {
     if (!isLoadingLRs) {
-      console.log('🔽 Opening dropdown for edit row:', index);
-      console.log('📊 Available lorryReceipts count:', lorryReceipts.length);
 
       setShowLRDropdown(true);
       setFilteredLRs(lorryReceipts.slice(0, 25)); // Show first 25 items initially
     } else {
-      console.log('⏳ Cannot open dropdown - still loading LRs');
     }
   };
 

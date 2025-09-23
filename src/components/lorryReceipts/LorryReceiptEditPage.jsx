@@ -197,13 +197,10 @@ const removeParticularField = (index) => {
   const loadLorryReceiptData = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Loading lorry receipt data for ID:', id);
       const response = await lorryReceiptService.getLorryReceiptById(id);
-      console.log('API Response:', response);
 
       if (response.success && response.data) {
         const lr = response.data;
-        console.log('Transformed lorry receipt data:', lr);
 
         // Parse JSON strings for arrays
         let nosArray = [''];
@@ -215,7 +212,6 @@ const removeParticularField = (index) => {
           particularsArray = lr.materialDetails.map(item => item.particulars || '');
         }
 
-        console.log('Parsed arrays - nos:', nosArray, 'particulars:', particularsArray);
 
         // Transform the data to match form structure
         const formDataToSet = {
@@ -264,7 +260,6 @@ const removeParticularField = (index) => {
           driver_id: lr.driver_id || ''
         };
 
-        console.log('Setting form data:', formDataToSet);
         setFormData(formDataToSet);
       } else {
         console.error('No data received from API');
@@ -395,9 +390,6 @@ const removeParticularField = (index) => {
       // Calculate total
       const total = calculateTotal();
 
-      console.log('Current formData:', formData);
-      console.log('consignor_id:', formData.consignor_id);
-      console.log('consignee_id:', formData.consignee_id);
 
       // Prepare data for update - match the service method expectations
       const updateData = {
@@ -428,7 +420,6 @@ const removeParticularField = (index) => {
         driver_id: formData.driver_id
       };
 
-      console.log('Sending update data:', updateData);
 
       const response = await lorryReceiptService.updateLorryReceipt(id, updateData);
 

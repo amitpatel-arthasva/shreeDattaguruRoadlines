@@ -2,12 +2,7 @@
 class ApiService {
   constructor() {
     this.isElectron = window.electronAPI !== undefined;
-    console.log('ApiService initialized');
-    console.log('window.electronAPI exists:', !!window.electronAPI);
-    console.log('isElectron:', this.isElectron);
-    console.log('userAgent contains Electron:', navigator.userAgent.includes('Electron'));
-   
- 
+
     this.mockData = {
       companies: [
         { id: 1, name: "ABC Industries Ltd.", company_name: "ABC Industries Ltd.", address: "123 Industrial Area, Phase 1", city: "Mumbai", state: "Maharashtra", pin_code: "400001", gstin: "27ABCIN1234F1Z5", pan: "ABCIN1234F" },

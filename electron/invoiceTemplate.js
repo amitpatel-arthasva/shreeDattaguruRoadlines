@@ -146,7 +146,7 @@ const invoiceTemplate = (data) => {
           <td style='width:80px;min-width:80px;'>${getValue(data.toLocation)}</td>
           <td style='width:100px;min-width:100px;'>${getValue(data.invoiceNumber)}</td>
           <td style='width:80px;min-width:80px;'>${formatCurrency(freight)}</td>
-          <td style='width:100px;min-width:100px;'>${formatCurrency(hamali + aoc + doorDelivery + collection + serviceCharge + extraLoading)}</td>
+          <td style='width:100px;min-width:100px;'>${formatCurrency(hamali + aoc + doorDelivery + detention + collection + serviceCharge + extraLoading)}</td>
           <td style='width:100px;min-width:100px;'>${formatCurrency(totalAmount)}</td>
         </tr>
       `;
