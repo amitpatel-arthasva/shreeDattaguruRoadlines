@@ -461,16 +461,12 @@ const LorryReceiptFormPage = () => {
     }
 
     // Validate payment type selection
-    const paymentAmount = parseFloat(formData.paid) || 0;
-    const toBeBillAmount = parseFloat(formData.toBeBill) || 0;
-    const toPayAmount = parseFloat(formData.toPay) || 0;
-
-    if (paymentAmount <= 0 && toBeBillAmount <= 0 && toPayAmount <= 0) {
-      errors.paymentType = 'Please specify payment amount in at least one payment type';
+    if (!formData.paymentType || formData.paymentType.trim() === '') {
+      errors.paymentType = 'Please select a payment type';
       hasErrors = true;
-      console.log('Validation failed (payment): paid', paymentAmount, 'toBeBill', toBeBillAmount, 'toPay', toPayAmount);
+      console.log('Validation failed (payment): paymentType', formData.paymentType);
     } else {
-      console.log('Validation passed (payment): paid', paymentAmount, 'toBeBill', toBeBillAmount, 'toPay', toPayAmount);
+      console.log('Validation passed (payment): paymentType', formData.paymentType);
     }
 
     setValidationErrors(prev => ({
@@ -770,9 +766,6 @@ const LorryReceiptFormPage = () => {
         extra_loading: parseFloat(formData.extraLoading) || 0,
         actual_weight: parseFloat(formData.actualWeight) || 0,
         chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
-        paid: parseFloat(formData.paid) || 0,
-        to_be_bill: parseFloat(formData.toBeBill) || 0,
-        to_pay: parseFloat(formData.toPay) || 0,
         payment_type: formData.paymentType,
         delivery_at: formData.deliveryAt,
         eway_bill: formData.ewayBill || '',
@@ -913,11 +906,9 @@ const LorryReceiptFormPage = () => {
         extra_loading: parseFloat(formData.extraLoading) || 0,
         actual_weight: parseFloat(formData.actualWeight) || 0,
         chargeable_weight: parseFloat(formData.chargeableWeight) || 0,
-        paid: parseFloat(formData.paid) || 0,
-        to_be_bill: parseFloat(formData.toBeBill) || 0,
-        to_pay: parseFloat(formData.toPay) || 0,
         payment_type: formData.paymentType,
         delivery_at: formData.deliveryAt,
+        eway_bill: formData.ewayBill || '',
         total: parseFloat(formData.total) || 0,
         remarks: formData.remarks
       };

@@ -1,12 +1,14 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const os = require('os');
 const fs = require('fs');
 const { fileURLToPath } = require('url');
 
 class DatabaseManager {
   constructor() {
     this.db = null;
-    this.dbPath = path.join(__dirname, '../../data/roadlines.db');
+    const documentsPath = path.join(os.homedir(), 'OneDrive', 'Documents');
+    this.dbPath = path.join(documentsPath, 'ShreedattaguruRoadlines', 'roadlines.db');
   }
 
   async initialize() {

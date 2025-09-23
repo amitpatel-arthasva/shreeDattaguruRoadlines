@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import os from 'os';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
@@ -9,10 +10,10 @@ const __dirname = path.dirname(__filename);
 class DatabaseManager {
   constructor() {
     this.db = null;
-  // Use user data directory in production, project root in development
+  // Use OneDrive Documents directory in production, project root in development
     if (process.env.NODE_ENV === 'production') {
-      const userDataPath = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME + "/.local/share");
-      this.dbPath = path.join(userDataPath, 'ShreeDattaguruRoadlines', 'roadlines.db');
+      const documentsPath = path.join(os.homedir(), 'OneDrive', 'Documents');
+      this.dbPath = path.join(documentsPath, 'ShreedattaguruRoadlines', 'roadlines.db');
     } else {
       this.dbPath = path.join(__dirname, '../../roadlines.db');
     }

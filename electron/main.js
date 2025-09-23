@@ -55,6 +55,7 @@ ipcMain.handle('generate-memo-print-pdf', async (event, options) => {
 });
 import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
+import os from 'os';
 import isDev from 'electron-is-dev';
 import { createMenu } from './menu.js';
 import fs from 'fs';
@@ -84,9 +85,9 @@ async function initializeDatabase() {
     const DatabaseManager = await import('../database/config/database.js');
     dbManager = new DatabaseManager.default();
 
-    // Use Electron's recommended userData path
-    const userDataPath = app.getPath('userData');
-    const appDataPath = path.join(userDataPath, 'ShreedattaguruRoadlines');
+    // Use OneDrive Documents path
+    const documentsPath = path.join(os.homedir(), 'OneDrive', 'Documents');
+    const appDataPath = path.join(documentsPath, 'ShreedattaguruRoadlines');
 
     if (!fs.existsSync(appDataPath)) {
       fs.mkdirSync(appDataPath, { recursive: true });
